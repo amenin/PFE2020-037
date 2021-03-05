@@ -1,0 +1,371 @@
+{
+    "nodes": [
+      {
+        "node": 0,
+        "name": "Andrea Locatelli"
+      },
+      {
+        "node": 1,
+        "year": "2003",
+        "country": "France"
+      },
+      {
+        "node": 2,
+        "year": "2004",
+        "country": "France"
+      },
+      {
+        "node": 3,
+        "year": "2007",
+        "country": "Italie"
+      },
+      {
+        "node": 4,
+        "year": "2014",
+        "country": "Italie"
+      },
+      {
+        "node": 5,
+        "year": "2015",
+        "country": "Italie"
+      },
+      {
+        "node": 6,
+        "year": "2016",
+        "country": "Italie"
+      },
+      {
+        "node": 7,
+        "year": "2017",
+        "country": "Italie"
+      },
+      {
+        "node": 8,
+        "year": "2018",
+        "country": "Italie"
+      },
+      {
+        "node": 9,
+        "year": "2019",
+        "country": "Allemagne"
+      },
+      {
+        "node": 10,
+        "year": "2019",
+        "country": "Italie"
+      },
+      {
+        "node": 11,
+        "year": "2020",
+        "country": "Italie"
+      }
+    ],
+    "links": [
+      {
+        "source": 0,
+        "target": 1,
+        "value": 1,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-00000652v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-00000652",
+            "docTitle": "Nanometers-thick self-organized Fe stripes: bridging the gap between surfaces and magnetic materials",
+            "labName": "ELETTRA"
+          }
+        ]
+      },
+      {
+        "source": 1,
+        "target": 2,
+        "value": 1,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-00000652v2",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-00000652",
+            "docTitle": "Nanometers-thick self-organized Fe stripes: bridging the gap between surfaces and magnetic materials",
+            "labName": "ELETTRA"
+          }
+        ]
+      },
+      {
+        "source": 2,
+        "target": 3,
+        "value": 5,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-00133628v2",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-00133628",
+            "docTitle": "Layer-resolved imaging of domain wall interactions in magnetic tunnel junction-like trilayers",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02405107v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02405107",
+            "docTitle": "Imaging Properties of Multimode Photonic Crystal Waveguides and Waveguide Arrays",
+            "labName": "Dipartimento di Ingegneria dell'Informazione [Brescia]"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02405328v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02405328",
+            "docTitle": "Self-pulsing and bistability in nonlinear Bragg gratings",
+            "labName": "Dipartimento di Ingegneria dell'Informazione [Brescia]"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-00133628v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-00133628",
+            "docTitle": "Layer-resolved real space imaging of domain wall interactions in magnetic tunnel junctions",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-00193844v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-00193844",
+            "docTitle": "Magnetostructure of MnAs on GaAs revisited",
+            "labName": "Synchrotron ELETTRA"
+          }
+        ]
+      },
+      {
+        "source": 3,
+        "target": 4,
+        "value": 1,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-00911025v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-00911025",
+            "docTitle": "Observation of Bloch-point domain walls in cylindrical magnetic nanowires",
+            "labName": "Elettra Light source"
+          }
+        ]
+      },
+      {
+        "source": 4,
+        "target": 5,
+        "value": 5,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01136656v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01136656",
+            "docTitle": "Broad band setup for magnetic field-induced domain wall motion in cylindrical nanowires",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/cea-01349660v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/cea-01349660",
+            "docTitle": "Pattern induced ordering of semiconducting graphene ribbons grown from nitrogen-seeded SiC",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01136656v2",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01136656",
+            "docTitle": "Broadband Setup for Magnetic-Field-Induced Domain Wall Motion in Cylindrical Nanowires",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01165227v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01165227",
+            "docTitle": "Quantitative analysis of shadow X-ray Magnetic Circular Dichroism Photo-Emission Electron Microscopy",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01165227v2",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01165227",
+            "docTitle": "Quantitative analysis of shadow X-ray Magnetic Circular Dichroism Photo-Emission Electron Microscopy",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      },
+      {
+        "source": 5,
+        "target": 6,
+        "value": 7,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/cea-01485298v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/cea-01485298",
+            "docTitle": "Laterally inhomogeneous Au intercalation in epitaxial graphene on SiC(0001): a multimethod electron microscopy study",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01271350v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01271350",
+            "docTitle": "Room-temperature chiral magnetic skyrmions in ultrathin magnetic nanostructures",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02484558v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02484558",
+            "docTitle": "Engineering the second harmonic emission from arrays of L‐shape nanoantennas",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01316259v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01316259",
+            "docTitle": "Fragmentation of magnetism in artificial kagome dipolar spin ice",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02484562v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02484562",
+            "docTitle": "Engineering the second harmonic emission from arrays of L‐shape nanoantennas",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02481685v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02481685",
+            "docTitle": "Engineering the Second Harmonic Emission from Arrays of L-shape Nanoantenna",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02481622v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02481622",
+            "docTitle": "Plasmon-enhanced Second Harmonic Generation : from individual antennas to extended arrays",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      },
+      {
+        "source": 6,
+        "target": 7,
+        "value": 2,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01698363v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01698363",
+            "docTitle": "Plasmon-Enhanced Second Harmonic Generation: from Individual Antennas to Extended Arrays",
+            "labName": "Department of Information Engineering [Brescia]"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01625728v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01625728",
+            "docTitle": "Intercalating cobalt between graphene and iridium (111): Spatially dependent kinetics from the edges",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      },
+      {
+        "source": 7,
+        "target": 8,
+        "value": 8,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02365354v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02365354",
+            "docTitle": "Tuning the second-harmonic generation in AlGaAs nanodimers via non-radiative state optimization [Invited]",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02365350v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02365350",
+            "docTitle": "Metal–dielectric hybrid nanoantennas for efficient frequency conversion at the anapole mode",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01781881v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01781881",
+            "docTitle": "Graphene as a Mechanically Active, Deformable Two-Dimensional Surfactant",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02046310v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02046310",
+            "docTitle": "Graphene as a Mechanically Active, Deformable Two-Dimensional Surfactant",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01764982v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01764982",
+            "docTitle": "Magnetic skyrmions in confined geometries: Effect of the magnetic field and the disorder",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02365333v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02365333",
+            "docTitle": "Nonlinear Goniometry by Second-Harmonic Generation in AlGaAs Nanoantennas",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01512662v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01512662",
+            "docTitle": "Flux-closure domains in high aspect ratio electroless-deposited CoNiB nanotubes",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02365345v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02365345",
+            "docTitle": "Shaping the Nonlinear Emission Pattern of a Dielectric Nanoantenna by Integrated Holographic Gratings",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      },
+      {
+        "source": 8,
+        "target": 9,
+        "value": 3,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02387468v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02387468",
+            "docTitle": "Active multiple matrix completion with adaptive confidence sets",
+            "labName": "Otto-von-Guericke University [Magdeburg]"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01936894v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01936894",
+            "docTitle": "Rotting bandits are not harder than stochastic ones",
+            "labName": "Otto-von-Guericke University [Magdeburg]"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-01936894v2",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-01936894",
+            "docTitle": "Rotting bandits are not harder than stochastic ones",
+            "labName": "Otto-von-Guericke University [Magdeburg]"
+          }
+        ]
+      },
+      {
+        "source": 8,
+        "target": 10,
+        "value": 2,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02107381v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02107381",
+            "docTitle": "Current-driven dynamics of magnetic skyrmions in an ultrathin film: experiments and modelling",
+            "labName": "Elettra Sincrotrone Trieste"
+          },
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02356080v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02356080",
+            "docTitle": "Current-Driven Skyrmion Dynamics and Drive-Dependent Skyrmion Hall Effect in an Ultrathin Film",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      },
+      {
+        "source": 9,
+        "target": 11,
+        "value": 1,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02881911v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02881911",
+            "docTitle": "In-Plane Magnetic Domains and Néel-like Domain Walls in Thin Flakes of the Room Temperature CrTe2 Van der Waals Ferromagnet",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      },
+      {
+        "source": 10,
+        "target": 11,
+        "value": 1,
+        "publications": [
+          {
+            "docURI": "https://data.archives-ouvertes.fr/document/hal-02881911v1",
+            "versionOf": "https://data.archives-ouvertes.fr/document/hal-02881911",
+            "docTitle": "In-Plane Magnetic Domains and Néel-like Domain Walls in Thin Flakes of the Room Temperature CrTe2 Van der Waals Ferromagnet",
+            "labName": "Elettra Sincrotrone Trieste"
+          }
+        ]
+      }
+    ]
+}
