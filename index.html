@@ -82,7 +82,6 @@ d3.json("sankey-2-author.json", function(error, graph) {
 // add the link titles
   link.append("title")
         .text(function(d) {
-            console.log(d);
             let sourceName = d.source.name || `${d.source.year} ${d.source.country}`;
             let targetName = d.target.name || `${d.target.year} ${d.target.country}`;
     		return d.author + ": " 

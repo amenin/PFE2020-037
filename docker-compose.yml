@@ -1,0 +1,20 @@
+version: "3"
+services:
+    client:
+        build: ./front
+        image: ter/front
+        stdin_open: true
+        ports:
+            - "3000:3000"
+        networks:
+            - net
+    server:
+        build: ./back
+        image: ter/back
+        ports:
+            - "5000:5000"
+        networks:
+            - net
+networks:
+    net:
+        driver: bridge
