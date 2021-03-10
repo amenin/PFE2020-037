@@ -16,3 +16,5 @@ docker-compose up --build
 
 -   http://localhost:3000 serves the build of the front site.
 -   http://localhost:5000 serves the backend.
+
+![build-sankey](https://github.com/TiFosi/PFE2020-037/blob/master/demo.gif)
