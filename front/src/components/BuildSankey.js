@@ -10,9 +10,9 @@ export const BuildSankey = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [filters, setFilters] = useState({});
-    const [selectedAuthors, setSelectedAuthors] = useState(null);
-    const [selectedCountries, setSelectedCountries] = useState(null);
-    const [selectedYears, setSelectedYears] = useState(null);
+    const [selectedAuthors, setSelectedAuthors] = useState([]);
+    const [selectedCountries, setSelectedCountries] = useState([]);
+    const [selectedYears, setSelectedYears] = useState([]);
 
     useEffect(async () => {
         setIsLoading(true);
@@ -25,7 +25,6 @@ export const BuildSankey = () => {
 
     const handleClick = async () => {
         if (!isDrawing) {
-            console.log(selectedAuthors);
             if (selectedAuthors.length) {
                 setIsDrawing(true);
                 const res = await fetchFromBackendPost("sankey", {
