@@ -21,9 +21,7 @@ export const fetchFromBackendPost = async (route, body) => {
             },
             body: JSON.stringify(body),
         });
-        console.log(response)
         const responseJson = await response.json();
-        console.log(responseJson)
         return responseJson;
     } catch (err) {
         console.log(`### ${err}`);

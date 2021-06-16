@@ -72,6 +72,31 @@ class Timeline extends Component {
             })
 
             this.setState({country_codes: values[0], world: worldData});
+
+            const buttons = [{'icon': '🗘', 'row': 0, 'col': 5, 'value': 'reset', 'action': 'reset'},
+                {'icon': '+', 'row': 0, 'col': 3, 'value': 'plus', 'action': 'zoom'},
+                {'icon': '-', 'row': 0, 'col': 4, 'value': 'minus', 'action': 'zoom'},
+                {'icon': '>', 'row': 1, 'col': 0, 'value': 'right', 'action': 'pan'},
+                {'icon': '<', 'row': 1, 'col': 2, 'value': 'left', 'action': 'pan'},
+                {'icon': '>', 'row': 0, 'col': 1, 'value': 'up', 'action': 'pan'},
+                {'icon': '<', 'row': 2, 'col': 1, 'value': 'down', 'action': 'pan'}]
+
+            d3.select(this.node.parentNode).selectAll('button.zoom-control')
+                .data(buttons)
+                .enter()
+                    .append('button')
+                    .classed('zoom-control', true)
+                    .style('cursor', 'pointer')
+                    .style('position', 'absolute')
+                    .style('background-color', '#dbdbdb')
+                    .style('border-radius', '5px')
+                    .style('width', '30px')
+                    .style('height', '30px')
+                    .style('font-size', '14px')
+                    .style('border', 'none')
+                    .style('transform', d => ['up', 'down'].includes(d.value) ? 'rotate(-90deg)' : null)
+                    .text(d => d.icon)           
+
         })
         .catch(function(error) { throw(error); })
     }   
@@ -190,7 +215,6 @@ class Timeline extends Component {
         const gCountries = mapGroup.append('g')
             .attr('class', 'countries')
             .style('cursor', 'grab')
-            .call(zoom)
         
         const gCountry = gCountries.selectAll('g')
             .data(world.features)
@@ -206,53 +230,39 @@ class Timeline extends Component {
             .style('stroke', '#ccc')
             .style('opacity', 0.8)
             .style('stroke-width', 0.3)
+            .call(zoom)
 
         gCountry.append('title')
             .text(d => d.properties.ADMIN)
 
         //// zoom & pan controls ////////
-        
-        const buttons = [{'icon': '+', 'row': 0, 'col': 3, 'value': 'plus', 'action': 'zoom'},
-            {'icon': '-', 'row': 0, 'col': 4, 'value': 'minus', 'action': 'zoom'},
-            {'icon': '>', 'row': 1, 'col': 0, 'value': 'right', 'action': 'pan'},
-            {'icon': '<', 'row': 1, 'col': 1.5, 'value': 'left', 'action': 'pan'},
-            {'icon': '>', 'row': 0, 'col': 0, 'value': 'up', 'action': 'pan'},
-            {'icon': '<', 'row': 2, 'col': 0, 'value': 'down', 'action': 'pan'}]
-        
-        const gControls = mapGroup.append('g')
-            .classed('controls', true)
+        const buttons = d3.selectAll('button.zoom-control')
+        buttons.style('left', d => chart.width - 30 - d.col * 35 + 'px')
+            .style('top', d => 120 + d.row * 20 + 'px')
+            .on('click', d => {
+                let value = 30;
+                let selection = gCountries.selectAll('path').transition().duration(500);
+                switch(d.action) {
+                    case 'zoom':
+                        value = d.value === 'plus' ? 1.3 : 1 / 1.3;
+                        zoom.scaleBy(selection, value)
+                        break;
+                    case 'pan':
+                        let x = 0, y = 0;
 
-        const button = gControls.selectAll('g')
-            .data(buttons)
-            .enter()
-                .append('g')
-                .attr('transform', (d,i) => `translate(${chart.width - 30 - d.col * 30}, ${margin.top + d.row * 23})`)
-                .style('cursor', 'pointer')
-                .style('fill', '#000')
-                .on('click', d => {
-                    let value = 20;
-                    switch(d.action) {
-                        case 'zoom':
-                            value = d.value === 'plus' ? 1.3 : 1 / 1.3;
-                            zoom.scaleBy(gCountries.selectAll('path').transition().duration(750), value)
-                            break;
-                        case 'pan':
-                            let x = 0, y = 0;
-
-                            if (d.value === 'up') y = value
-                            else if (d.value === 'down') y = -value
-                            else if (d.value === 'left') x = -value
-                            else x = value
-                            zoom.translateBy(gCountries.selectAll('path').transition().duration(750), x, y)
-                            break;
-                    }
-                    
-                })
+                        if (d.value === 'up') y = value
+                        else if (d.value === 'down') y = -value
+                        else if (d.value === 'left') x = -value
+                        else x = value
+                        zoom.translateBy(selection, x, y)
+                        break;
+                    case 'reset':
+                        selection.call(zoom.transform, d3.zoomIdentity);
+                        break;
+                }
+                
+            })            
         
-        button.append('text')
-            .style('font-size', '35px')
-            .attr('transform', d => `rotate(${['up', 'down'].includes(d.value) ? -90 : 0})`)
-            .text(d => d.icon)       
 
     }
 
@@ -303,7 +313,7 @@ class Timeline extends Component {
             .range([0, chart.width])
             .paddingInner(0.2);
 
-        chart.symbolSize = xScale.bandwidth() * 2
+        chart.symbolSize = xScale.bandwidth() * 3
 
         const xAxis = d3.axisBottom()
             .ticks(dates.length)
@@ -415,10 +425,11 @@ class Timeline extends Component {
                 .attr("d", area)
                 .style('opacity', 0.5)
                 .on('mouseenter', d => {
+                    let k = d3.zoomTransform(d3.select('g.countries').selectAll('path').node()).k
                     let visitedCountries = countryCodes.filter(e => e.authors.some(a => a.name === d.key))
 
                     svg.select('g#map-group').selectAll('path')
-                        .style('stroke-width', d => visitedCountries.some(e => e.alpha3 === d.properties.alpha3) ? 1.5 : .3)
+                        .style('stroke-width', d => visitedCountries.some(e => e.alpha3 === d.properties.alpha3) ? 1.5 / k : .3)
                         .style('stroke', d => visitedCountries.some(e => e.alpha3 === d.properties.alpha3) ? '#000' : '#ccc')
 
                 }).on('mouseleave', d => {
@@ -426,7 +437,7 @@ class Timeline extends Component {
                 })
 
         /// publications per country ///////////////
-        let patternSize = chart.symbolSize / 12;
+        let patternSize = chart.symbolSize * .07;
         let patterns = d3.selectAll('pattern')
         patterns.attr('width', patternSize).attr('height', patternSize)
         patterns.selectAll('image').attr('width', patternSize).attr('height', patternSize)
@@ -451,12 +462,23 @@ class Timeline extends Component {
                     code = code.length ? code[0].alpha2 : null;
                     return code ? `url(#flag_${code})` : '#fff';
                 })
+                .on('mouseenter', d => {
+                    let k = d3.zoomTransform(d3.select('g.countries').selectAll('path').node()).k
+                    let country = countryCodes.filter(e => e.country == d.country && e.authors.some(a => a.name === d.author))[0]
+
+                    svg.select('g#map-group').selectAll('path')
+                        .style('stroke-width', d => country.alpha3 === d.properties.alpha3 ? 1.2 / k : .3)
+                        .style('stroke', d => country.alpha3 === d.properties.alpha3 ? '#000' : '#ccc')
+
+                }).on('mouseleave', d => {
+                    svg.select('g#map-group').selectAll('path').style('stroke-width', '.3').style('stroke', '#ccc')
+                })
         
         /// place circles close to each other using force simulation //////////////
         d3.forceSimulation()
             .force("x", d3.forceX().strength(0.4).x(d => xScale(+d.year)))
             .force("y", d3.forceY().strength(0.2).y(d => yScale(d.author)))
-            .force("collide", d3.forceCollide().strength(.1).radius(chart.symbolSize/12).iterations(32)) // Force that avoids circle overlapping
+            .force("collide", d3.forceCollide().strength(.1).radius(chart.symbolSize * .06).iterations(32)) // Force that avoids circle overlapping
             .nodes(data)
             .on("tick", () => symbols.attr('transform', e => `translate(${xScale.bandwidth()/2 + e.x}, ${e.y})`))
         
