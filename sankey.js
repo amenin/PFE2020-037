@@ -80,16 +80,17 @@ d3.sankey = function() {
     // Also, if the source and target are not objects, assume they are indices.
     function computeNodeLinks() {
         nodes.forEach(function(node) {
-        node.sourceLinks = [];
-        node.targetLinks = [];
+            node.sourceLinks = [];
+            node.targetLinks = [];
         });
+        
         links.forEach(function(link) {
-        var source = link.source,
-            target = link.target;
-        if (typeof source === "number") source = link.source = nodes[link.source];
-        if (typeof target === "number") target = link.target = nodes[link.target];
-        source.sourceLinks.push(link);
-        target.targetLinks.push(link);
+            var source = link.source,
+                target = link.target;
+            if (typeof source === "number") source = link.source = nodes[link.source];
+            if (typeof target === "number") target = link.target = nodes[link.target];
+            source.sourceLinks.push(link);
+            target.targetLinks.push(link);
         });
     }
 
@@ -111,20 +112,20 @@ d3.sankey = function() {
         var remainingNodes = nodes,
             nextNodes,
             x = 0;
-
+       
         while (remainingNodes.length) {
-        nextNodes = [];
-        remainingNodes.forEach(function(node) {
-            node.x = x;
-            node.dx = nodeWidth;
-            node.sourceLinks.forEach(function(link) {
-            if (nextNodes.indexOf(link.target) < 0) {
-                nextNodes.push(link.target);
-            }
+            nextNodes = [];
+            remainingNodes.forEach(function(node) {
+                node.x = x;
+                node.dx = nodeWidth;
+                node.sourceLinks.forEach(function(link) {
+                    if (nextNodes.indexOf(link.target) < 0) {
+                        nextNodes.push(link.target);
+                    }
+                });
             });
-        });
-        remainingNodes = nextNodes;
-        ++x;
+            remainingNodes = nextNodes;
+            ++x;
         }
 
         //

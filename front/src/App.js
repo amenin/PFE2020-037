@@ -16,6 +16,7 @@ import "./App.css";
 // import { Authors } from "./components/Authors.js";
 import { AuthorsData } from "./components/AuthorsData.js";
 import { BuildSankey } from "./components/BuildSankey.js";
+import { BuildTimeline } from './components/BuildTimeline.js';
 // import { Sidenav } from "./components/Sidenav.js";
 
 const { Header, Sider, Content } = Layout;
@@ -74,6 +75,9 @@ function App() {
                     <Menu.Item key="2" icon={<PieChartOutlined />}>
                         <Link to="/sankey">Sankey diagram</Link>
                     </Menu.Item>
+                    <Menu.Item key="3" icon={<PieChartOutlined />}>
+                        <Link to="/timeline">Timeline</Link>
+                    </Menu.Item>
                 </Menu>
             </Sider>
             <Layout className="site-layout">
@@ -112,6 +116,9 @@ function App() {
                         </Route>
                         <Route path="/sankey">
                             <BuildSankey data={data} />
+                        </Route>
+                        <Route path="/timeline">
+                            <BuildTimeline data={data} />
                         </Route>
                     </Switch>
                 </Content>

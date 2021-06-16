@@ -4,7 +4,7 @@ import json
 
 sparql = SPARQLWrapper("http://sparql.archives-ouvertes.fr/sparql")
 sparql.setReturnFormat(JSON)
-sparql.setTimeout(10000000)
+sparql.setTimeout(1000000)
 
 pd.set_option('display.max_colwidth', None)
 
@@ -45,12 +45,11 @@ def save_data(authors):
 
 def group_data():
     data = pd.read_csv('static/data.csv').fillna('')
-
     byAuthorDict = {}
     for row in data.values.tolist():
         authorURI = row[0]
         year, mont, date = row[4].split('-')
-        country = row[7]
+        # country = row[8]
 
         if authorURI not in byAuthorDict:
             byAuthorDict[ authorURI ] = {}
@@ -58,10 +57,11 @@ def group_data():
         if year not in byAuthorDict[ authorURI ]:
             byAuthorDict[ authorURI ][ year ] = {}
 
-        if country not in byAuthorDict[ authorURI ][ year ]:
-            byAuthorDict[ authorURI ][ year ][ country ] = []
+        # if country not in byAuthorDict[ authorURI ][ year ]:
+        #     byAuthorDict[ authorURI ][ year ][ country ] = []
 
-        byAuthorDict[ authorURI ][ year ][ country ].append({
+        # byAuthorDict[ authorURI ][ year ][ country ].append({
+        byAuthorDict[ authorURI ][ year ].append({
             # 'author': row[0],
             'docURI': row[1],
             'docTitle': row[2],
@@ -69,11 +69,12 @@ def group_data():
             'issuedAt': row[4],
             'lab': row[5],
             'labName': row[6],
-            'country': row[7],
-            'availableAt': row[8],
-            'name1': row[9],
-            'name2': row[10],
-            'adress': row[11],
+            'docType': row[7].split('/')[-1],
+            'country': row[8],
+            'availableAt': row[9],
+            'name1': row[10],
+            'name2': row[11],
+            'address': row[12],
         })
     # byAuthorDict
 
@@ -83,23 +84,23 @@ def group_data():
 
         authorData = []
         for year in byAuthorDict[ authorURI ]:
-            yearData = []
-            for country in byAuthorDict[ authorURI ][ year ]:
-                docs = []
-                for doc in byAuthorDict[ authorURI ][ year ][ country ]:
-                    if doc['name1']:
-                        names.add(doc['name1'])
-                    if doc['name2']:
-                        names.add(doc['name2'])
+            # yearData = []
+            # for country in byAuthorDict[ authorURI ][ year ]:
+            docs = []
+            for doc in byAuthorDict[ authorURI ][ year ]:
+                if doc['name1']:
+                    names.add(doc['name1'])
+                if doc['name2']:
+                    names.add(doc['name2'])
 
-                    docs.append( {k:doc[k] for k in doc if k not in ['name1', 'name2']} )
+                docs.append( {k:doc[k] for k in doc if k not in ['name1', 'name2']} )
 
-                yearData.append({ 'country': country,
-                    'docs': docs
-                })
+            # yearData.append({ 'country': country,
+            #     'docs': docs
+            # })
 
             authorData.append({ 'year': year,
-                'byCountry': yearData
+                'docs': yearData
             })
 
         byAuthorList.append({ 'authorURI': authorURI, # .replace("https://data.archives-ouvertes.fr/author/", ""),
@@ -111,29 +112,31 @@ def group_data():
         json.dump(byAuthorList, f, ensure_ascii=False, indent=2)
 
 def by_author_dict(data, authors = [], countries = [], years = []):
+
     byAuthorDict = {}
     for row in data.values.tolist():
         authorURI = row[0]
         year, mont, date = row[4].split('-')
-        country = row[7]
+        country = row[8]
 
         if isinstance(authors, list) and len(authors) and authorURI not in authors:
             continue
         if isinstance(years, list) and len(years) and year not in years:
             continue
-        if isinstance(countries, list) and len(countries) and country not in countries:
-            continue
+        # if isinstance(countries, list) and len(countries) and country not in countries:
+        #     continue
 
         if authorURI not in byAuthorDict:
             byAuthorDict[ authorURI ] = {}
 
         if year not in byAuthorDict[ authorURI ]:
-            byAuthorDict[ authorURI ][ year ] = {}
+            byAuthorDict[ authorURI ][ year ] = []
 
-        if country not in byAuthorDict[ authorURI ][ year ]:
-            byAuthorDict[ authorURI ][ year ][ country ] = []
+        # if country not in byAuthorDict[ authorURI ][ year ]:
+        #     byAuthorDict[ authorURI ][ year ][ country ] = []
 
-        byAuthorDict[ authorURI ][ year ][ country ].append({
+        # byAuthorDict[ authorURI ][ year ][ country ].append({
+        byAuthorDict[ authorURI ][ year ].append({
             # 'author': row[0],
             'docURI': row[1],
             'docTitle': row[2],
@@ -141,11 +144,12 @@ def by_author_dict(data, authors = [], countries = [], years = []):
             'issuedAt': row[4],
             'lab': row[5],
             'labName': row[6],
-            'country': row[7],
-            'availableAt': row[8],
-            'name1': row[9],
-            'name2': row[10],
-            'adress': row[11],
+            'docType': row[7].split('/')[-1],
+            'country': row[8],
+            'availableAt': row[9],
+            'name1': row[10],
+            'name2': row[11],
+            'address': row[12]
         })
     return byAuthorDict
 
@@ -156,24 +160,24 @@ def by_author_list(byAuthorDict):
 
         authorData = []
         for year in byAuthorDict[ authorURI ]:
-            yearData = []
-            for country in byAuthorDict[ authorURI ][ year ]:
-                docs = []
-                for doc in byAuthorDict[ authorURI ][ year ][ country ]:
-                    if doc['name1']:
-                        names.add(doc['name1'])
-                    if doc['name2']:
-                        names.add(doc['name2'])
+            # yearData = []
+            # for country in byAuthorDict[ authorURI ][ year ]:
+            docs = []
+            for doc in byAuthorDict[ authorURI ][ year ]: #[ country ]:
+                if doc['name1']:
+                    names.add(doc['name1'])
+                if doc['name2']:
+                    names.add(doc['name2'])
 
-                    docs.append( {k:doc[k] for k in doc if k not in ['name1', 'name2']} )
-
-                yearData.append({ 'country': country,
-                    'docs': docs
-                })
+                docs.append( {k:doc[k] for k in doc if k not in ['name1', 'name2']} )
 
             authorData.append({ 'year': year,
-                'byCountry': yearData
+                'docs': docs
             })
+
+            # authorData.append({ 'year': year,
+            #     'byCountry': yearData
+            # })
 
         byAuthorList.append({ 'authorURI': authorURI, # .replace("https://data.archives-ouvertes.fr/author/", ""),
             'name': list(names)[0] if len(names) == 1 else list(names),
@@ -251,6 +255,99 @@ def generate_sankey(byAuthorList):
     with open('static/sankey-formatted.json', 'w', encoding='utf-8') as f:
         json.dump({'nodes': nodes, 'links': links}, f, ensure_ascii=False, indent=2)
 
+    return {'nodes': nodes, 'links': links}
+
+def generate_sankey_per_year(byAuthorList):
+    index = -1
+    nodes = []
+    links = []
+    nodesMap = {}
+
+    for author in byAuthorList:
+        name = author['name']
+        if isinstance(name, list):
+            name = '; '.join(name)
+
+        index += 1
+        authIndex = index
+        nodes.append({'node': index, 'name': name, 'value': 1})
+
+        authorData = author['byYear']  
+        for i in range(len(authorData)):
+
+            currYear = authorData[i]['year']
+            currNodeKey = currYear + name
+            
+            if currNodeKey not in nodesMap:
+                index += 1
+                nodesMap[ currNodeKey ] = index
+                nodes.append({ 
+                    'node': index, 
+                    'year': authorData[i]['year'] ,
+                    'name': name, 
+                    'value': len(authorData[i]['docs']),
+                    'publications': authorData[i]['docs']
+                })
+
+            link = {
+                'target': nodesMap[ currNodeKey ],
+                'author': name,
+                'value': len(authorData[i]['docs'])
+            }
+            if i == 0:
+                link['source'] = authIndex
+            else:
+                prevYear = authorData[i-1]['year']
+
+                prevNodeKey = prevYear + name
+                
+                if prevNodeKey == currNodeKey:
+                    continue
+
+                link['source'] = nodesMap[ prevNodeKey ]
+                
+            links.append(link)
+ 
+    with open('static/sankey-formatted.json', 'w', encoding='utf-8') as f:
+        json.dump({'nodes': nodes, 'links': links}, f, ensure_ascii=False, indent=2)
+
+    return {'nodes': nodes, 'links': links}
+
+
+def generate_timeline_data(data):
+    publications = []
+    index = 0
+
+    for author in data:
+        name = author['name']
+        if isinstance(name, list):
+            name = '; '.join(name)
+
+        for yearData in author['byYear']  :
+
+            for docData in yearData['docs']:
+                publications.append(docData)
+                publications[index]['year'] = yearData['year']
+                publications[index]['author'] = name
+                index += 1
+ 
+    with open('static/sankey-formatted.json', 'w', encoding='utf-8') as f:
+        json.dump({'publications': publications}, f, ensure_ascii=False, indent=2)
+
+    return {'publications': publications}
+
+def generate_parallelCoord(byAuthorList):
+    data = []
+
+    for author in byAuthorList:
+        authorData = {'author': author['name'], data: []}
+        for year in author['byYear']:
+            for country in year['byCountry']:
+                authorData.data.append({'year': year['year'], 'country': country['country'], 'docs': country['docs'] })
+        data.append(authorData)
+
+    return data
+
 query_authors = """
     select distinct ?author
         # concat(str(?nameAgg), '') as ?nameAgg 
@@ -276,21 +373,22 @@ query_data = """
             str(?title) as ?title 
             str(?versionOf) as ?versionOf 
             xsd:date(?issued) as ?issuedAt 
-        ?lab ?labName 
+        ?lab ?labName ?type
         replace(str(?country), 'http://fr.dbpedia.org/resource/', '') AS ?country 
         concat(str(xsd:date(?available)), '') as ?availableAt
         concat(str(?nameAgg), '') as ?nameAgg 
         concat(str(?nameAuth), '') as ?nameAuth 
-        concat(str(?adress), '') as ?adress 
+        concat(str(?address), '') as ?address 
     where {{
         ?doc dcterms:issued ?issued;
-            dcterms:creator [ hal:person ?authorURI; hal:structure ?lab ].
+            dcterms:creator [ hal:person ?authorURI; hal:structure ?lab ] ;
+            a ?type .
             optional {{ ?doc dcterms:available ?available }}
             optional {{ ?doc dcterms:title ?title }}
             optional {{ ?doc dcterms:isVersionOf ?versionOf }}
         ?lab skos:prefLabel ?labName;
             vcard2006:country-name ?country.
-            optional {{ ?lab org:siteAddress ?adress }}
+            optional {{ ?lab org:siteAddress ?address }}
         optional {{ ?authorURI ore:isAggregatedBy ?authorAgg optional {{ ?authorAgg foaf:name ?nameAgg }} }}
         optional {{ ?authorURI foaf:name ?nameAuth }}
         bind( if(bound(?authorAgg), ?authorAgg, ?authorURI ) as ?author )

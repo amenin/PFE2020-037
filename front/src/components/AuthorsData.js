@@ -64,6 +64,11 @@ export const AuthorsData = ({ isLoading, data, handleRegenerate }) => {
                         key: "docTitle",
                     },
                     {
+                        title: "Publication Type",
+                        dataIndex: "docType",
+                        key: "docType",
+                    },
+                    {
                         title: "issuedAt",
                         dataIndex: "issuedAt",
                         key: "issuedAt",
@@ -84,9 +89,9 @@ export const AuthorsData = ({ isLoading, data, handleRegenerate }) => {
                         key: "country",
                     },
                     {
-                        title: "Adress",
-                        dataIndex: "adress",
-                        key: "adress",
+                        title: "Address",
+                        dataIndex: "address",
+                        key: "address",
                     },
                 ]}
                 scroll={{ x: 2000 }}

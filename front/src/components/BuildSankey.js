@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import ReactDOM from 'react-dom';
+
 import { Select, Typography, Row, Col, Button, Spin, Modal } from "antd";
 
 import { fetchFromBackendGet, fetchFromBackendPost } from "./fetchFromBackend";
+import SankeyChart from './SankeyChart';
 
 const { Title } = Typography;
 const REACT_APP_API_URL = "http://localhost:5000";
@@ -10,35 +13,37 @@ export const BuildSankey = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [filters, setFilters] = useState({});
+    const [data, setData] = useState({});
+    const [sankeyData, setSankeyData] = useState({})
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const [selectedCountries, setSelectedCountries] = useState([]);
     const [selectedYears, setSelectedYears] = useState([]);
+    const [selectedNodeStyle, setNodeStyle] = useState('Bars');
 
-    useEffect(async () => {
-        setIsLoading(true);
+    useEffect(() => {
+        async function fetchData() {
+            setIsLoading(true);
 
-        const filters = await fetchFromBackendGet("filters");
-        setFilters(filters);
-
-        setIsLoading(false);
+            const filters = await fetchFromBackendGet("filters");
+            setFilters(filters);
+            
+            setIsLoading(false);
+        }
+        fetchData()
     }, []);
 
     const handleClick = async () => {
         if (!isDrawing) {
             if (selectedAuthors.length) {
                 setIsDrawing(true);
+                
                 const res = await fetchFromBackendPost("sankey", {
                     authors: selectedAuthors,
-                    countries: selectedCountries,
-                    years: selectedYears,
+                    countries: filters.countries,
+                    years: filters.years,
                 });
 
-                window.open(
-                    `${REACT_APP_API_URL}/sankey?_=` +
-                        Math.floor(Math.random() * 99999999999999),
-                    "_blank",
-                    "width=4000,height=400"
-                );
+                setSankeyData(res)
 
                 setIsDrawing(false);
             } else {
@@ -46,6 +51,8 @@ export const BuildSankey = () => {
             }
         }
     };
+
+    const changeNodeStyle = async(value) => setNodeStyle(value)
 
     return (
         <>
@@ -58,6 +65,7 @@ export const BuildSankey = () => {
                             mode="multiple"
                             style={{ width: "100%" }}
                             placeholder="Please select"
+                            allowClear="true"
                             onChange={(value) => {
                                 setSelectedAuthors(value);
                             }}
@@ -109,7 +117,30 @@ export const BuildSankey = () => {
                             </Button>
                         </Spin>
                     </Col>
+                    {/* <Col span={8}>
+                        <Spin
+                            style={{ marginTop: 20 }}
+                            spinning={isDrawing}
+                            tip="Loading..."
+                        >
+                            <Title level={4}>Node Style</Title>
+                            <Select
+                                style={{ width: "100%" }}
+                                placeholder="Please select"
+                                onChange={(value) => {
+                                    changeNodeStyle(value);
+                                }}
+                                options={[{value: 'Bars'}, {value: 'Circle'}]}
+                                // defaultValue={{value: 'Bars'}}
+                            />
+                            
+                        </Spin>
+                    </Col> */}
                 </Row>
+                <div style={
+                    {width: '100%', height: window.innerHeight}}>
+                    <SankeyChart data={sankeyData} nodeStyle={selectedNodeStyle}></SankeyChart>
+                </div>
             </Spin>
         </>
     );
