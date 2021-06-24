@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
 
 import * as d3 from 'd3'
-import { schemeCategory10, interpolateBlues } from 'd3-scale-chromatic'
 import { geoRobinson } from 'd3-geo-projection'
 import { jenks } from 'simple-statistics'
-import { stack } from 'd3'
-import vanDerGrinten4 from 'd3-geo-projection/src/vanDerGrinten4'
+
+import '../style/timeline.css'
 
 class Timeline extends Component {
     constructor (props) {
@@ -14,51 +13,14 @@ class Timeline extends Component {
         this.state = {
             country_codes: [],
             world: {},
-            selected_countries: []        
+            selected_countries: []    
         };
 
         this.createTimeline = this.createTimeline.bind(this)
-        this.createMap = this.createMap.bind(this)
     }
 
-    // static method
-    // dont have access of 'this'
-    // return object will update the state
-    // static getDerivedStateFromProps(props, state) {
-    //     if (!Object.keys(props.data).length) return state;
-
-    //     let nestedData = d3.nest()
-    //         .key(function(d) { return d.country; })
-    //         .sortKeys((a,b) => a.localeCompare(b))
-    //         .entries(props.data.publications)
-
-    //     /// keep only information for selected countries /////
-    //     let validCountries = nestedData.map(d => {
-    //         let authors = d.values.map(e => e.author)
-    //         authors = authors.filter((d,i) => i === authors.indexOf(d))
-
-    //         authors = authors.map(e => {
-    //             return {
-    //                 'name': e,
-    //                 'value': d.values.filter(v => v.author === e).length
-    //             }
-    //         })
-
-    //         let res = state.country_codes.filter(item => item.name === d.key);
-    //         return {
-    //             'country': d.key, 
-    //             'authors': authors,
-    //             'value': d.values.length,
-    //             'alpha3': res.length ? res[0].alpha3 : null,
-    //             'alpha2': res.length ? res[0].alpha2 : null
-    //         }
-    //     })
-
-    //     return {country_codes: state.country_codes, world: state.world, selected_countries: validCountries};
-    // }
-
     shouldComponentUpdate (nextProps, nextState) {
-        return Object.keys(nextProps.data).length && this.props.data !== nextProps.data
+        return this.props.data !== nextProps.data
     }
 
     componentDidMount() {
@@ -81,34 +43,34 @@ class Timeline extends Component {
                 {'icon': '>', 'row': 0, 'col': 1, 'value': 'up', 'action': 'pan'},
                 {'icon': '<', 'row': 2, 'col': 1, 'value': 'down', 'action': 'pan'}]
 
-            d3.select(this.node.parentNode).selectAll('button.zoom-control')
+            const div = d3.select(this.node.parentNode)
+            div.selectAll('button.zoom-control')
                 .data(buttons)
                 .enter()
                     .append('button')
                     .classed('zoom-control', true)
-                    .style('cursor', 'pointer')
-                    .style('position', 'absolute')
-                    .style('background-color', '#dbdbdb')
-                    .style('border-radius', '5px')
-                    .style('width', '30px')
-                    .style('height', '30px')
-                    .style('font-size', '14px')
-                    .style('border', 'none')
                     .style('transform', d => ['up', 'down'].includes(d.value) ? 'rotate(-90deg)' : null)
                     .text(d => d.icon)           
+
+            div.append('div')
+                .classed('context-menu', true)
 
         })
         .catch(function(error) { throw(error); })
     }   
     
     componentDidUpdate() {
+        d3.select(this.node).selectAll('g').remove()
+        d3.select(this.node.parentNode).selectAll('button.zoom-control').style('display', 'none')
+
+        if (!Object.keys(this.props.data).length) return;
+
         const updateState = new Promise((resolve, reject) => {
-            if (!Object.keys(this.props.data).length) return;
 
             let nestedData = d3.nest()
                 .key(function(d) { return d.country; })
                 .sortKeys((a,b) => a.localeCompare(b))
-                .entries(this.props.data.publications)
+                .entries(this.props.data.docs)
     
             /// keep only information for selected countries /////
             let validCountries = nestedData.map(d => {
@@ -138,7 +100,6 @@ class Timeline extends Component {
 
         updateState.then(() => {
             this.createImagePatterns()
-            this.createMap()
             this.createTimeline()
         })
         
@@ -147,7 +108,7 @@ class Timeline extends Component {
     createImagePatterns(){
         let countryCodes = this.state.selected_countries;
 
-        d3.select('g#patterns-group').remove()
+        // d3.select('g#patterns-group').remove()
 
         var defs = d3.select(this.node)
             .append('g')
@@ -159,137 +120,105 @@ class Timeline extends Component {
 
         defs.append("pattern")
             .attr("id", d => "flag_" + d.alpha2)
-            .attr("width", 20)
-            .attr("height", 20)
-            .attr("patternUnits", "userSpaceOnUse")
+            .attr("width", 1)
+            .attr("height", 1)
+            .attr('viewBox', "0 0 100 100")
+            .attr('preserveAspectRatio', 'none')
                 .append("svg:image")
                 .attr("xlink:href", d => `${process.env.PUBLIC_URL}/flags/${d.alpha2}.svg`)
-                .attr("width", 20)
-                .attr("height", 20)
-                .attr("x", 0)
-                .attr("y", 0);
-    }
-
-    createMap () {
-        if (!Object.keys(this.props.data).length) return;
-
-        // let data = this.props.data.publications,
-        let world = this.state.world,
-            countryCodes = this.state.selected_countries;
-        
-        // color code: count of publications per country
-        let values = countryCodes.map(d => d.value);
-        let breaks = jenks(values, values.length >= 5 ? 5 : values.length)
-        const countryColor = d3.scaleThreshold()
-            .domain(breaks)
-            .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
-
-        const chart = {width: this.node.parentNode.clientWidth, height: this.node.parentNode.clientHeight},
-            margin = {top: 30, left: 0, right: 0, bottom: 0};
-
-        const zoom = d3.zoom()
-            .scaleExtent([1, 8])
-            .on('zoom', function(){
-                gCountries.selectAll('path') 
-                    .attr('transform', d3.event.transform);
-            });
-        
-        const svg = d3.select(this.node)
-            .attr('width', chart.width)
-            .attr('height', chart.height)
-
-        svg.select('g#map-group').remove()
-
-        const mapGroup = svg.append('g')
-            .attr('id', 'map-group')
-            .attr('transform', `translate(${margin.left}, ${margin.top})`); 
-            
-        ///// world map ////////////
-        const projection = geoRobinson()
-            .scale(250)
-            .rotate([352, 0, 0])
-            .translate([chart.width/2, chart.height/2]);
-
-        const path = d3.geoPath().projection(projection);
-
-        const gCountries = mapGroup.append('g')
-            .attr('class', 'countries')
-            .style('cursor', 'grab')
-        
-        const gCountry = gCountries.selectAll('g')
-            .data(world.features)
-            .enter()
-                .append('g')
-        
-        gCountry.append('path') 
-            .attr('d', path)
-            .style('fill', d => {
-                let res = countryCodes.filter(e => e.alpha3 === d.properties.alpha3)
-                return res.length ? countryColor(res[0].value) : "#f4f4f4";
-            })
-            .style('stroke', '#ccc')
-            .style('opacity', 0.8)
-            .style('stroke-width', 0.3)
-            .call(zoom)
-
-        gCountry.append('title')
-            .text(d => d.properties.ADMIN)
-
-        //// zoom & pan controls ////////
-        const buttons = d3.selectAll('button.zoom-control')
-        buttons.style('left', d => chart.width - 30 - d.col * 35 + 'px')
-            .style('top', d => 120 + d.row * 20 + 'px')
-            .on('click', d => {
-                let value = 30;
-                let selection = gCountries.selectAll('path').transition().duration(500);
-                switch(d.action) {
-                    case 'zoom':
-                        value = d.value === 'plus' ? 1.3 : 1 / 1.3;
-                        zoom.scaleBy(selection, value)
-                        break;
-                    case 'pan':
-                        let x = 0, y = 0;
-
-                        if (d.value === 'up') y = value
-                        else if (d.value === 'down') y = -value
-                        else if (d.value === 'left') x = -value
-                        else x = value
-                        zoom.translateBy(selection, x, y)
-                        break;
-                    case 'reset':
-                        selection.call(zoom.transform, d3.zoomIdentity);
-                        break;
-                }
-                
-            })            
-        
-
+                .attr("width", 100)
+                .attr("height", 100)
+                .attr('preserveAspectRatio', 'none')
     }
 
     createTimeline () {
-        if (!Object.keys(this.props.data).length) return;
         
-        let data = this.props.data.publications,
-            countryCodes = this.state.selected_countries;
+        let data = this.props.data.docs,
+            countryCodes = this.state.selected_countries,
+            links = this.props.data.links,
+            world = this.state.world,
+            changeFocus = this.props.retrieveData;
+
+        const controls = {freeze_links: null}
         
+        links = links.filter((d,i) => i === links.findIndex(e => e.source == d.source && e.target === d.target && e.year === d.year))
+
         let nestedData = d3.nest()
             .key(function(d) { return d.author; })
             .sortKeys((a,b) => a.localeCompare(b))
             .entries(data)
 
-        const authors = nestedData.map(d => d.key)
-        
-        const margin = { top: 100, right: 0, bottom: 100, left: 50 },
-            width = this.node.parentNode.clientWidth - margin.left - margin.right,
-            chart = { width: width * .95, height: 150 * authors.length, symbolSize: 60 };
+        const nestedDocsbyAuthor = d3.nest()
+            .key(d => d.author)
+            .key(d => d.docURI)
+            .sortKeys((a,b) => a.localeCompare(b))
+            .entries(data)
 
-        if (chart.height > this.node.parentNode.clientHeight)
+        // group different countries, adresses and labs per document and author
+        let docs = []
+        nestedDocsbyAuthor.forEach(author => {
+            author.values.forEach(doc => {
+                let addresses = doc.values.map(d => d.address)
+                addresses = addresses.filter((d,i) => i === addresses.indexOf(d))
+
+                let countries = doc.values.map(d => d.country)
+                countries = countries.filter((d,i) => i === countries.indexOf(d))
+
+                let labs = doc.values.map(d => d.labName)
+                labs = labs.filter((d,i) => i === labs.indexOf(d))
+
+                let docData = doc.values[0]
+                docData.authorsList = docData.authorsList.map(d => d.name)
+                docData.address = addresses
+                docData.country = countries
+                docData.labName = labs
+                docs.push(docData)
+            })
+        })
+
+        // classification of document types
+        const docTypes = {
+            'conf': ['COMM', 'POSTER', 'PRESCONF', 'UNDEFINED'],
+            'journal': ['ART'],
+            'diplome': ['ETABTHESE', 'THESE', 'HDR' ],
+            'art': ['MAP', 'PATENT', 'SON', 'VIDEO', 'IMG'],
+            'book': ['OUV', 'BOOK', 'COUV', 'DOUV'],
+            'gray': ['MEM', 'MINUTES', 'OTHER', 'OTHERREPORT', 'REPACT', 'REPORT', 'SYNTHESE', 'NOTE', 'MEMLIC']
+        }
+        const symbol = {color: '#cab609', stroke: '#666666'}
+
+        let nestedDataByyear = d3.nest()
+            .key(d => d.year)
+            .entries(docs)
+        let maxHeight = d3.max(nestedDataByyear, d => d.values.length) / 3
+        maxHeight = 20 * maxHeight > 200 ? 20 * maxHeight : 200;
+
+        const authors = nestedData.map(d => d.key)
+
+        // create an array with name and uris of authors
+        let authorsInfo = []
+        authors.forEach(author => {
+            let uris = data.filter(d => d.author === author).map(d => d.authorURI)
+            uris = uris.filter((d,i) => i === uris.indexOf(d))
+            authorsInfo.push({
+                'name': author,
+                'uri': uris
+            })            
+        })
+        
+        const margin = { top: 100, right: 0, bottom: 100, left: 100 },
+            width = this.node.parentNode.clientWidth - margin.left - margin.right,
+            chart = { width: width * .95, height: maxHeight * authors.length, symbolSize: 15 };
+
+        if (chart.height + 150 > this.node.parentNode.clientHeight)
             this.node.parentNode.style.height = chart.height + 150 + 'px';
         
         const svg = d3.select(this.node)
             .attr('height', this.node.parentNode.clientHeight)
            
-        svg.select('g#group-chart').remove()
+        // svg.select('g#group-chart').remove()
+
+        createMap(this)
 
         const chartGroup =  svg.append('g')
             .attr('id', 'group-chart')
@@ -304,16 +233,13 @@ class Timeline extends Component {
         const yAxis = d3.axisLeft()
             .scale(yScale)
         
-        let dates = data.map(d => d.year)
-        dates = dates.filter((d,i) => i === dates.indexOf(d))
+        let dates = nestedDataByyear.map(d => d.key)
         dates.sort((a,b) => +a - (+b))
 
         const xScale = d3.scaleBand()
             .domain(dates)
             .range([0, chart.width])
             .paddingInner(0.2);
-
-        chart.symbolSize = xScale.bandwidth() * 3
 
         const xAxis = d3.axisBottom()
             .ticks(dates.length)
@@ -324,14 +250,96 @@ class Timeline extends Component {
             .attr('transform', `translate(0, ${chart.height})`)
             .call(xAxis)
         
-        chartGroup.append('g')
+        const yAxisGroup = chartGroup.append('g')
             .attr('transform', `translate(0, 0)`)
+            .attr('id', 'x-group')
             .call(yAxis)
-            .selectAll("text")	
-                .style("text-anchor", "end")
-                .attr("dx", "-.5em")
-                .attr("dy", "-.15em")
-                .attr("transform", "rotate(-65)");
+
+        yAxisGroup.append('title')
+            .text(`Click to pause/play the links animation\n\nRight click for more options`)
+
+        yAxisGroup.selectAll(".tick text")
+            .style('font-weight', 'bold')
+            .style('font-size', '12px')
+            .attr("dx", "-1em")
+            .style('cursor', 'pointer')
+            .on('mouseenter', d => {
+                if (controls.freeze_links) return;
+                let linkElem = chartGroup.selectAll('g.link')
+                    .style('opacity', e => e.source === d ? 1 : .1)
+
+                linkElem.selectAll('line').style('stroke-width', '2')
+
+                // highlight documents within line of co-authors
+                let targets = links.filter(e => e.source === d).map(e => e.target)
+
+                let symbolGroup = chartGroup.selectAll('g.symbol-group').filter(e => e.authorsList.includes(d) && e.authorsList.some(a => targets.includes(a)))
+                symbolGroup.selectAll('.symbol')
+                    .style('stroke', '#000')
+                    .style('stroke-width', 2)
+    
+                symbolGroup.selectAll('.symbol').filter(e => docs.filter(a => a.docURI === e.docURI).length == 1).style('stroke-dasharray', 4)
+            })
+            .on('mouseleave', () => {
+                if (controls.freeze_links) return;
+                chartGroup.selectAll('g.link')
+                    .style('opacity', 1)
+                    .selectAll('line')
+                    .style('stroke-width', 1)
+
+                let symbolGroup = chartGroup.selectAll('g.symbol-group')
+                symbolGroup.selectAll('.symbol')
+                    .style('stroke', symbol.stroke)
+                    .style('stroke-width', 1)
+                    .style('stroke-dasharray', 'none')
+            })
+            .on('click', function(d) {
+                if (controls.freeze_links && controls.freeze_links != d) return;
+
+                controls.freeze_links = d === controls.freeze_links ? null : d;
+                
+                d3.select(this).style('color', d => controls.freeze_links ? '#8e8e8e' : '#000')
+            })
+            .on('contextmenu', d => {
+                d3.event.preventDefault()
+                const x = d3.event.layerX,
+                    y = d3.event.layerY
+
+                d3.select('div.context-menu')
+                    .style('left', x + 'px')
+                    .style('top', y + 'px')
+                    .style('display', 'block')
+                    .html(`Reload and Focus on ${d}`)
+                    .on('click', function() {
+                        changeFocus(authorsInfo.filter(e => e.name === d)[0])
+                        d3.select(this).style('display', 'none')
+                    })
+            })
+            .call(wrap, yScale.step()/2)
+
+        function wrap(text, width) {
+            text.each(function() {
+                var text = d3.select(this),
+                    words = text.text().split(/\s+/).reverse(),
+                    word,
+                    line = [],
+                    lineNumber = 0,
+                    lineHeight = 1.1, // ems
+                    y = text.attr("y"),
+                    dy = parseFloat(text.attr("dy")),
+                    tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+                while (word = words.pop()) {
+                    line.push(word);
+                    tspan.text(line.join(" "));
+                    if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                    }
+                }
+            });
+        }
 
         ///// grids ////////////////////////////
         const gridGroup = chartGroup.append('g')
@@ -349,7 +357,7 @@ class Timeline extends Component {
                 .style('stroke', '#ccc')
                 .style('stroke-dasharray', 3)
 
-        gridGroup.selectAll('line.vert')
+        gridGroup.selectAll('line.hori')
             .data(authors)
             .enter()
                 .append('line')
@@ -396,7 +404,7 @@ class Timeline extends Component {
         /// author wave profile //////////////
         const yWave = d3.scaleLinear()
             .domain([-2, 2])
-            .range([ xScale.bandwidth()/2, -xScale.bandwidth()/2 ]);
+            .range([ yScale.step() * .05, -yScale.step() * .05 ]);
         
         const stack = d3.stack()
             .offset(d3.stackOffsetSilhouette)
@@ -414,7 +422,10 @@ class Timeline extends Component {
                 .append('g')
 
         /// wave ////////
-        authorGroup.selectAll("path")
+        const profileGroup = authorGroup.append('g')
+            .classed('profile', true)
+
+        profileGroup.selectAll("path")
             .data(d => {
                 stack.keys([d.key])
                 return stack(dataPerYear.filter(e => e.author === d.key))
@@ -436,56 +447,275 @@ class Timeline extends Component {
                     svg.select('g#map-group').selectAll('path').style('stroke-width', '.3').style('stroke', '#ccc')
                 })
 
-        /// publications per country ///////////////
-        let patternSize = chart.symbolSize * .07;
-        let patterns = d3.selectAll('pattern')
-        patterns.attr('width', patternSize).attr('height', patternSize)
-        patterns.selectAll('image').attr('width', patternSize).attr('height', patternSize)
+        //// co-authorship links ////////////
 
-        const docTypes = ['Book', 'ConferencePaper', 'Article', 'Chapter', 'DoctoralThesis', 'Hdr', 'Other']
-        const shapes = [ d3.symbolDiamond, d3.symbolCross, d3.symbolCircle, d3.symbolSquare, d3.symbolStar, d3.symbolTriangle, d3.symbolWye ]
-        const symbol = d3.symbol().size(chart.symbolSize).type(d3.symbolDiamond)
+        const linksGroup = chartGroup.append('g')
 
-        const flagsGroup = chartGroup.append('g')
-        
-        const symbols = flagsGroup.selectAll('path.symbol')
-            .data(data)
+        const link = linksGroup.selectAll('g')
+            .data(links)
             .enter()
-                .append('path')
-                .attr('d', symbol.type(d => { let index = docTypes.indexOf(d.docType)
-                        return index >= 0 ? shapes[index] : shapes[6]
-                    }))
+                .append('g')
+                .classed('link', true)        
+
+        const lines = link.append('line')
+            .attr('x1', d => xScale.bandwidth()/ 2 + xScale(d.year))
+            .attr('x2', d => xScale.bandwidth()/ 2 + xScale(d.year))
+            .attr('y1', d => yScale(d.source))
+            .attr('y2', d => yScale(d.target))
+            .style('stroke', '#000')
+
+        lines.filter(d => {
+            let items = docs.filter(e => e.authorsList.includes(d.source) && e.authorsList.includes(d.target) && e.year === d.year)
+            let nestedItems = d3.nest().key(e => e.docURI).entries(items)
+            return nestedItems.every(e => e.values.length == 1)
+        })
+        .style('stroke-dasharray', 4)
+
+        link.append('circle')
+            .attr('r', '3')
+            .attr('cx', d => xScale.bandwidth()/ 2 + xScale(d.year))
+            .attr('cy', d => yScale(d.source))   
+            .style('fill', '#000')
+            
+        link.append('circle')
+            .attr('r', '3')
+            .attr('cx', d => xScale.bandwidth()/ 2 + xScale(d.year))
+            .attr('cy', d => yScale(d.target))   
+            .style('fill', '#000')
+
+
+        /// publications per author, year and type ///////////////
+        
+        // group of documents
+        const docsGroup = chartGroup.append('g')
+
+        // group per symbol (some symbols include more than one info)
+        const symbolGroup = docsGroup.selectAll('g')
+                .data(docs)
+                .enter()
+                    .append('g')
+                    .classed('symbol-group', true)
+                    .style('cursor', 'pointer')
+                    .on('click', d => {
+                        window.open(d.docURI)
+                    })
+
+        // squares for conference, diplome and artistic/technical documents
+        symbolGroup.filter(d => !docTypes.gray.includes(d.docTypeCode))
+            .append('rect')
+            .attr('width', chart.symbolSize)
+            .attr('height', chart.symbolSize)
+            .attr('fill', '#fff')
+            .style('stroke', symbol.stroke)
+            .classed('symbol', true)
+
+        // whole books and editions
+        symbolGroup.filter(d => docTypes.book.includes(d.docTypeCode))
+            .selectAll('rect')
+            .attr('width', chart.symbolSize * 1.5) 
+            .attr('fill', d => ['OUV', 'BOOK'].includes(d.docTypeCode) ? symbol.color : '#fff')   
+
+        /// book chapters
+        symbolGroup.filter(d => d.docTypeCode == 'COUV')
+            .append('rect')
+            .attr('width', chart.symbolSize * .75)
+            .attr('height', chart.symbolSize)
+            .attr('fill', symbol.color)
+            .style('stroke', symbol.stroke)
+
+        // journals
+        symbolGroup.filter(d => docTypes.journal.includes(d.docTypeCode))
+            .selectAll('rect')
+            .attr('height', chart.symbolSize * 1.5)
+            .attr('fill', symbol.color)
+
+        // D in the center of square representing diplomes    
+        symbolGroup.filter(d => docTypes.diplome.includes(d.docTypeCode))
+            .append('text')
+            .style('text-anchor', 'middle')
+            .style('font-weight', 'bold')
+            .attr('x', chart.symbolSize / 2)
+            .attr('y', chart.symbolSize * .85)
+            .text('D')
+
+        // colorful rectangle representing art
+        symbolGroup.filter(d => docTypes.art.includes(d.docTypeCode))
+            .append('rect')
+            .attr('height', chart.symbolSize * .3)
+            .attr('width', chart.symbolSize * .9)
+            .attr('fill', symbol.color)
+            .attr('y', chart.symbolSize * .65)
+            .attr('x', chart.symbolSize * .05)
+        
+        symbolGroup.filter(d => docTypes.gray.includes(d.docTypeCode))
+            .append('circle')
+            .attr('r', chart.symbolSize/2)
+            .attr('fill', '#fff')
+            .style('stroke', symbol.stroke)
+            .classed('symbol', true)
+
+        symbolGroup.on('mouseenter', d => {
+            if (controls.freeze_links) return;
+
+            // highlight documents within line of co-authors
+            symbolGroup.selectAll('.symbol')
+                .filter(e => e.docURI === d.docURI)
                 .style('stroke', '#000')
-                .style('stroke-width', '.2')
-                .attr('fill', d => {
-                    let code = countryCodes.filter(e => e.country === d.country);
-                    code = code.length ? code[0].alpha2 : null;
-                    return code ? `url(#flag_${code})` : '#fff';
-                })
-                .on('mouseenter', d => {
-                    let k = d3.zoomTransform(d3.select('g.countries').selectAll('path').node()).k
-                    let country = countryCodes.filter(e => e.country == d.country && e.authors.some(a => a.name === d.author))[0]
+                .style('stroke-width', 2)
 
-                    svg.select('g#map-group').selectAll('path')
-                        .style('stroke-width', d => country.alpha3 === d.properties.alpha3 ? 1.2 / k : .3)
-                        .style('stroke', d => country.alpha3 === d.properties.alpha3 ? '#000' : '#ccc')
+            /// highlight countries of co-authors
+            let countries = []
+            docs.filter(e => e.docURI === d.docURI).forEach(e => {
+                countries = countries.concat(e.country)
+            })
 
-                }).on('mouseleave', d => {
-                    svg.select('g#map-group').selectAll('path').style('stroke-width', '.3').style('stroke', '#ccc')
-                })
+            let countriesCodes = countryCodes.map(e => {
+                if (countries.includes(e.country))
+                    return e.alpha3
+            })
+
+            let k = d3.zoomTransform(d3.select('g.countries').selectAll('path').node()).k
+            svg.select('g#map-group').selectAll('path')
+                .style('stroke-width', d => countriesCodes.includes(d.properties.alpha3) ? 1.2 / k : .3)
+                .style('stroke', d => countriesCodes.includes(d.properties.alpha3) ? '#000' : '#ccc')
+
+        }).on('mouseleave', d => {
+            if (controls.freeze_links) return
+            svg.select('g#map-group').selectAll('path').style('stroke-width', '.3').style('stroke', '#ccc')
+            symbolGroup.selectAll('.symbol').style('stroke', symbol.stroke).style('stroke-width', 1)
+        })
         
         /// place circles close to each other using force simulation //////////////
         d3.forceSimulation()
-            .force("x", d3.forceX().strength(0.4).x(d => xScale(+d.year)))
-            .force("y", d3.forceY().strength(0.2).y(d => yScale(d.author)))
-            .force("collide", d3.forceCollide().strength(.1).radius(chart.symbolSize * .06).iterations(32)) // Force that avoids circle overlapping
-            .nodes(data)
-            .on("tick", () => symbols.attr('transform', e => `translate(${xScale.bandwidth()/2 + e.x}, ${e.y})`))
+            .force("x", d3.forceX().strength(0.4).x(d => xScale(d.year)))
+            .force("y", d3.forceY().strength(0.2).y(d => yScale(d.author) - chart.symbolSize / 2))
+            .force("collide", d3.forceCollide().strength(.1).radius(chart.symbolSize).iterations(32)) // Force that avoids circle overlapping
+            .nodes(docs)
+            .on("tick", () => symbolGroup.attr('transform', e => `translate(${xScale.bandwidth()/2 + e.x}, ${e.y})`))
         
 
-        symbols.append('title')
-            .text(d => `${d.country}\n${d.author}\nAffiliation: ${d.labName}\n\n${d.docTitle} (${d.year})\nPublication Type: ${d.docType}`)
+        symbolGroup.append('title')
+            .text(d => `${d.country.join(', ')}
+                Author of Reference: ${d.author}
+                Affiliation(s): ${d.labName.join('\n\t\t\t')}\n
+                Title: ${d.docTitle}
+                Publication Year: ${d.year}
+                Document Type: ${d.docType}\n
+                Bibliographic Citation: ${d.citation.split('&')[0]}\n
+                Click to go to source`)
         
+
+        function createMap (_this) {           
+            
+            // color code: count of publications per country
+            let values = countryCodes.map(d => d.value);
+            let breaks = jenks(values, values.length >= 5 ? 5 : values.length)
+            const countryColor = d3.scaleThreshold()
+                .domain(breaks)
+                .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
+    
+            const chart = {width: _this.node.parentNode.clientWidth, height: _this.node.parentNode.clientHeight},
+                margin = {top: 30, left: 0, right: 0, bottom: 0};
+    
+            const zoom = d3.zoom()
+                .scaleExtent([1, 8])
+                .on('zoom', function(){
+                    gCountries.selectAll('path') 
+                        .attr('transform', d3.event.transform);
+                });
+            
+            const svg = d3.select(_this.node)
+                .attr('width', chart.width)
+                .attr('height', chart.height)
+    
+            // svg.select('g#map-group').remove()
+    
+            const mapGroup = svg.append('g')
+                .attr('id', 'map-group')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`); 
+                
+            ///// world map ////////////
+            const projection = geoRobinson()
+                .scale(250)
+                .rotate([352, 0, 0])
+                .translate([chart.width/2, chart.height/2]);
+    
+            const path = d3.geoPath().projection(projection);
+    
+            const gCountries = mapGroup.append('g')
+                .attr('class', 'countries')
+                .style('cursor', 'grab')
+            
+            const gCountry = gCountries.selectAll('g')
+                .data(world.features)
+                .enter()
+                    .append('g')
+            
+            gCountry.append('path') 
+                .attr('d', path)
+                .style('fill', d => {
+                    let res = countryCodes.filter(e => e.alpha3 === d.properties.alpha3)
+                    return res.length ? countryColor(res[0].value) : "#f4f4f4";
+                })
+                .style('stroke', '#ccc')
+                .style('opacity', 0.8)
+                .style('stroke-width', 0.3)
+                .on('mouseover', d => {
+                    if (controls.freeze_links) return;
+
+                    if (!countryCodes.some(x => x.alpha3 === d.properties.alpha3)) return;
+    
+                    d3.selectAll('g.symbol-group').filter(e => {
+                            let codes = countryCodes.filter(x => e.country.includes(x.country)).map(x => x.alpha3)
+                            return codes.includes(d.properties.alpha3)
+                        })
+                        .selectAll('.symbol')
+                        .style('stroke-width', 2)
+                        .style('stroke', '#000')
+                })
+                .on('mouseout', () => {
+                    if (controls.freeze_links) return;
+
+                    d3.selectAll('.symbol').style('stroke-width', 1).style('stroke', "#666666")
+                })
+                // .call(zoom)
+    
+            gCountry.append('title')
+                .text(d => d.properties.ADMIN)
+    
+            //// zoom & pan controls ////////
+            d3.selectAll('button.zoom-control')
+                .style('display', 'block')
+                .style('left', d => chart.width - 30 - d.col * 35 + 'px')
+                .style('top', d => 120 + d.row * 20 + 'px')
+                .on('click', d => {
+                    let value = 30;
+                    let selection = gCountries.selectAll('path').transition().duration(500);
+                    switch(d.action) {
+                        case 'zoom':
+                            value = d.value === 'plus' ? 1.3 : 1 / 1.3;
+                            zoom.scaleBy(selection, value)
+                            break;
+                        case 'pan':
+                            let x = 0, y = 0;
+    
+                            if (d.value === 'up') y = value
+                            else if (d.value === 'down') y = -value
+                            else if (d.value === 'left') x = -value
+                            else x = value
+                            zoom.translateBy(selection, x, y)
+                            break;
+                        case 'reset':
+                            selection.call(zoom.transform, d3.zoomIdentity);
+                            break;
+                    }
+                    
+                })            
+        }
+
+        d3.select('body').on('click', function(){
+            d3.selectAll('div.context-menu').style('display', 'none')
+        })
     }
 
     render() {

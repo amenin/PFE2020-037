@@ -1,0 +1,24 @@
+.zoom-control{
+    cursor: pointer;
+    position: absolute;
+    background-color: #dbdbdb;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    border: none;
+    display: none;
+}
+
+.context-menu{
+    cursor: pointer;
+    position: absolute;
+    background-color: whitesmoke;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none;
+    border: none;
+    min-height: 30px;
+    padding: 5px;
+    box-shadow: 10px 5px 5px #dbdbdb;
+}
