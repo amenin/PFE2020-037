@@ -62,7 +62,7 @@ def save_data_bis(authors):
     for row in authors.values.tolist(): # recover the coauthors
         authorId = row[0]
         authorName = row[1] # using the author's name for testing
-        print('author', authorName, authorId)
+        # print('author', authorName, authorId)
         offset = 0
 
         if authorId not in authors_list:
@@ -82,7 +82,7 @@ def save_data_bis(authors):
                         if uri in authors_list :
                             continue
 
-                        print(index, 'coauthor', name, uri)
+                        # print(index, 'coauthor', name, uri)
                         
                         co_offset = 0
                         authors_list.append(uri)
@@ -628,21 +628,17 @@ query_docs_by_uri = """
                 dcterms:creator [ hal:person ?author; hal:structure ?lab ] ;
                 dcterms:type ?type ;
                 dcterms:bibliographicCitation ?c .
-
             ?type dc:identifier ?typeCode ; skos:prefLabel ?typeLabel .
             filter langMatches(lang(?typeLabel), "en")
-
             # optional {{ ?authorURI ore:isAggregatedBy ?authorAgg }} 
             # bind( if(bound(?authorAgg), ?authorAgg, ?authorURI ) as ?author )
             ?author foaf:name ?name .
-
             optional {{ ?doc dcterms:available ?available }}
             optional {{ ?doc dcterms:title ?title }}
             optional {{ ?doc dcterms:isVersionOf ?versionOf }}
             ?lab skos:prefLabel ?labName;
             vcard2006:country-name ?country.
             optional {{ ?lab org:siteAddress ?address }}
-
             bind(replace(str(?c),",","--") as ?citation) .
             filter (?author = <{0}>)
             }}
@@ -650,10 +646,8 @@ query_docs_by_uri = """
         {{ select ?doc (group_concat(?coauthor ; separator="&&") as ?authorList) 
 	        where {{
                 ?doc dcterms:creator [ hal:person ?coauthorURI ] .
-
                 # optional {{ ?coauthorURI ore:isAggregatedBy ?coauthorAgg }} 
                 # bind( if(bound(?coauthorAgg), ?coauthorAgg, ?coauthorURI ) as ?coauthorURI )
-
                 ?coauthorURI foaf:name ?name .
                 bind(concat(?name, "&", ?coauthorURI) AS ?coauthor)
 	        }} 
@@ -662,6 +656,68 @@ query_docs_by_uri = """
     }}
     limit {1} offset {2}
     """
+
+# query_docs_by_uri = """
+#     select distinct
+#         ?author
+#         ?doc ?versionOf ?hal
+#         ?name
+#         str(?title) as ?title 
+#         # str(?versionOf) as ?versionOf 
+#         xsd:date(?issued) as ?issuedAt 
+#         ?lab ?labName ?type
+#         replace(str(?country), 'http://fr.dbpedia.org/resource/', '') AS ?country 
+#         concat(str(?address), '') as ?address 
+#         ?citation
+#         ?authorList
+#         ?typeCode
+#         ?typeLabel
+#     where {{
+#         {{select * where {{
+#             ?doc dcterms:creator [ hal:person ?author; hal:structure ?lab ] ;
+#                 dcterms:issued ?issued ; 
+#                 dcterms:type ?type ;
+#                 dcterms:bibliographicCitation ?c ;
+#                 dcterms:identifier ?hal . 
+#             filter strstarts(str(?hal), "https://hal.archives-ouvertes.fr/") 
+
+#             ?type dc:identifier ?typeCode ; skos:prefLabel ?typeLabel .
+#             filter langMatches(lang(?typeLabel), "en")
+
+#             # optional {{ ?authorURI ore:isAggregatedBy ?authorAgg }} 
+#             # bind( if(bound(?authorAgg), ?authorAgg, ?authorURI ) as ?author )
+#             ?author foaf:name ?name .
+
+#             # optional {{ ?doc dcterms:available ?available }}
+#             optional {{ ?doc dcterms:title ?title }}
+#             optional {{ ?doc dcterms:isVersionOf ?versionOf }}
+#             ?lab skos:prefLabel ?labName;
+#             vcard2006:country-name ?country.
+#             optional {{ ?lab org:siteAddress ?address }}
+
+#             # optional {{ ?doc dcterms:issued ?issued }}
+#             # optional {{ ?doc dcterms:hasVersion ?version . ?version dcterms:issued ?issuedVersion }}
+
+
+#             bind(replace(str(?c),",","--") as ?citation) .
+#             filter (?author = <{0}>)
+#             }}
+#         }}
+#         {{ select ?doc (group_concat(?coauthor ; separator="&&") as ?authorList) 
+# 	        where {{
+#                 ?doc dcterms:creator [ hal:person ?coauthorURI ] .
+
+#                 # optional {{ ?coauthorURI ore:isAggregatedBy ?coauthorAgg }} 
+#                 # bind( if(bound(?coauthorAgg), ?coauthorAgg, ?coauthorURI ) as ?coauthorURI )
+
+#                 ?coauthorURI foaf:name ?name .
+#                 bind(concat(?name, "&", ?coauthorURI) AS ?coauthor)
+# 	        }} 
+#             group by ?doc
+#         }}
+#     }}
+#     limit {1} offset {2}
+#     """
 
 query_data = """
     select distinct

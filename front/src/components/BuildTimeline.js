@@ -70,17 +70,24 @@ export const BuildTimeline = () => {
                 author: value.name
             });
 
-            let new_filters = null
+            let new_filters = null,
+                new_data = {}
             if (res.message === 'done') {
                 await fetchFromBackendGet("group_data")
 
                 new_filters = await fetchFromBackendGet("filters");
                 setFilters(new_filters);
+
+                new_data = await fetchFromBackendPost("transformedData", {
+                    authors: [value.name],
+                    years: filters.years,
+                });
             }
 
             setSelectedAuthors(value.name)
             setSelectedCoAuthors([])
-            setChartData({})
+
+            setChartData(new_data)
 
             let coauthors = []
             if (new_filters)
@@ -97,7 +104,7 @@ export const BuildTimeline = () => {
 
     return (
         <>
-            <Spin spinning={isLoading} tip="Loading...">
+            <Spin spinning={isDrawing} tip="Loading...">
                 <Form form={form} layout="inline">
                     <Form.Item label="Select an author" name="author">
                         <Select
@@ -132,14 +139,14 @@ export const BuildTimeline = () => {
                             options={coauthorsList.map(item => { return {label: item.name, value: item.name}; })}
                         />
                     </Form.Item>       
-                        <Spin
+                        {/* <Spin
                             spinning={isDrawing}
                             tip="Loading..."
-                        >
+                        > */}
                             <Button type="primary" onClick={handleClick}>
                                 Build
                             </Button>
-                        </Spin>
+                        {/* </Spin> */}
                     </Form>
                 <div style={
                     {width: '100%', height: window.innerHeight}}>

@@ -32,26 +32,6 @@
         "id": "https://data.archives-ouvertes.fr/author/368823"
       },
       {
-        "name": "Petr Kurka",
-        "id": "https://data.archives-ouvertes.fr/author/336372"
-      },
-      {
-        "name": "Giancarlo Mauri",
-        "id": "https://data.archives-ouvertes.fr/author/198452"
-      },
-      {
-        "name": "Luca Manzoni",
-        "id": "https://data.archives-ouvertes.fr/author/1334225"
-      },
-      {
-        "name": "Hiroshi Umeo",
-        "id": "https://data.archives-ouvertes.fr/author/312711"
-      },
-      {
-        "name": "Ferdinand Pepper",
-        "id": "https://data.archives-ouvertes.fr/author/1334231"
-      },
-      {
         "name": "Theophilos Pisokas",
         "id": "https://data.archives-ouvertes.fr/author/109941"
       },
@@ -66,6 +46,10 @@
       {
         "name": "Pierre Guillon",
         "id": "https://data.archives-ouvertes.fr/author/169047"
+      },
+      {
+        "name": "Petr Kurka",
+        "id": "https://data.archives-ouvertes.fr/author/336372"
       },
       {
         "name": "Luigi Acerbi",
@@ -112,12 +96,8 @@
         "id": "https://data.archives-ouvertes.fr/author/828476"
       },
       {
-        "name": "Pietro Di Lena",
-        "id": "https://data.archives-ouvertes.fr/author/302416"
-      },
-      {
-        "name": "Luciano Margara",
-        "id": "https://data.archives-ouvertes.fr/author/302417"
+        "name": "Luca Manzoni",
+        "id": "https://data.archives-ouvertes.fr/author/1334225"
       },
       {
         "name": "Jérôme Chandesris",
@@ -140,6 +120,14 @@
         "id": "https://data.archives-ouvertes.fr/author/344096"
       },
       {
+        "name": "Pietro Di Lena",
+        "id": "https://data.archives-ouvertes.fr/author/302416"
+      },
+      {
+        "name": "Luciano Margara",
+        "id": "https://data.archives-ouvertes.fr/author/302417"
+      },
+      {
         "name": "Sébastien Verel",
         "id": "https://data.archives-ouvertes.fr/author/772713"
       },
@@ -148,120 +136,8 @@
         "id": "https://data.archives-ouvertes.fr/author/873139"
       },
       {
-        "name": "Eric Rémila",
-        "id": "https://data.archives-ouvertes.fr/author/1023895"
-      },
-      {
-        "name": "Kévin Perrot",
-        "id": "https://data.archives-ouvertes.fr/author/883023"
-      },
-      {
-        "name": "Antonio Enrico Porreca",
-        "id": "https://data.archives-ouvertes.fr/author/1334322"
-      },
-      {
-        "name": "Valentina Dorigatti",
-        "id": "https://data.archives-ouvertes.fr/author/11371638"
-      },
-      {
-        "name": "Sébastien Autran",
-        "id": "https://data.archives-ouvertes.fr/author/11371639"
-      },
-      {
-        "name": "Paolo Massazza",
-        "id": "https://data.archives-ouvertes.fr/author/11303009"
-      },
-      {
-        "name": "Markus Holzer",
-        "id": "https://data.archives-ouvertes.fr/author/466320"
-      },
-      {
-        "name": "Martin Kutrib",
-        "id": "https://data.archives-ouvertes.fr/author/1319857"
-      },
-      {
-        "name": "Thi Ha Duong Phan",
-        "id": "https://data.archives-ouvertes.fr/author/662075"
-      },
-      {
-        "name": "Trung Van Pham",
-        "id": "https://data.archives-ouvertes.fr/author/1211200"
-      },
-      {
-        "name": "Thi Thu Huong Tran",
-        "id": "https://data.archives-ouvertes.fr/author/1197002"
-      },
-      {
-        "name": "Sukanta Das",
-        "id": "https://data.archives-ouvertes.fr/author/946173"
-      },
-      {
-        "name": "Michael Weiss",
-        "id": "https://data.archives-ouvertes.fr/author/376721"
-      },
-      {
-        "name": "Roberto Tagliaferri",
-        "id": "https://data.archives-ouvertes.fr/author/1334320"
-      },
-      {
-        "name": "Ernst Wit",
-        "id": "https://data.archives-ouvertes.fr/author/1334321"
-      },
-      {
-        "name": "Giampiero Chiaselotti",
-        "id": "https://data.archives-ouvertes.fr/author/1335098"
-      },
-      {
         "name": "Zahradník Ondřej",
         "id": "https://data.archives-ouvertes.fr/author/1259882"
-      },
-      {
-        "name": "Valentin Montmirail",
-        "id": "https://data.archives-ouvertes.fr/author/1351908"
-      },
-      {
-        "name": "Sara Riva",
-        "id": "https://data.archives-ouvertes.fr/author/11559929"
-      },
-      {
-        "name": "Darij Grinberg",
-        "id": "https://data.archives-ouvertes.fr/author/1224441"
-      },
-      {
-        "name": "Luca Mariot",
-        "id": "https://data.archives-ouvertes.fr/author/1335994"
-      },
-      {
-        "name": "Alberto Leporati",
-        "id": "https://data.archives-ouvertes.fr/author/1336002"
-      },
-      {
-        "name": "Maximilien Gadouleau",
-        "id": "https://data.archives-ouvertes.fr/author/855306"
-      },
-      {
-        "name": "Sylvain Sené",
-        "id": "https://data.archives-ouvertes.fr/author/1481751"
-      },
-      {
-        "name": "Adrian-Horia Dediu",
-        "id": "https://data.archives-ouvertes.fr/author/1335674"
-      },
-      {
-        "name": "Bianca Truthe",
-        "id": "https://data.archives-ouvertes.fr/author/1335675"
-      },
-      {
-        "name": "Martin-Vide Carlos",
-        "id": "https://data.archives-ouvertes.fr/author/1079990"
-      },
-      {
-        "name": "Thomas Worsch",
-        "id": "https://data.archives-ouvertes.fr/author/553219"
-      },
-      {
-        "name": "Antonio E. Porreca",
-        "id": "https://data.archives-ouvertes.fr/author/1692572"
       }
     ]
   },
@@ -280,54 +156,6 @@
       {
         "name": "Julien Cervelle",
         "id": "https://data.archives-ouvertes.fr/author/46479"
-      },
-      {
-        "name": "Alberto Dennunzio",
-        "id": "https://data.archives-ouvertes.fr/author/292700"
-      },
-      {
-        "name": "Pierre Guillon",
-        "id": "https://data.archives-ouvertes.fr/author/292701"
-      },
-      {
-        "name": "Carlile Lavor",
-        "id": "https://data.archives-ouvertes.fr/author/655369"
-      },
-      {
-        "name": "Leo Liberti",
-        "id": "https://data.archives-ouvertes.fr/author/156665"
-      },
-      {
-        "name": "Jon Lee",
-        "id": "https://data.archives-ouvertes.fr/author/437445"
-      },
-      {
-        "name": "Antonio Mucherino",
-        "id": "https://data.archives-ouvertes.fr/author/660287"
-      },
-      {
-        "name": "Yan Pei",
-        "id": "https://data.archives-ouvertes.fr/author/1512383"
-      },
-      {
-        "name": "Frédéric Skoczylas",
-        "id": "https://data.archives-ouvertes.fr/author/91452"
-      },
-      {
-        "name": "Franck Agostini",
-        "id": "https://data.archives-ouvertes.fr/author/222614"
-      },
-      {
-        "name": "Abudushalamu Aili",
-        "id": "https://data.archives-ouvertes.fr/author/1292258"
-      },
-      {
-        "name": "Jean-Michel Torrenti",
-        "id": "https://data.archives-ouvertes.fr/author/90856"
-      },
-      {
-        "name": "Matthieu Vandamme",
-        "id": "https://data.archives-ouvertes.fr/author/1209754"
       }
     ]
   },
@@ -1555,154 +1383,1714 @@
     ]
   },
   {
-    "id": "https://data.archives-ouvertes.fr/author/292700",
-    "name": "Alberto Dennunzio",
+    "id": "https://data.archives-ouvertes.fr/author/701520",
+    "name": "Franck Michel",
     "coauthors": [
       {
-        "name": "Enrico Formenti",
-        "id": "https://data.archives-ouvertes.fr/author/46480"
+        "name": "John Graybeal",
+        "id": "https://data.archives-ouvertes.fr/author/1416564"
       },
       {
-        "name": "Julien Provillard",
-        "id": "https://data.archives-ouvertes.fr/author/1319824"
+        "name": "François Pinet",
+        "id": "https://data.archives-ouvertes.fr/author/378803"
       },
       {
-        "name": "Petr Kurka",
-        "id": "https://data.archives-ouvertes.fr/author/336372"
+        "name": "Catherine Roumet",
+        "id": "https://data.archives-ouvertes.fr/author/1203185"
       },
       {
-        "name": "Giancarlo Mauri",
-        "id": "https://data.archives-ouvertes.fr/author/198452"
+        "name": "Louise Deleger",
+        "id": "https://data.archives-ouvertes.fr/author/1477205"
       },
       {
-        "name": "Luca Manzoni",
-        "id": "https://data.archives-ouvertes.fr/author/1334225"
+        "name": "Romain David",
+        "id": "https://data.archives-ouvertes.fr/author/11556986"
       },
       {
-        "name": "Hiroshi Umeo",
-        "id": "https://data.archives-ouvertes.fr/author/312711"
+        "name": "Konstantin Todorov",
+        "id": "https://data.archives-ouvertes.fr/author/675264"
       },
       {
-        "name": "Ferdinand Pepper",
-        "id": "https://data.archives-ouvertes.fr/author/1334231"
+        "name": "Clement Jonquet",
+        "id": "https://data.archives-ouvertes.fr/author/885662"
       },
       {
-        "name": "Pierre Guillon",
-        "id": "https://data.archives-ouvertes.fr/author/292701"
+        "name": "Catherine Faron Zucker",
+        "id": "https://data.archives-ouvertes.fr/author/1217461"
       },
       {
-        "name": "Benoît Masson",
-        "id": "https://data.archives-ouvertes.fr/author/292702"
+        "name": "Sophie Aubin",
+        "id": "https://data.archives-ouvertes.fr/author/1562676"
       },
       {
-        "name": "Pietro Di Lena",
-        "id": "https://data.archives-ouvertes.fr/author/302416"
+        "name": "Esther Dzale Yeumo",
+        "id": "https://data.archives-ouvertes.fr/author/1639620"
       },
       {
-        "name": "Luciano Margara",
-        "id": "https://data.archives-ouvertes.fr/author/302417"
+        "name": "Stéphan Bernard",
+        "id": "https://data.archives-ouvertes.fr/author/1639635"
       },
       {
-        "name": "Petr Kůrka",
-        "id": "https://data.archives-ouvertes.fr/author/1211205"
+        "name": "François Brun",
+        "id": "https://data.archives-ouvertes.fr/author/1470459"
       },
       {
-        "name": "Jérôme Chandesris",
-        "id": "https://data.archives-ouvertes.fr/author/1333455"
+        "name": "Mouhamadou Ba",
+        "id": "https://data.archives-ouvertes.fr/author/1477200"
       },
       {
-        "name": "Valentin Montmirail",
-        "id": "https://data.archives-ouvertes.fr/author/1351908"
+        "name": "Robert Bossy",
+        "id": "https://data.archives-ouvertes.fr/author/1477201"
       },
       {
-        "name": "Sara Riva",
-        "id": "https://data.archives-ouvertes.fr/author/11559929"
+        "name": "Claire Nédellec",
+        "id": "https://data.archives-ouvertes.fr/author/1477207"
       },
       {
-        "name": "Darij Grinberg",
-        "id": "https://data.archives-ouvertes.fr/author/1224441"
+        "name": "Anne-Francoise Adam-Blondon",
+        "id": "https://data.archives-ouvertes.fr/author/1454288"
       },
       {
-        "name": "Antonio Enrico Porreca",
-        "id": "https://data.archives-ouvertes.fr/author/1334322"
+        "name": "Michael Alaux",
+        "id": "https://data.archives-ouvertes.fr/author/1454289"
       },
       {
-        "name": "Nazim Fatès",
-        "id": "https://data.archives-ouvertes.fr/author/661916"
+        "name": "Cyril Pommier",
+        "id": "https://data.archives-ouvertes.fr/author/1454293"
       },
       {
-        "name": "Luigi Acerbi",
-        "id": "https://data.archives-ouvertes.fr/author/336024"
+        "name": "Garnier Eric",
+        "id": "https://data.archives-ouvertes.fr/author/1482767"
       },
       {
-        "name": "Julien Cervelle",
-        "id": "https://data.archives-ouvertes.fr/author/46479"
+        "name": "Anne Toulet",
+        "id": "https://data.archives-ouvertes.fr/author/1486295"
       },
       {
-        "name": "Thomas Worsch",
-        "id": "https://data.archives-ouvertes.fr/author/553219"
+        "name": "Luc Menut",
+        "id": "https://data.archives-ouvertes.fr/author/1702538"
       },
       {
-        "name": "Antonio E. Porreca",
-        "id": "https://data.archives-ouvertes.fr/author/1692572"
+        "name": "Catherine Roussey",
+        "id": "https://data.archives-ouvertes.fr/author/11872290"
       },
       {
-        "name": "Luca Mariot",
-        "id": "https://data.archives-ouvertes.fr/author/1335994"
+        "name": "Arnaud Castelltort",
+        "id": "https://data.archives-ouvertes.fr/author/12086018"
       },
       {
-        "name": "Alberto Leporati",
-        "id": "https://data.archives-ouvertes.fr/author/1336002"
+        "name": "Olivier Corby",
+        "id": "https://data.archives-ouvertes.fr/author/720457"
       },
       {
-        "name": "Michael Weiss",
-        "id": "https://data.archives-ouvertes.fr/author/376721"
+        "name": "Christian Pichot",
+        "id": "https://data.archives-ouvertes.fr/author/1388493"
       },
       {
-        "name": "Gianpiero Cattaneo",
-        "id": "https://data.archives-ouvertes.fr/author/1335097"
+        "name": "Pierre Larmande",
+        "id": "https://data.archives-ouvertes.fr/author/867538"
       },
       {
-        "name": "Giampiero Chiaselotti",
-        "id": "https://data.archives-ouvertes.fr/author/1335098"
+        "name": "Patrice Buche",
+        "id": "https://data.archives-ouvertes.fr/author/1196856"
       },
       {
-        "name": "Valentina Dorigatti",
-        "id": "https://data.archives-ouvertes.fr/author/11371638"
+        "name": "Théo-Paul Haezebrouck",
+        "id": "https://data.archives-ouvertes.fr/author/11639181"
+      },
+      {
+        "name": "Mark A. Musen",
+        "id": "https://data.archives-ouvertes.fr/author/306455"
+      },
+      {
+        "name": "Julien Cufi",
+        "id": "https://data.archives-ouvertes.fr/author/1641969"
+      },
+      {
+        "name": "Pierre Bisquert",
+        "id": "https://data.archives-ouvertes.fr/author/1262542"
+      },
+      {
+        "name": "Fabien Gandon",
+        "id": "https://data.archives-ouvertes.fr/author/827904"
+      },
+      {
+        "name": "Johan Montagnat",
+        "id": "https://data.archives-ouvertes.fr/author/701477"
+      },
+      {
+        "name": "Olivier Gargominy",
+        "id": "https://data.archives-ouvertes.fr/author/1419616"
+      },
+      {
+        "name": "Sandrine Tercerie",
+        "id": "https://data.archives-ouvertes.fr/author/1419617"
+      },
+      {
+        "name": "Antonia Ettorre",
+        "id": "https://data.archives-ouvertes.fr/author/11521589"
+      },
+      {
+        "name": "Andrea Tettamanzi",
+        "id": "https://data.archives-ouvertes.fr/author/1550480"
+      },
+      {
+        "name": "Michel Buffa",
+        "id": "https://data.archives-ouvertes.fr/author/1535818"
+      },
+      {
+        "name": "Serena Villata",
+        "id": "https://data.archives-ouvertes.fr/author/1257617"
+      },
+      {
+        "name": "Elena Cabrio",
+        "id": "https://data.archives-ouvertes.fr/author/1184174"
+      },
+      {
+        "name": "Loïc Djimenou",
+        "id": "https://data.archives-ouvertes.fr/author/1076439"
+      },
+      {
+        "name": "Marco Winckler",
+        "id": "https://data.archives-ouvertes.fr/author/11226269"
+      },
+      {
+        "name": "Alain Giboin",
+        "id": "https://data.archives-ouvertes.fr/author/1160869"
+      },
+      {
+        "name": "Gargominy Olivier",
+        "id": "https://data.archives-ouvertes.fr/author/11429122"
+      },
+      {
+        "name": "Cécile Callou",
+        "id": "https://data.archives-ouvertes.fr/author/1161552"
+      },
+      {
+        "name": "Chloé Martin",
+        "id": "https://data.archives-ouvertes.fr/author/389732"
+      },
+      {
+        "name": "Daniel Marcus",
+        "id": "https://data.archives-ouvertes.fr/author/811248"
+      },
+      {
+        "name": "Thomas E Nichols",
+        "id": "https://data.archives-ouvertes.fr/author/1212078"
+      },
+      {
+        "name": "Yaroslav Halchenko",
+        "id": "https://data.archives-ouvertes.fr/author/1593968"
+      },
+      {
+        "name": "Tibor Auer",
+        "id": "https://data.archives-ouvertes.fr/author/1125493"
+      },
+      {
+        "name": "David Kennedy",
+        "id": "https://data.archives-ouvertes.fr/author/1569399"
+      },
+      {
+        "name": "Russell Poldrack",
+        "id": "https://data.archives-ouvertes.fr/author/1594189"
+      },
+      {
+        "name": "Daniel Margulies",
+        "id": "https://data.archives-ouvertes.fr/author/1594191"
+      },
+      {
+        "name": "Ziad Saad",
+        "id": "https://data.archives-ouvertes.fr/author/1594197"
+      },
+      {
+        "name": "Guillaume Flandin",
+        "id": "https://data.archives-ouvertes.fr/author/343969"
+      },
+      {
+        "name": "David Keator",
+        "id": "https://data.archives-ouvertes.fr/author/1114575"
+      },
+      {
+        "name": "Satrajit Ghosh",
+        "id": "https://data.archives-ouvertes.fr/author/1114576"
+      },
+      {
+        "name": "Cameron Craddock",
+        "id": "https://data.archives-ouvertes.fr/author/1114578"
+      },
+      {
+        "name": "Krysztof Gorgolewski",
+        "id": "https://data.archives-ouvertes.fr/author/1114580"
+      },
+      {
+        "name": "Michael Hanke",
+        "id": "https://data.archives-ouvertes.fr/author/1114581"
+      },
+      {
+        "name": "Christian Haselgrove",
+        "id": "https://data.archives-ouvertes.fr/author/1114582"
+      },
+      {
+        "name": "Karl Helmer",
+        "id": "https://data.archives-ouvertes.fr/author/1114583"
+      },
+      {
+        "name": "Jason Steffener",
+        "id": "https://data.archives-ouvertes.fr/author/1114586"
+      },
+      {
+        "name": "Jessica Turner",
+        "id": "https://data.archives-ouvertes.fr/author/1114588"
+      },
+      {
+        "name": "John van Horn",
+        "id": "https://data.archives-ouvertes.fr/author/1256521"
+      },
+      {
+        "name": "Tanya Schmah",
+        "id": "https://data.archives-ouvertes.fr/author/895882"
+      },
+      {
+        "name": "Richard Reynolds",
+        "id": "https://data.archives-ouvertes.fr/author/1360619"
+      },
+      {
+        "name": "Jean-Baptiste Poline",
+        "id": "https://data.archives-ouvertes.fr/author/301186"
+      },
+      {
+        "name": "Mark Jenkinson",
+        "id": "https://data.archives-ouvertes.fr/author/385878"
+      },
+      {
+        "name": "B. Nolan Nichols",
+        "id": "https://data.archives-ouvertes.fr/author/1123777"
+      },
+      {
+        "name": "Samir Das",
+        "id": "https://data.archives-ouvertes.fr/author/1364339"
+      },
+      {
+        "name": "Camille Maumet",
+        "id": "https://data.archives-ouvertes.fr/author/471453"
+      },
+      {
+        "name": "Theo M van Erp",
+        "id": "https://data.archives-ouvertes.fr/author/1397633"
+      },
+      {
+        "name": "Gang Chen",
+        "id": "https://data.archives-ouvertes.fr/author/219410"
+      },
+      {
+        "name": "Arno Klein",
+        "id": "https://data.archives-ouvertes.fr/author/385869"
+      },
+      {
+        "name": "Frédéric Vest",
+        "id": "https://data.archives-ouvertes.fr/author/1419618"
+      },
+      {
+        "name": "Yannick Schwartz",
+        "id": "https://data.archives-ouvertes.fr/author/758608"
+      },
+      {
+        "name": "Ruediger Bruehl",
+        "id": "https://data.archives-ouvertes.fr/author/903032"
+      },
+      {
+        "name": "Thomas E. Nichols",
+        "id": "https://data.archives-ouvertes.fr/author/1125490"
+      },
+      {
+        "name": "Blaise Frederick",
+        "id": "https://data.archives-ouvertes.fr/author/1114579"
+      },
+      {
+        "name": "Michael Milham",
+        "id": "https://data.archives-ouvertes.fr/author/1114584"
+      },
+      {
+        "name": "Russel Poldrack",
+        "id": "https://data.archives-ouvertes.fr/author/1114585"
+      },
+      {
+        "name": "Rich Stoner",
+        "id": "https://data.archives-ouvertes.fr/author/1114587"
+      },
+      {
+        "name": "Gully Burns",
+        "id": "https://data.archives-ouvertes.fr/author/721726"
+      },
+      {
+        "name": "David N. Kennedy",
+        "id": "https://data.archives-ouvertes.fr/author/1123959"
+      },
+      {
+        "name": "Tristan Glatard",
+        "id": "https://data.archives-ouvertes.fr/author/201908"
+      },
+      {
+        "name": "Bernard Gibaud",
+        "id": "https://data.archives-ouvertes.fr/author/169839"
+      },
+      {
+        "name": "Bénédicte Batrancourt",
+        "id": "https://data.archives-ouvertes.fr/author/565377"
+      },
+      {
+        "name": "Alban Gaignard",
+        "id": "https://data.archives-ouvertes.fr/author/704670"
+      },
+      {
+        "name": "Gilles Kassel",
+        "id": "https://data.archives-ouvertes.fr/author/52377"
+      },
+      {
+        "name": "Michel Dojat",
+        "id": "https://data.archives-ouvertes.fr/author/165336"
+      },
+      {
+        "name": "Mathieu Simon",
+        "id": "https://data.archives-ouvertes.fr/author/11250077"
+      },
+      {
+        "name": "Tobias Mayer",
+        "id": "https://data.archives-ouvertes.fr/author/11276718"
+      },
+      {
+        "name": "Raphaël Gazzotti",
+        "id": "https://data.archives-ouvertes.fr/author/1367668"
       }
     ]
   },
   {
-    "id": "https://data.archives-ouvertes.fr/author/1319824",
-    "name": "Julien Provillard",
+    "id": "https://data.archives-ouvertes.fr/author/11226269",
+    "name": "Marco Winckler",
     "coauthors": [
       {
-        "name": "Alberto Dennunzio",
-        "id": "https://data.archives-ouvertes.fr/author/292700"
+        "name": "Stéphane Conversy",
+        "id": "https://data.archives-ouvertes.fr/author/904347"
+      },
+      {
+        "name": "Philippe Palanque",
+        "id": "https://data.archives-ouvertes.fr/author/679761"
+      },
+      {
+        "name": "Célia Martinie",
+        "id": "https://data.archives-ouvertes.fr/author/1053500"
+      },
+      {
+        "name": "Eric Barboni",
+        "id": "https://data.archives-ouvertes.fr/author/1053076"
+      },
+      {
+        "name": "David Navarre",
+        "id": "https://data.archives-ouvertes.fr/author/1053077"
+      },
+      {
+        "name": "Sergio Firmenich",
+        "id": "https://data.archives-ouvertes.fr/author/497533"
+      },
+      {
+        "name": "Gustavo Rossi",
+        "id": "https://data.archives-ouvertes.fr/author/156866"
+      },
+      {
+        "name": "Racim Fahssi",
+        "id": "https://data.archives-ouvertes.fr/author/1423517"
+      },
+      {
+        "name": "Peter Forbrig",
+        "id": "https://data.archives-ouvertes.fr/author/412755"
+      },
+      {
+        "name": "Fabio Paternò",
+        "id": "https://data.archives-ouvertes.fr/author/1063886"
+      },
+      {
+        "name": "Loïc Martinez Normand",
+        "id": "https://data.archives-ouvertes.fr/author/1168312"
+      },
+      {
+        "name": "Stefan Sauer",
+        "id": "https://data.archives-ouvertes.fr/author/1423567"
+      },
+      {
+        "name": "Cristian Bogdan",
+        "id": "https://data.archives-ouvertes.fr/author/1423568"
+      },
+      {
+        "name": "Regina Bernhaupt",
+        "id": "https://data.archives-ouvertes.fr/author/1423569"
+      },
+      {
+        "name": "Carla Freitas",
+        "id": "https://data.archives-ouvertes.fr/author/431756"
+      },
+      {
+        "name": "Ricardo Cava",
+        "id": "https://data.archives-ouvertes.fr/author/1361873"
+      },
+      {
+        "name": "Cédric Bach",
+        "id": "https://data.archives-ouvertes.fr/author/69895"
+      },
+      {
+        "name": "Félix Albertos Marco",
+        "id": "https://data.archives-ouvertes.fr/author/1246738"
+      },
+      {
+        "name": "Victor Penichet",
+        "id": "https://data.archives-ouvertes.fr/author/1246739"
+      },
+      {
+        "name": "José Gallud",
+        "id": "https://data.archives-ouvertes.fr/author/1246740"
+      },
+      {
+        "name": "Michel Galindo",
+        "id": "https://data.archives-ouvertes.fr/author/1230444"
+      },
+      {
+        "name": "Janet Wesson",
+        "id": "https://data.archives-ouvertes.fr/author/1518548"
+      },
+      {
+        "name": "Gary Marsden",
+        "id": "https://data.archives-ouvertes.fr/author/1518707"
+      },
+      {
+        "name": "Paula Kotzé",
+        "id": "https://data.archives-ouvertes.fr/author/1518727"
+      },
+      {
+        "name": "Gitte Lindgaard",
+        "id": "https://data.archives-ouvertes.fr/author/1518728"
+      },
+      {
+        "name": "Cristiano Maciel",
+        "id": "https://data.archives-ouvertes.fr/author/1626498"
+      },
+      {
+        "name": "Elizabeth Furtado",
+        "id": "https://data.archives-ouvertes.fr/author/1626499"
+      },
+      {
+        "name": "Milene Silveira",
+        "id": "https://data.archives-ouvertes.fr/author/1626500"
+      },
+      {
+        "name": "Raquel Prates",
+        "id": "https://data.archives-ouvertes.fr/author/1626501"
+      },
+      {
+        "name": "Pedro Campos",
+        "id": "https://data.archives-ouvertes.fr/author/1387880"
+      },
+      {
+        "name": "Nicholas Graham",
+        "id": "https://data.archives-ouvertes.fr/author/1618590"
+      },
+      {
+        "name": "Joaquim Jorge",
+        "id": "https://data.archives-ouvertes.fr/author/1618591"
+      },
+      {
+        "name": "Nuno Nunes",
+        "id": "https://data.archives-ouvertes.fr/author/1518627"
+      },
+      {
+        "name": "Dong-Bach Vo",
+        "id": "https://data.archives-ouvertes.fr/author/694906"
+      },
+      {
+        "name": "Vincent Gaits",
+        "id": "https://data.archives-ouvertes.fr/author/694915"
+      },
+      {
+        "name": "Firmenich Sergio",
+        "id": "https://data.archives-ouvertes.fr/author/694916"
+      },
+      {
+        "name": "Joëlle Coutaz",
+        "id": "https://data.archives-ouvertes.fr/author/783145"
+      },
+      {
+        "name": "Gaëlle Calvary",
+        "id": "https://data.archives-ouvertes.fr/author/783217"
+      },
+      {
+        "name": "Dominique Scapin",
+        "id": "https://data.archives-ouvertes.fr/author/789072"
+      },
+      {
+        "name": "Florence Pontico",
+        "id": "https://data.archives-ouvertes.fr/author/789073"
+      },
+      {
+        "name": "Audrey Serna",
+        "id": "https://data.archives-ouvertes.fr/author/665210"
+      },
+      {
+        "name": "Thiago Rocha Silva",
+        "id": "https://data.archives-ouvertes.fr/author/1685836"
+      },
+      {
+        "name": "Jean-Luc Hak",
+        "id": "https://data.archives-ouvertes.fr/author/1685837"
+      },
+      {
+        "name": "Nuno Jardim Nunes",
+        "id": "https://data.archives-ouvertes.fr/author/1619796"
+      },
+      {
+        "name": "Pedro Valente",
+        "id": "https://data.archives-ouvertes.fr/author/1685857"
+      },
+      {
+        "name": "Gabriela Bosseti",
+        "id": "https://data.archives-ouvertes.fr/author/11128974"
+      },
+      {
+        "name": "Tomas Barbieri",
+        "id": "https://data.archives-ouvertes.fr/author/11130359"
+      },
+      {
+        "name": "Nunes Nuno",
+        "id": "https://data.archives-ouvertes.fr/author/11131545"
+      },
+      {
+        "name": "Chris Johnson",
+        "id": "https://data.archives-ouvertes.fr/author/1647118"
+      },
+      {
+        "name": "Jan Gulliksen",
+        "id": "https://data.archives-ouvertes.fr/author/1525410"
+      },
+      {
+        "name": "Filip Kis",
+        "id": "https://data.archives-ouvertes.fr/author/1685855"
+      },
+      {
+        "name": "Silvia Gordillo",
+        "id": "https://data.archives-ouvertes.fr/author/497535"
+      },
+      {
+        "name": "Gabriela Bosetti",
+        "id": "https://data.archives-ouvertes.fr/author/11494875"
+      },
+      {
+        "name": "José María Corletto",
+        "id": "https://data.archives-ouvertes.fr/author/11501379"
+      },
+      {
+        "name": "Iñigo Aldalur",
+        "id": "https://data.archives-ouvertes.fr/author/11494843"
+      },
+      {
+        "name": "Oscar Díaz",
+        "id": "https://data.archives-ouvertes.fr/author/1009995"
+      },
+      {
+        "name": "Célia Martinie de Almeida",
+        "id": "https://data.archives-ouvertes.fr/author/1180573"
+      },
+      {
+        "name": "Marta Larusdottir",
+        "id": "https://data.archives-ouvertes.fr/author/1387920"
+      },
+      {
+        "name": "Kati Kuusinen",
+        "id": "https://data.archives-ouvertes.fr/author/1685834"
+      },
+      {
+        "name": "Olivier Nicolas",
+        "id": "https://data.archives-ouvertes.fr/author/148806"
+      },
+      {
+        "name": "Alejandro Fernandez",
+        "id": "https://data.archives-ouvertes.fr/author/1617539"
+      },
+      {
+        "name": "Girish Dalvi",
+        "id": "https://data.archives-ouvertes.fr/author/1715273"
+      },
+      {
+        "name": "Devanuj K. Balkrishan",
+        "id": "https://data.archives-ouvertes.fr/author/1715274"
+      },
+      {
+        "name": "Jacki O'Neill",
+        "id": "https://data.archives-ouvertes.fr/author/1715275"
+      },
+      {
+        "name": "Anirudha Joshi",
+        "id": "https://data.archives-ouvertes.fr/author/1423499"
+      },
+      {
+        "name": "Jacki O’neill",
+        "id": "https://data.archives-ouvertes.fr/author/1715244"
+      },
+      {
+        "name": "Elena Kornyshova",
+        "id": "https://data.archives-ouvertes.fr/author/732138"
+      },
+      {
+        "name": "Julien Lemaire",
+        "id": "https://data.archives-ouvertes.fr/author/11330980"
+      },
+      {
+        "name": "Ramon Aparicio-Pardo",
+        "id": "https://data.archives-ouvertes.fr/author/1181003"
+      },
+      {
+        "name": "Thomas Fisichella",
+        "id": "https://data.archives-ouvertes.fr/author/1670066"
+      },
+      {
+        "name": "Antoine Dezarnaud",
+        "id": "https://data.archives-ouvertes.fr/author/11655373"
+      },
+      {
+        "name": "Lucile Sassatelli",
+        "id": "https://data.archives-ouvertes.fr/author/560681"
+      },
+      {
+        "name": "Daniela Gorski Trevisan",
+        "id": "https://data.archives-ouvertes.fr/author/11486732"
+      },
+      {
+        "name": "Helen Petrie",
+        "id": "https://data.archives-ouvertes.fr/author/1518682"
+      },
+      {
+        "name": "David Lamas",
+        "id": "https://data.archives-ouvertes.fr/author/1718380"
+      },
+      {
+        "name": "Fernando Loizides",
+        "id": "https://data.archives-ouvertes.fr/author/11799545"
+      },
+      {
+        "name": "Lennart Nacke",
+        "id": "https://data.archives-ouvertes.fr/author/11799546"
+      },
+      {
+        "name": "Panayiotis Zaphiris",
+        "id": "https://data.archives-ouvertes.fr/author/11799547"
+      },
+      {
+        "name": "Zauwali S Paki",
+        "id": "https://data.archives-ouvertes.fr/author/11720352"
+      },
+      {
+        "name": "Karima Boudaoud",
+        "id": "https://data.archives-ouvertes.fr/author/971549"
+      },
+      {
+        "name": "Hallvard Trætteberg",
+        "id": "https://data.archives-ouvertes.fr/author/11799497"
+      },
+      {
+        "name": "Anne-Marie Dery-Pinna",
+        "id": "https://data.archives-ouvertes.fr/author/783218"
+      },
+      {
+        "name": "Elod Egyed-Zsigmond",
+        "id": "https://data.archives-ouvertes.fr/author/401564"
+      },
+      {
+        "name": "Fandos, Ulises",
+        "id": "https://data.archives-ouvertes.fr/author/11530266"
+      },
+      {
+        "name": "Hind Benfenatki",
+        "id": "https://data.archives-ouvertes.fr/author/1290695"
+      },
+      {
+        "name": "Mbaye Fall Diallo",
+        "id": "https://data.archives-ouvertes.fr/author/11158980"
+      },
+      {
+        "name": "Isabelle Collin-Lachaud",
+        "id": "https://data.archives-ouvertes.fr/author/11418665"
+      },
+      {
+        "name": "Alex Deslée",
+        "id": "https://data.archives-ouvertes.fr/author/11511879"
+      },
+      {
+        "name": "Gautier Ubersfeld",
+        "id": "https://data.archives-ouvertes.fr/author/11511880"
+      },
+      {
+        "name": "Christophe Cianchi",
+        "id": "https://data.archives-ouvertes.fr/author/11511881"
+      },
+      {
+        "name": "Laurent Goncalves",
+        "id": "https://data.archives-ouvertes.fr/author/11279009"
+      },
+      {
+        "name": "Nourhène Alaya",
+        "id": "https://data.archives-ouvertes.fr/author/1118847"
+      },
+      {
+        "name": "Thierry Despeyroux",
+        "id": "https://data.archives-ouvertes.fr/author/70965"
+      },
+      {
+        "name": "Frédérique Biennier",
+        "id": "https://data.archives-ouvertes.fr/author/234626"
+      },
+      {
+        "name": "Lennart E. Nacke",
+        "id": "https://data.archives-ouvertes.fr/author/11799693"
+      },
+      {
+        "name": "Franck Michel",
+        "id": "https://data.archives-ouvertes.fr/author/701520"
+      },
+      {
+        "name": "Fabien Gandon",
+        "id": "https://data.archives-ouvertes.fr/author/827904"
+      },
+      {
+        "name": "Serena Villata",
+        "id": "https://data.archives-ouvertes.fr/author/1257617"
+      },
+      {
+        "name": "Olivier Corby",
+        "id": "https://data.archives-ouvertes.fr/author/720457"
+      },
+      {
+        "name": "Elena Cabrio",
+        "id": "https://data.archives-ouvertes.fr/author/947799"
+      },
+      {
+        "name": "Alain Giboin",
+        "id": "https://data.archives-ouvertes.fr/author/1160869"
+      },
+      {
+        "name": "José Abdelnour Nocera",
+        "id": "https://data.archives-ouvertes.fr/author/1387941"
+      },
+      {
+        "name": "Antigoni Parmaxi",
+        "id": "https://data.archives-ouvertes.fr/author/1522700"
+      },
+      {
+        "name": "Ganesh Bhutkar",
+        "id": "https://data.archives-ouvertes.fr/author/1485041"
+      },
+      {
+        "name": "Carmelo Ardito",
+        "id": "https://data.archives-ouvertes.fr/author/11226271"
+      },
+      {
+        "name": "Peter Dannenmann",
+        "id": "https://data.archives-ouvertes.fr/author/1718696"
+      },
+      {
+        "name": "Judy Bowen",
+        "id": "https://data.archives-ouvertes.fr/author/1715203"
+      },
+      {
+        "name": "Jean Vanderdonckt",
+        "id": "https://data.archives-ouvertes.fr/author/1236528"
+      },
+      {
+        "name": "Christophe Kolski",
+        "id": "https://data.archives-ouvertes.fr/author/761866"
+      },
+      {
+        "name": "Anne-Marie Déry-Pinna",
+        "id": "https://data.archives-ouvertes.fr/author/1578676"
+      },
+      {
+        "name": "Sophie Lepreux",
+        "id": "https://data.archives-ouvertes.fr/author/1103729"
+      },
+      {
+        "name": "Ahmed Abdelmaksoud",
+        "id": "https://data.archives-ouvertes.fr/author/12210433"
+      },
+      {
+        "name": "Genny Tortora",
+        "id": "https://data.archives-ouvertes.fr/author/1456168"
+      },
+      {
+        "name": "Giuliana Vitiello",
+        "id": "https://data.archives-ouvertes.fr/author/1666759"
+      },
+      {
+        "name": "Tom Gross",
+        "id": "https://data.archives-ouvertes.fr/author/1628770"
+      },
+      {
+        "name": "Simone Barbosa",
+        "id": "https://data.archives-ouvertes.fr/author/1577962"
+      },
+      {
+        "name": "Julio Abascal",
+        "id": "https://data.archives-ouvertes.fr/author/1626529"
+      },
+      {
+        "name": "Mirko Fetter",
+        "id": "https://data.archives-ouvertes.fr/author/1423511"
+      },
+      {
+        "name": "Alberto Pasquini",
+        "id": "https://data.archives-ouvertes.fr/author/679762"
+      },
+      {
+        "name": "Simone D. J. Barbosa",
+        "id": "https://data.archives-ouvertes.fr/author/1064380"
+      },
+      {
+        "name": "Ana Maria M G Valença",
+        "id": "https://data.archives-ouvertes.fr/author/11300160"
+      },
+      {
+        "name": "Thaíse K L Costa",
+        "id": "https://data.archives-ouvertes.fr/author/11292855"
+      },
+      {
+        "name": "Liliane S Machado",
+        "id": "https://data.archives-ouvertes.fr/author/11292856"
+      },
+      {
+        "name": "Ronei M Moraes",
+        "id": "https://data.archives-ouvertes.fr/author/11292859"
+      },
+      {
+        "name": "Ana Maria Gondim Valença",
+        "id": "https://data.archives-ouvertes.fr/author/11501283"
+      },
+      {
+        "name": "Thaise K. L. Costa",
+        "id": "https://data.archives-ouvertes.fr/author/11501293"
+      },
+      {
+        "name": "Ronei Moraes",
+        "id": "https://data.archives-ouvertes.fr/author/1212705"
+      },
+      {
+        "name": "Liliane Machado",
+        "id": "https://data.archives-ouvertes.fr/author/1212706"
+      },
+      {
+        "name": "Torkil Clemmensen",
+        "id": "https://data.archives-ouvertes.fr/author/1065375"
+      },
+      {
+        "name": "Venkatesh Rajamanickam",
+        "id": "https://data.archives-ouvertes.fr/author/11226268"
+      },
+      {
+        "name": "Zohra Saoud",
+        "id": "https://data.archives-ouvertes.fr/author/1145975"
+      },
+      {
+        "name": "Savino Dambra",
+        "id": "https://data.archives-ouvertes.fr/author/11142899"
+      },
+      {
+        "name": "Giuseppe Samela",
+        "id": "https://data.archives-ouvertes.fr/author/11142900"
+      },
+      {
+        "name": "Romaric Pighetti",
+        "id": "https://data.archives-ouvertes.fr/author/1499827"
+      },
+      {
+        "name": "Llúcia Masip",
+        "id": "https://data.archives-ouvertes.fr/author/1578632"
+      },
+      {
+        "name": "Toni Granollers",
+        "id": "https://data.archives-ouvertes.fr/author/1578633"
+      },
+      {
+        "name": "Marta Oliva",
+        "id": "https://data.archives-ouvertes.fr/author/1578634"
+      },
+      {
+        "name": "Mathieu Simon",
+        "id": "https://data.archives-ouvertes.fr/author/11250077"
+      },
+      {
+        "name": "Tobias Mayer",
+        "id": "https://data.archives-ouvertes.fr/author/11276718"
+      },
+      {
+        "name": "Raphaël Gazzotti",
+        "id": "https://data.archives-ouvertes.fr/author/1367668"
+      }
+    ]
+  },
+  {
+    "id": "https://data.archives-ouvertes.fr/author/156942",
+    "name": "Bruno Durand",
+    "coauthors": [
+      {
+        "name": "Andrei Romashchenko",
+        "id": "https://data.archives-ouvertes.fr/author/302465"
+      },
+      {
+        "name": "Alexander Shen",
+        "id": "https://data.archives-ouvertes.fr/author/289898"
+      },
+      {
+        "name": "Alexis Ballier",
+        "id": "https://data.archives-ouvertes.fr/author/180265"
+      },
+      {
+        "name": "Emmanuel Jeandel",
+        "id": "https://data.archives-ouvertes.fr/author/302266"
+      },
+      {
+        "name": "Magali Jara",
+        "id": "https://data.archives-ouvertes.fr/author/227139"
+      },
+      {
+        "name": "Guilhem Gamard",
+        "id": "https://data.archives-ouvertes.fr/author/1189332"
+      },
+      {
+        "name": "Anaël Grandjean",
+        "id": "https://data.archives-ouvertes.fr/author/1502574"
+      },
+      {
+        "name": "Christophe Papazian",
+        "id": "https://data.archives-ouvertes.fr/author/11462551"
+      },
+      {
+        "name": "Frantz Rowe",
+        "id": "https://data.archives-ouvertes.fr/author/694633"
+      },
+      {
+        "name": "François de Corbière",
+        "id": "https://data.archives-ouvertes.fr/author/987953"
+      },
+      {
+        "name": "Alexandre Zvonkine",
+        "id": "https://data.archives-ouvertes.fr/author/373931"
+      },
+      {
+        "name": "Aristide Grange",
+        "id": "https://data.archives-ouvertes.fr/author/1195350"
+      },
+      {
+        "name": "Zsuzsanna Róka",
+        "id": "https://data.archives-ouvertes.fr/author/1195351"
       },
       {
         "name": "Enrico Formenti",
         "id": "https://data.archives-ouvertes.fr/author/46480"
       },
       {
-        "name": "Martin Kutrib",
-        "id": "https://data.archives-ouvertes.fr/author/1319857"
+        "name": "Georges Varouchas",
+        "id": "https://data.archives-ouvertes.fr/author/1195352"
       },
       {
-        "name": "György Vaszil",
-        "id": "https://data.archives-ouvertes.fr/author/1319858"
+        "name": "Cyril Allauzen",
+        "id": "https://data.archives-ouvertes.fr/author/639247"
       },
       {
-        "name": "Matthias Wendlandt",
-        "id": "https://data.archives-ouvertes.fr/author/1319859"
+        "name": "Vladimir Kanovei",
+        "id": "https://data.archives-ouvertes.fr/author/11462547"
       },
       {
-        "name": "Markus Holzer",
-        "id": "https://data.archives-ouvertes.fr/author/466320"
+        "name": "Vladimir A. Uspensky",
+        "id": "https://data.archives-ouvertes.fr/author/11462548"
       },
       {
-        "name": "Gianpiero Cattaneo",
-        "id": "https://data.archives-ouvertes.fr/author/1319809"
+        "name": "Nikolai Vereshagin",
+        "id": "https://data.archives-ouvertes.fr/author/11462549"
+      },
+      {
+        "name": "Elodie Huré",
+        "id": "https://data.archives-ouvertes.fr/author/443853"
+      },
+      {
+        "name": "Gérard Cliquet",
+        "id": "https://data.archives-ouvertes.fr/author/80802"
+      },
+      {
+        "name": "Thi Le Hoa Vo",
+        "id": "https://data.archives-ouvertes.fr/author/11160938"
+      },
+      {
+        "name": "Nicolas Dégallier",
+        "id": "https://data.archives-ouvertes.fr/author/191409"
+      },
+      {
+        "name": "Paulo Sérgio Lucio",
+        "id": "https://data.archives-ouvertes.fr/author/1516415"
+      },
+      {
+        "name": "Raimundo Nonato de Souza",
+        "id": "https://data.archives-ouvertes.fr/author/1516416"
+      },
+      {
+        "name": "Zolyde Mota Ribeiro",
+        "id": "https://data.archives-ouvertes.fr/author/1516417"
+      },
+      {
+        "name": "Jacques Servain",
+        "id": "https://data.archives-ouvertes.fr/author/156943"
+      },
+      {
+        "name": "Alexis Hannart",
+        "id": "https://data.archives-ouvertes.fr/author/438633"
+      },
+      {
+        "name": "Dominique Perrin",
+        "id": "https://data.archives-ouvertes.fr/author/84966"
+      },
+      {
+        "name": "Sergio Rica",
+        "id": "https://data.archives-ouvertes.fr/author/260340"
+      },
+      {
+        "name": "Cristian Calude",
+        "id": "https://data.archives-ouvertes.fr/author/1502573"
+      },
+      {
+        "name": "Ivan Rapaport",
+        "id": "https://data.archives-ouvertes.fr/author/112608"
+      },
+      {
+        "name": "Anahí Gajardo",
+        "id": "https://data.archives-ouvertes.fr/author/1160925"
+      },
+      {
+        "name": "Nikolay Vereshchagin",
+        "id": "https://data.archives-ouvertes.fr/author/254739"
+      },
+      {
+        "name": "Henri Laurent",
+        "id": "https://data.archives-ouvertes.fr/author/156944"
+      },
+      {
+        "name": "Luiz A. T. Machado",
+        "id": "https://data.archives-ouvertes.fr/author/156945"
+      }
+    ]
+  },
+  {
+    "id": "https://data.archives-ouvertes.fr/author/602780",
+    "name": "Alain Giboin",
+    "coauthors": [
+      {
+        "name": "Christian Brel",
+        "id": "https://data.archives-ouvertes.fr/author/1108777"
+      },
+      {
+        "name": "Anne-Marie Dery",
+        "id": "https://data.archives-ouvertes.fr/author/1108779"
+      },
+      {
+        "name": "Philippe Renevier",
+        "id": "https://data.archives-ouvertes.fr/author/471429"
+      },
+      {
+        "name": "Michel Riveill",
+        "id": "https://data.archives-ouvertes.fr/author/384664"
+      },
+      {
+        "name": "Mehdi Ahizoune",
+        "id": "https://data.archives-ouvertes.fr/author/1108784"
+      },
+      {
+        "name": "Fabien Gandon",
+        "id": "https://data.archives-ouvertes.fr/author/827904"
+      },
+      {
+        "name": "Romain Gugert",
+        "id": "https://data.archives-ouvertes.fr/author/883703"
+      },
+      {
+        "name": "Maxime Lefrançois",
+        "id": "https://data.archives-ouvertes.fr/author/715914"
+      },
+      {
+        "name": "Emilie Palagi",
+        "id": "https://data.archives-ouvertes.fr/author/1066506"
+      },
+      {
+        "name": "Nicolas Marie",
+        "id": "https://data.archives-ouvertes.fr/author/716404"
+      },
+      {
+        "name": "Patrick Rives",
+        "id": "https://data.archives-ouvertes.fr/author/78366"
+      },
+      {
+        "name": "David Daney",
+        "id": "https://data.archives-ouvertes.fr/author/127432"
+      },
+      {
+        "name": "Jean-Pierre Merlet",
+        "id": "https://data.archives-ouvertes.fr/author/11361823"
+      },
+      {
+        "name": "Celia Ormea",
+        "id": "https://data.archives-ouvertes.fr/author/1037634"
+      },
+      {
+        "name": "Pierre Robillard",
+        "id": "https://data.archives-ouvertes.fr/author/149003"
+      },
+      {
+        "name": "Isabelle Mirbel",
+        "id": "https://data.archives-ouvertes.fr/author/1151526"
+      },
+      {
+        "name": "Aurore Defays",
+        "id": "https://data.archives-ouvertes.fr/author/1201416"
+      },
+      {
+        "name": "Aurélie Jeunejean",
+        "id": "https://data.archives-ouvertes.fr/author/1201417"
+      },
+      {
+        "name": "Olivier Corby",
+        "id": "https://data.archives-ouvertes.fr/author/720457"
+      },
+      {
+        "name": "Rose Dieng-Kuntz",
+        "id": "https://data.archives-ouvertes.fr/author/98115"
+      },
+      {
+        "name": "Nicolas Gronnier",
+        "id": "https://data.archives-ouvertes.fr/author/1054747"
+      },
+      {
+        "name": "Cecile Guigard",
+        "id": "https://data.archives-ouvertes.fr/author/1168559"
+      },
+      {
+        "name": "Sylvain Dehors",
+        "id": "https://data.archives-ouvertes.fr/author/53796"
+      },
+      {
+        "name": "Jean-Paul Stromboni",
+        "id": "https://data.archives-ouvertes.fr/author/53799"
+      },
+      {
+        "name": "Catherine Faron Zucker",
+        "id": "https://data.archives-ouvertes.fr/author/1217461"
+      },
+      {
+        "name": "Cécile Guigard",
+        "id": "https://data.archives-ouvertes.fr/author/1054748"
+      },
+      {
+        "name": "Alain Michard",
+        "id": "https://data.archives-ouvertes.fr/author/97712"
+      },
+      {
+        "name": "Chantal Mais",
+        "id": "https://data.archives-ouvertes.fr/author/97713"
+      },
+      {
+        "name": "Philippe Verdret",
+        "id": "https://data.archives-ouvertes.fr/author/97696"
+      },
+      {
+        "name": "Christina Evangelou",
+        "id": "https://data.archives-ouvertes.fr/author/229549"
+      },
+      {
+        "name": "Adil El Ghali",
+        "id": "https://data.archives-ouvertes.fr/author/109796"
+      },
+      {
+        "name": "Amira Tifous",
+        "id": "https://data.archives-ouvertes.fr/author/230141"
+      },
+      {
+        "name": "Priscille Durville",
+        "id": "https://data.archives-ouvertes.fr/author/230142"
+      },
+      {
+        "name": "Géraldine Vidou",
+        "id": "https://data.archives-ouvertes.fr/author/230143"
+      },
+      {
+        "name": "Amaury Daele",
+        "id": "https://data.archives-ouvertes.fr/author/1711"
+      },
+      {
+        "name": "Nikos Karacapilidis",
+        "id": "https://data.archives-ouvertes.fr/author/229543"
+      },
+      {
+        "name": "Manfred Künzel",
+        "id": "https://data.archives-ouvertes.fr/author/229544"
+      },
+      {
+        "name": "Robert Peeters",
+        "id": "https://data.archives-ouvertes.fr/author/229546"
+      },
+      {
+        "name": "Nathalie van de Wiele",
+        "id": "https://data.archives-ouvertes.fr/author/229547"
+      },
+      {
+        "name": "Manolis Tzagarakis",
+        "id": "https://data.archives-ouvertes.fr/author/229550"
+      },
+      {
+        "name": "Bernadette Charlier",
+        "id": "https://data.archives-ouvertes.fr/author/1866"
+      },
+      {
+        "name": "Vincent Quint",
+        "id": "https://data.archives-ouvertes.fr/author/101807"
+      },
+      {
+        "name": "Aida Boukottaya",
+        "id": "https://data.archives-ouvertes.fr/author/229082"
+      },
+      {
+        "name": "Sandy El Helou",
+        "id": "https://data.archives-ouvertes.fr/author/229087"
+      },
+      {
+        "name": "Amagoia Madina",
+        "id": "https://data.archives-ouvertes.fr/author/229088"
+      },
+      {
+        "name": "Hervé Platteaux",
+        "id": "https://data.archives-ouvertes.fr/author/230130"
+      },
+      {
+        "name": "Michel Buffa",
+        "id": "https://data.archives-ouvertes.fr/author/1535818"
+      },
+      {
+        "name": "Étienne Vandeput",
+        "id": "https://data.archives-ouvertes.fr/author/65886"
+      },
+      {
+        "name": "Nathalie Deschryver",
+        "id": "https://data.archives-ouvertes.fr/author/50824"
+      },
+      {
+        "name": "Irène Vatton",
+        "id": "https://data.archives-ouvertes.fr/author/70737"
+      },
+      {
+        "name": "Liliane Esnault",
+        "id": "https://data.archives-ouvertes.fr/author/178192"
+      },
+      {
+        "name": "Murray Saunders",
+        "id": "https://data.archives-ouvertes.fr/author/184578"
+      },
+      {
+        "name": "Christian Maissen",
+        "id": "https://data.archives-ouvertes.fr/author/602781"
+      },
+      {
+        "name": "Jan Mikáč",
+        "id": "https://data.archives-ouvertes.fr/author/602782"
+      },
+      {
+        "name": "Arnaud Milstein",
+        "id": "https://data.archives-ouvertes.fr/author/602783"
+      },
+      {
+        "name": "Frédéric Vermeulin",
+        "id": "https://data.archives-ouvertes.fr/author/602784"
+      },
+      {
+        "name": "Macha da Costa",
+        "id": "https://data.archives-ouvertes.fr/author/1324770"
+      },
+      {
+        "name": "Anne-Marie Pinna-Déry",
+        "id": "https://data.archives-ouvertes.fr/author/471426"
+      },
+      {
+        "name": "Philippe Renevier-Gonin",
+        "id": "https://data.archives-ouvertes.fr/author/1063907"
+      },
+      {
+        "name": "Raphaël Troncy",
+        "id": "https://data.archives-ouvertes.fr/author/1297668"
+      },
+      {
+        "name": "Geoffroy Peeters",
+        "id": "https://data.archives-ouvertes.fr/author/518456"
+      },
+      {
+        "name": "Manuel Moussallam",
+        "id": "https://data.archives-ouvertes.fr/author/722150"
+      },
+      {
+        "name": "Gabriel Meseguer-Brocal",
+        "id": "https://data.archives-ouvertes.fr/author/1617353"
+      },
+      {
+        "name": "Guillaume Pellerin",
+        "id": "https://data.archives-ouvertes.fr/author/1617354"
+      },
+      {
+        "name": "Romain Hennequin",
+        "id": "https://data.archives-ouvertes.fr/author/1617356"
+      },
+      {
+        "name": "Thomas Fillon",
+        "id": "https://data.archives-ouvertes.fr/author/1617359"
+      },
+      {
+        "name": "Francesco Piccoli",
+        "id": "https://data.archives-ouvertes.fr/author/1617918"
+      },
+      {
+        "name": "Elena Cabrio",
+        "id": "https://data.archives-ouvertes.fr/author/1184174"
+      },
+      {
+        "name": "Yoann Bertrand",
+        "id": "https://data.archives-ouvertes.fr/author/1292995"
+      },
+      {
+        "name": "Patrice Pena",
+        "id": "https://data.archives-ouvertes.fr/author/1201662"
+      },
+      {
+        "name": "Karima Boudaoud",
+        "id": "https://data.archives-ouvertes.fr/author/971549"
+      },
+      {
+        "name": "Sophie Lepreux",
+        "id": "https://data.archives-ouvertes.fr/author/1103729"
+      },
+      {
+        "name": "Anne-Marie Déry-Pinna",
+        "id": "https://data.archives-ouvertes.fr/author/11147522"
+      },
+      {
+        "name": "Oscar Rodríguez Rocha",
+        "id": "https://data.archives-ouvertes.fr/author/1396617"
+      },
+      {
+        "name": "Eddie Soulier",
+        "id": "https://data.archives-ouvertes.fr/author/46807"
+      },
+      {
+        "name": "Florie Bugeaud",
+        "id": "https://data.archives-ouvertes.fr/author/497454"
+      },
+      {
+        "name": "Michel Leclère",
+        "id": "https://data.archives-ouvertes.fr/author/144785"
+      },
+      {
+        "name": "Rallou Thomopoulos",
+        "id": "https://data.archives-ouvertes.fr/author/831325"
+      },
+      {
+        "name": "Marie-Laure Mugnier",
+        "id": "https://data.archives-ouvertes.fr/author/863201"
+      },
+      {
+        "name": "Jean-François Baget",
+        "id": "https://data.archives-ouvertes.fr/author/1110060"
+      },
+      {
+        "name": "Alain Gutierrez",
+        "id": "https://data.archives-ouvertes.fr/author/1113693"
+      },
+      {
+        "name": "Gaëtan Rey",
+        "id": "https://data.archives-ouvertes.fr/author/70570"
+      },
+      {
+        "name": "Thierry Bergeron",
+        "id": "https://data.archives-ouvertes.fr/author/1357679"
+      },
+      {
+        "name": "Rose Dieng",
+        "id": "https://data.archives-ouvertes.fr/author/100749"
+      },
+      {
+        "name": "Nada Matta",
+        "id": "https://data.archives-ouvertes.fr/author/518073"
+      },
+      {
+        "name": "Joanna Golebiowska",
+        "id": "https://data.archives-ouvertes.fr/author/1160878"
+      },
+      {
+        "name": "Myriam Ribiere",
+        "id": "https://data.archives-ouvertes.fr/author/1160879"
+      },
+      {
+        "name": "Aurélie Lagarrigue",
+        "id": "https://data.archives-ouvertes.fr/author/1249747"
+      },
+      {
+        "name": "Marie Destandau",
+        "id": "https://data.archives-ouvertes.fr/author/11704043"
+      },
+      {
+        "name": "Jean-Daniel Fekete",
+        "id": "https://data.archives-ouvertes.fr/author/950645"
+      },
+      {
+        "name": "Franck Michel",
+        "id": "https://data.archives-ouvertes.fr/author/701520"
+      },
+      {
+        "name": "Marco Winckler",
+        "id": "https://data.archives-ouvertes.fr/author/11226269"
+      },
+      {
+        "name": "Serena Villata",
+        "id": "https://data.archives-ouvertes.fr/author/1257617"
+      },
+      {
+        "name": "Luc Vandenabeele",
+        "id": "https://data.archives-ouvertes.fr/author/230144"
+      },
+      {
+        "name": "Stéphane Jacquemart",
+        "id": "https://data.archives-ouvertes.fr/author/230145"
+      },
+      {
+        "name": "Thibault Latour",
+        "id": "https://data.archives-ouvertes.fr/author/230146"
+      },
+      {
+        "name": "Patrick Plichart",
+        "id": "https://data.archives-ouvertes.fr/author/230147"
+      },
+      {
+        "name": "Brigitte Denis",
+        "id": "https://data.archives-ouvertes.fr/author/229540"
+      },
+      {
+        "name": "Fabienne Pironet",
+        "id": "https://data.archives-ouvertes.fr/author/229541"
+      },
+      {
+        "name": "Martin Erpicum",
+        "id": "https://data.archives-ouvertes.fr/author/229542"
+      },
+      {
+        "name": "Dorel Gorga",
+        "id": "https://data.archives-ouvertes.fr/author/230128"
+      },
+      {
+        "name": "Thibaud Guillaume-Gentil",
+        "id": "https://data.archives-ouvertes.fr/author/230129"
+      },
+      {
+        "name": "Christine Vanoirbeek",
+        "id": "https://data.archives-ouvertes.fr/author/230131"
+      },
+      {
+        "name": "Joël Quinqueton",
+        "id": "https://data.archives-ouvertes.fr/author/153940"
+      },
+      {
+        "name": "Philippe Perez",
+        "id": "https://data.archives-ouvertes.fr/author/1160871"
+      },
+      {
+        "name": "Hervé Karp",
+        "id": "https://data.archives-ouvertes.fr/author/1160872"
+      },
+      {
+        "name": "Agostino Poggi",
+        "id": "https://data.archives-ouvertes.fr/author/1160873"
+      },
+      {
+        "name": "Giovanni Rimassa",
+        "id": "https://data.archives-ouvertes.fr/author/1160874"
+      },
+      {
+        "name": "Claudio Fietta",
+        "id": "https://data.archives-ouvertes.fr/author/1160875"
+      },
+      {
+        "name": "Juergen Mueller",
+        "id": "https://data.archives-ouvertes.fr/author/1160876"
+      },
+      {
+        "name": "Joachim Hackstein",
+        "id": "https://data.archives-ouvertes.fr/author/1160877"
+      },
+      {
+        "name": "Peter Sander",
+        "id": "https://data.archives-ouvertes.fr/author/101927"
+      },
+      {
+        "name": "Nhan Le Thanh",
+        "id": "https://data.archives-ouvertes.fr/author/1100037"
+      },
+      {
+        "name": "Andrea G. B. Tettamanzi",
+        "id": "https://data.archives-ouvertes.fr/author/1068529"
+      },
+      {
+        "name": "Sandrine Grataloup",
+        "id": "https://data.archives-ouvertes.fr/author/498646"
+      },
+      {
+        "name": "Olivier Morel",
+        "id": "https://data.archives-ouvertes.fr/author/968353"
+      },
+      {
+        "name": "Jean-Pierre Cahier",
+        "id": "https://data.archives-ouvertes.fr/author/950568"
+      },
+      {
+        "name": "Nicolas Delaforge",
+        "id": "https://data.archives-ouvertes.fr/author/950569"
+      },
+      {
+        "name": "Bruno Carlier",
+        "id": "https://data.archives-ouvertes.fr/author/950570"
+      },
+      {
+        "name": "Guillaume Erétéo",
+        "id": "https://data.archives-ouvertes.fr/author/1184312"
+      },
+      {
+        "name": "Freddy Limpens",
+        "id": "https://data.archives-ouvertes.fr/author/1168654"
+      },
+      {
+        "name": "Virginie Lacroix-Hugues",
+        "id": "https://data.archives-ouvertes.fr/author/1472363"
+      },
+      {
+        "name": "Elisa Noual",
+        "id": "https://data.archives-ouvertes.fr/author/11512811"
+      },
+      {
+        "name": "David Darmon",
+        "id": "https://data.archives-ouvertes.fr/author/895508"
+      },
+      {
+        "name": "Raphaël Gazzotti",
+        "id": "https://data.archives-ouvertes.fr/author/1367668"
+      },
+      {
+        "name": "Michael Fell",
+        "id": "https://data.archives-ouvertes.fr/author/11283620"
+      },
+      {
+        "name": "Anne-Marie Dery-Pinna",
+        "id": "https://data.archives-ouvertes.fr/author/783218"
+      },
+      {
+        "name": "Philippe Renevier Gonin",
+        "id": "https://data.archives-ouvertes.fr/author/11675670"
+      },
+      {
+        "name": "Stéphanie Lopez",
+        "id": "https://data.archives-ouvertes.fr/author/1343690"
+      },
+      {
+        "name": "Diane Lingrand",
+        "id": "https://data.archives-ouvertes.fr/author/469086"
+      },
+      {
+        "name": "Frédéric Precioso",
+        "id": "https://data.archives-ouvertes.fr/author/374348"
+      },
+      {
+        "name": "Arnaud Revel",
+        "id": "https://data.archives-ouvertes.fr/author/460819"
+      },
+      {
+        "name": "Valériane Dusaucy",
+        "id": "https://data.archives-ouvertes.fr/author/1350086"
+      },
+      {
+        "name": "Bruno Fies",
+        "id": "https://data.archives-ouvertes.fr/author/747432"
+      },
+      {
+        "name": "Marc Bourdeau",
+        "id": "https://data.archives-ouvertes.fr/author/1137521"
+      },
+      {
+        "name": "Laurent Berthelot",
+        "id": "https://data.archives-ouvertes.fr/author/1161280"
+      },
+      {
+        "name": "Adorjan Kiss",
+        "id": "https://data.archives-ouvertes.fr/author/1161283"
+      },
+      {
+        "name": "Emmanuelle Loyson",
+        "id": "https://data.archives-ouvertes.fr/author/1161284"
+      },
+      {
+        "name": "Paola Turci",
+        "id": "https://data.archives-ouvertes.fr/author/1161288"
+      },
+      {
+        "name": "Alexandre Delteil",
+        "id": "https://data.archives-ouvertes.fr/author/128925"
+      },
+      {
+        "name": "Anne Merle",
+        "id": "https://data.archives-ouvertes.fr/author/1006918"
+      },
+      {
+        "name": "Mylène Leitzelman",
+        "id": "https://data.archives-ouvertes.fr/author/574924"
+      },
+      {
+        "name": "Patrick Grohan",
+        "id": "https://data.archives-ouvertes.fr/author/574929"
+      },
+      {
+        "name": "Guillaume Ereteo",
+        "id": "https://data.archives-ouvertes.fr/author/1168566"
+      },
+      {
+        "name": "Talel Abdessalem",
+        "id": "https://data.archives-ouvertes.fr/author/776051"
+      },
+      {
+        "name": "Sébastien Comos",
+        "id": "https://data.archives-ouvertes.fr/author/1183176"
+      },
+      {
+        "name": "Frédéric Herledan",
+        "id": "https://data.archives-ouvertes.fr/author/1183177"
+      },
+      {
+        "name": "Valérie Le Meur",
+        "id": "https://data.archives-ouvertes.fr/author/1183178"
+      },
+      {
+        "name": "Benoit Leloup",
+        "id": "https://data.archives-ouvertes.fr/author/1183179"
+      },
+      {
+        "name": "Mathieu Simon",
+        "id": "https://data.archives-ouvertes.fr/author/11250077"
+      },
+      {
+        "name": "Tobias Mayer",
+        "id": "https://data.archives-ouvertes.fr/author/11276718"
+      },
+      {
+        "name": "Laurence Alpay",
+        "id": "https://data.archives-ouvertes.fr/author/101231"
       }
     ]
   }

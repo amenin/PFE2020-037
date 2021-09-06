@@ -1,3 +1,13 @@
+.zoom-div{
+    position: absolute;
+    display: none;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 10px 5px 5px #dbdbdb;
+    width: 120px;
+    height: 130px;
+}
+
 .zoom-control{
     cursor: pointer;
     position: absolute;
@@ -7,7 +17,7 @@
     height: 30px;
     font-size: 14px;
     border: none;
-    display: none;
+    display: inline-block;
 }
 
 .context-menu{
