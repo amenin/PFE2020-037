@@ -1,0 +1,28 @@
+.header{
+    background-color: whitesmoke;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: gray 5px;
+    width: 100%;
+    font-size: 14px;
+    font-family:Arial, Helvetica, sans-serif;
+    height: 7%;
+    z-index: 2;
+}
+
+.header h1 {
+    display: inline-block;
+    margin-left: 10px;
+    text-anchor: middle;
+}
+
+
+.vis {
+    width: 100vw;
+    height: 93%;
+    position: fixed;
+    overflow-x: hidden;
+    overflow-y: auto;
+    top: 7%;
+}

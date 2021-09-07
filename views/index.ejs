@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/dropdown.css">
+    <link rel="stylesheet" href="css/timeline.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js" ></script>
+    <script src="https://unpkg.com/simple-statistics@6.1.0/dist/simple-statistics.min.js" ></script>
+    <script src="https://d3js.org/d3-array.v1.min.js"></script>
+    <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    
+    <script src="lib/ss-jenks.js"></script>
+    <script src="js/timeline.js"></script>
+
+    <title>Timeline Viz</title>
+</head>
+
+<body>
+    <div class='header'>
+        <h1>TimelineViz</h1>
+        <div class="dropdown">
+            <button class="dropbtn">Select author</button>
+            <div class="dropdown-content">
+                <ul>
+                    <table id='authors-list'></table>
+                </ul>
+            </div>
+        </div>
+        <div class="dropdown coauthors" style="display:none;">
+            <button class="dropbtn">Select co-authors</button>
+            <div class="dropdown-content">
+                <ul>
+                    <table id='coauthors-list'></table>
+                </ul>
+            </div>
+        </div>
+        <button class='submitbtn'>Submit</button>
+    </div>
+    <div class="vis"></div>
+
+    <script>
+        const protocol = window.location.protocol +'//';
+        const hostname = window.location.host;
+
+        const data = <%- JSON.stringify(data) %>;
+        const timeline = new Timeline()
+        timeline.init()
+
+        const authorsItems = d3.select('table#authors-list')        
+            .selectAll('tr')
+            .data(data.authors)
+            .enter()
+                .append('tr')
+                .classed('item', true)
+                
+        authorsItems.append('input')
+            .attr('type', 'radio')
+            .on('change', function(d) {
+                let _this = this;
+                d3.select(this.parentNode.parentNode)
+                    .selectAll('input')
+                    .property('checked', function() { return this === _this ? true : false })   
+
+                d3.select('div.coauthors')
+                    .style('display', 'inline-block')
+                
+                const selectedAuthor = d3.select(this.parentNode).datum()
+                
+                d3.select('table#coauthors-list').selectAll('tr').remove()
+    
+                const coauthorItems =  d3.select('table#coauthors-list')
+                    .selectAll('tr')
+                    .data(data.coauthors[selectedAuthor.uri.value])
+                    .enter()
+                        .append('tr')
+                        .classed('item', true)
+
+                coauthorItems.append('input')
+                    .attr('type', 'checkbox')
+
+                coauthorItems.append('text')
+                    .text(e => e.name)
+                
+            })
+
+        authorsItems.append('text')                
+            .text(d => d.name.value)
+
+            
+        d3.select('button.submitbtn')
+            .on('click', function() {
+                d3.selectAll('.dropdown-content').style('display', 'none')
+                
+                let selectedAuthor = null; 
+                let selectedCoauthors = []; 
+
+                d3.select('table#authors-list').selectAll('input').each(function(){
+                    if (this.checked) {
+                        selectedAuthor = d3.select(this.parentNode).datum().uri.value;
+                    }
+                })
+
+                d3.select('table#coauthors-list').selectAll('input').each(function(){
+                    if (this.checked) {
+                        selectedCoauthors.push(d3.select(this.parentNode).datum().uri)
+                    }
+                })
+
+                selectedCoauthors.push(selectedAuthor)
+
+                // send request to server: retrieve documents for selected co-authors
+                const url = protocol + hostname + "/get_docs"; // local server
+                
+                fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify({'authors': selectedCoauthors})
+                }).then(response => {
+                    return response.text();
+                }).then(res => {
+                    // hideLoading();
+                    if (res.startsWith('Virtuoso')) {
+                        // Syntax error message
+                        window.alert(res);
+                        updateVisualizationSpace('none')
+                    } else {
+                        timeline.update(JSON.parse(res))
+                        // getResult(text, values, followupQuery);
+                    }
+                }).catch(error => {
+                    alert(error);
+                });
+            })
+
+            d3.selectAll('button.dropbtn').on('click', openDropdown)
+
+            function openDropdown(){
+                const _this = this;
+               
+                const dropdownContent = this.nextElementSibling;
+                d3.select(this.parentNode.parentNode)
+                    .selectAll('.dropdown-content')
+                    .filter(function() { return this !== dropdownContent; })
+                    .style('display', 'none')
+                
+                if(dropdownContent.style.display == "block")
+                    dropdownContent.style.display = "none";
+                else
+                    dropdownContent.style.display = "block"; 
+            }
+    </script>
+</body>
