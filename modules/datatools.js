@@ -1,6 +1,5 @@
 const hal_uri = "http://sparql.archives-ouvertes.fr/sparql"
 
-
 //--------------------------------
 // to send the query to the sparql endpoint
 function prepare(query) {
@@ -35,6 +34,7 @@ function sparqlQuery(query, uri) {
 function getData (docs, queries, authors) {
     authors_list = Object.keys(docs)
     let query = queries.prefixes + queries.query_docs;
+    
     authors.forEach(author => {
         let offset = 0
 

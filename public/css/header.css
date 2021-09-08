@@ -26,3 +26,16 @@
     overflow-y: scroll;
     top: 7%;
 }
+
+.loading {
+    opacity: .8;
+    background-color: whitesmoke;
+    position: fixed;
+    top: 7%;
+    height: 93%;
+    width: 100vw;
+    display: none;
+    z-index: 2;
+    vertical-align: middle;
+    text-align: center;
+}

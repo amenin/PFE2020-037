@@ -13,7 +13,7 @@
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
     
     <script src="lib/ss-jenks.js"></script>
-    <script src="js/timeline.js"></script>
+    
 
     <title>Timeline Viz</title>
 </head>
@@ -39,121 +39,13 @@
         </div>
         <button class='submitbtn'>Submit</button>
     </div>
+    <div class='loading' id='div-loading'></div>
     <div class="vis"></div>
 
+    <script src="js/timeline.js"></script>
+    <script src="js/utils.js"></script>
     <script>
-        const protocol = window.location.protocol +'//';
-        const hostname = window.location.host;
-
         const data = <%- JSON.stringify(data) %>;
-        data.authors.forEach(d => {
-            d.uri = d.uri.value;
-            d.name = d.name.value;
-        })
-
-        const timeline = new Timeline()
-        timeline.init()
-
-        const authorsItems = d3.select('table#authors-list')        
-            .selectAll('tr')
-            .data(data.authors)
-            .enter()
-                .append('tr')
-                .classed('item', true)
-                
-        authorsItems.append('input')
-            .attr('type', 'radio')
-            .on('change', function(d) {
-                let _this = this;
-                d3.select(this.parentNode.parentNode)
-                    .selectAll('input')
-                    .property('checked', function() { return this === _this ? true : false })   
-
-                d3.select('div.coauthors')
-                    .style('display', 'inline-block')
-                
-                const selectedAuthor = d3.select(this.parentNode).datum()
-                
-                d3.select('table#coauthors-list').selectAll('tr').remove()
-    
-                const coauthorItems =  d3.select('table#coauthors-list')
-                    .selectAll('tr')
-                    .data(data.coauthors[selectedAuthor.uri])
-                    .enter()
-                        .append('tr')
-                        .classed('item', true)
-
-                coauthorItems.append('input')
-                    .attr('type', 'checkbox')
-
-                coauthorItems.append('text')
-                    .text(e => e.name)
-                
-            })
-
-        authorsItems.append('text')                
-            .text(d => d.name)
-
-            
-        d3.select('button.submitbtn')
-            .on('click', function() {
-                d3.selectAll('.dropdown-content').style('display', 'none')
-
-                let selectedAuthor = null; 
-                let selectedCoauthors = []; 
-
-                d3.select('table#authors-list').selectAll('input').each(function(){
-                    if (this.checked) {
-                        selectedAuthor = d3.select(this.parentNode).datum()
-                    }
-                })
-
-                d3.select('table#coauthors-list').selectAll('input').each(function(){
-                    if (this.checked) {
-                        selectedCoauthors.push(d3.select(this.parentNode).datum())
-                    }
-                })
-
-                selectedCoauthors.push(selectedAuthor)
-                console.log(selectedCoauthors)
-
-                // send request to server: retrieve documents for selected co-authors
-                const url = protocol + hostname + "/get_docs"; // local server
-                
-                fetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify({'authors': selectedCoauthors})
-                }).then(response => {
-                    return response.text();
-                }).then(res => {
-                    // hideLoading();
-                    if (res.startsWith('Virtuoso')) {
-                        // Syntax error message
-                        window.alert(res);
-                        updateVisualizationSpace('none')
-                    } else {
-                        timeline.update(JSON.parse(res))
-                    }
-                }).catch(error => {
-                    alert(error);
-                });
-            })
-
-            d3.selectAll('button.dropbtn').on('click', openDropdown)
-
-            function openDropdown(){
-                const _this = this;
-               
-                const dropdownContent = this.nextElementSibling;
-                d3.select(this.parentNode.parentNode)
-                    .selectAll('.dropdown-content')
-                    .filter(function() { return this !== dropdownContent; })
-                    .style('display', 'none')
-                
-                if(dropdownContent.style.display == "block")
-                    dropdownContent.style.display = "none";
-                else
-                    dropdownContent.style.display = "block"; 
-            }
+        setFilters(data)
     </script>
 </body>

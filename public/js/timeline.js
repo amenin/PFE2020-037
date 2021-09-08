@@ -40,8 +40,6 @@ class Timeline {
         this.width = div.node().clientWidth;
         this.height = div.node().clientHeight;
         this.svg = div.append('svg')
-            // .attr('preserveAspectRatio', 'xMinYMin meet')
-            //.attr('viewBox', `0 0 ${this.width} ${this.height}`)
 
         div.append('div')
             .classed('zoom-div', true)
@@ -79,6 +77,10 @@ class Timeline {
                 .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
                 .attr('stroke', '#000000')
                 .attr('stroke-width', 1);
+    }
+
+    clear() {
+        this.svg.selectAll('g').remove()
     }
 
     update(data) {
@@ -214,11 +216,11 @@ class Timeline {
             .domain(breaks)
             .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
 
-        console.log(chart.height + 150, this.height)
         if (chart.height + 150 > this.height)
             d3.select('div.vis').style('height', (chart.height + 150) + 'px');
 
-        createMap(this)
+        const _this = this;
+        createMap()
 
         const chartGroup =  this.svg.append('g')
             .attr('id', 'group-chart')
@@ -344,37 +346,15 @@ class Timeline {
                     .style('left', x + 'px')
                     .style('top', y + 'px')
                     .style('display', 'block')
-                    .html(`Reload and Focus on ${d}`)
+                    .html(`Fetch Data and Focus on ${d}`)
                     .on('click', function() {
-                        changeFocus(authorsInfo.filter(e => e.name === d)[0])
+                        const author_data = authorsInfo.filter(e => e.name === d)[0]
+                        author_data.uri = author_data.uri[0]
+                        fetchData(author_data)
                         d3.select(this).style('display', 'none')
                     })
             })
             .call(wrap, yScale.step()/2)
-
-        function wrap(text, width) {
-            text.each(function() {
-                var text = d3.select(this),
-                    words = text.text().split(/\s+/).reverse(),
-                    word,
-                    line = [],
-                    lineNumber = 0,
-                    lineHeight = 1.1, // ems
-                    y = text.attr("y"),
-                    dy = parseFloat(text.attr("dy")),
-                    tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-                while (word = words.pop()) {
-                    line.push(word);
-                    tspan.text(line.join(" "));
-                    if (tspan.node().getComputedTextLength() > width) {
-                    line.pop();
-                    tspan.text(line.join(" "));
-                    line = [word];
-                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
-                    }
-                }
-            });
-        }
 
         ///// authors ///////////////////////  
 
@@ -443,7 +423,6 @@ class Timeline {
                 .attr("d", area)
                 .style('opacity', 0.5)
                 .on('mouseenter', d => {
-                    console.log(d)
                     let visitedCountries = countryCodes.filter(e => e.authors.some(a => a.name === d.key))
 
                     this.svg.select('g#map-group').selectAll('path')
@@ -650,7 +629,7 @@ class Timeline {
                 Click to go to source`)
         
 
-        function createMap (_this) {           
+        function createMap () {           
     
             const chart = {width: _this.width, height: _this.height},
                 margin = {top: 30, left: 0, right: 0, bottom: 0};
