@@ -21,8 +21,8 @@
 .vis {
     width: 100vw;
     height: 93%;
-    position: fixed;
+    position: absolute;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: scroll;
     top: 7%;
 }

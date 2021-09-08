@@ -124,14 +124,14 @@ app.post('/get_docs', function(req, res) {
                 // verify for which authors we already have the data
                 let keys = []
                 data.authors.forEach(author => {
-                    if (!Object.keys(docs).includes(author)) {
-                        keys.push(author)
+                    if (!Object.keys(docs).includes(author.uri)) {
+                        keys.push(author.uri)
                     } 
                 })
 
                 // retrieve docs for authors for whom we don't have data
                 if (keys.length) {
-                    console.log('Retrieving docs of ' + keys.length + ' authors...')
+                    console.log('Retrieving docs for ' + keys.length + ' authors...')
                     try {
                         let queries = fs.readFileSync(datadir + 'queries.json')    
                         queries = JSON.parse(queries)
@@ -146,9 +146,10 @@ app.post('/get_docs', function(req, res) {
 
                 // filter the docs to keep only the ones for the selected authors
                 data.authors.forEach(author => {
-                    result[author] = docs[author]
+                    result[author.uri] = docs[author.uri]
                 })
 
+               
                 result = datatools.transformData(result, data.authors)
             } 
 

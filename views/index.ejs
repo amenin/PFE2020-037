@@ -46,6 +46,11 @@
         const hostname = window.location.host;
 
         const data = <%- JSON.stringify(data) %>;
+        data.authors.forEach(d => {
+            d.uri = d.uri.value;
+            d.name = d.name.value;
+        })
+
         const timeline = new Timeline()
         timeline.init()
 
@@ -73,7 +78,7 @@
     
                 const coauthorItems =  d3.select('table#coauthors-list')
                     .selectAll('tr')
-                    .data(data.coauthors[selectedAuthor.uri.value])
+                    .data(data.coauthors[selectedAuthor.uri])
                     .enter()
                         .append('tr')
                         .classed('item', true)
@@ -87,29 +92,30 @@
             })
 
         authorsItems.append('text')                
-            .text(d => d.name.value)
+            .text(d => d.name)
 
             
         d3.select('button.submitbtn')
             .on('click', function() {
                 d3.selectAll('.dropdown-content').style('display', 'none')
-                
+
                 let selectedAuthor = null; 
                 let selectedCoauthors = []; 
 
                 d3.select('table#authors-list').selectAll('input').each(function(){
                     if (this.checked) {
-                        selectedAuthor = d3.select(this.parentNode).datum().uri.value;
+                        selectedAuthor = d3.select(this.parentNode).datum()
                     }
                 })
 
                 d3.select('table#coauthors-list').selectAll('input').each(function(){
                     if (this.checked) {
-                        selectedCoauthors.push(d3.select(this.parentNode).datum().uri)
+                        selectedCoauthors.push(d3.select(this.parentNode).datum())
                     }
                 })
 
                 selectedCoauthors.push(selectedAuthor)
+                console.log(selectedCoauthors)
 
                 // send request to server: retrieve documents for selected co-authors
                 const url = protocol + hostname + "/get_docs"; // local server
@@ -127,7 +133,6 @@
                         updateVisualizationSpace('none')
                     } else {
                         timeline.update(JSON.parse(res))
-                        // getResult(text, values, followupQuery);
                     }
                 }).catch(error => {
                     alert(error);

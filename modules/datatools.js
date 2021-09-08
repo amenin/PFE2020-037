@@ -90,12 +90,13 @@ function transformData(data, authors_list) {
         links = [];
 
     authors_list.forEach(author => {
-
-        data[author].forEach(item => {
+        
+        data[author.uri].forEach(item => {
             let authorsList = item.authorList.value.split('&&').map(d => { return {'name': d.split('&')[0], 'uri': d.split('&')[1]}}),
                 year = item.issuedAt.value.split('-')[0];
+
             docs.push({
-                'authorURI': author,
+                'authorURI': author.uri,
                 'authorName': item.name.value,
                 'docURI': item.doc.value,
                 'docTitle': item.title.value,
@@ -109,15 +110,16 @@ function transformData(data, authors_list) {
                 'country': item.country.value,
                 'address': item.address.value,
                 'citation': item.citation.value.replace(/--/g, ','),
-                'authorsList': authorsList
+                'authorsList': authorsList,
+                'hal': item.hal.value
             })
 
-            authorsList.filter(d => authors_list.includes(d.uri)).forEach(coauthor => {
-                if (coauthor.uri === author) return
+            authorsList.filter(d => authors_list.map(e => e.name).includes(d.name)).forEach(coauthor => {
+                if (coauthor.name === author.name) return
 
-                let link = {'source': {'name': item.name.value, 'uri': author}, 'target': coauthor, 'year': year}
+                let link = {'source': {'name': item.name.value, 'uri': author.uri}, 'target': coauthor, 'year': year}
                 
-                let index = links.findIndex(e => e.source.uri === author && e.target.uri === coauthor.uri && e.year === year)
+                let index = links.findIndex(e => e.source.name === author.name && e.target.name === coauthor.name && e.year === year)
                 if (index == -1)
                     links.push(link)
             })

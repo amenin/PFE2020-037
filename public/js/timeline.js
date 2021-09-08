@@ -40,10 +40,8 @@ class Timeline {
         this.width = div.node().clientWidth;
         this.height = div.node().clientHeight;
         this.svg = div.append('svg')
-            .attr('height', this.height)
-            .attr('width', this.width)
-            .attr('preserveAspectRatio', 'xMinYMin meet')
-            .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+            // .attr('preserveAspectRatio', 'xMinYMin meet')
+            //.attr('viewBox', `0 0 ${this.width} ${this.height}`)
 
         div.append('div')
             .classed('zoom-div', true)
@@ -92,15 +90,15 @@ class Timeline {
 
         if (!Object.keys(data).length) return;
 
+        const _this = this;
         const updateState = new Promise((resolve, reject) => {
 
             let nestedData = d3.nest()
-                .key(function(d) { return d.country; })
-                .sortKeys((a,b) => a.localeCompare(b))
-                .entries(data)
-    
+                .key(d => d.country)
+                .entries(data.docs)
+
             /// keep only information for selected countries /////
-            this.selected_countries = nestedData.map(d => {
+            _this.selected_countries = nestedData.map(d => {
                 let authors = d.values.map(e => e.authorName)
                 authors = authors.filter((d,i) => i === authors.indexOf(d))
     
@@ -110,8 +108,8 @@ class Timeline {
                         'value': d.values.filter(v => v.authorName === e).length
                     }
                 })
-    
-                let res = this.country_codes.filter(item => item.name === d.key);
+                
+                let res = _this.country_codes.filter(item => item.name === d.key);
                 return {
                     'country': d.key, 
                     'authors': authors,
@@ -136,8 +134,9 @@ class Timeline {
         const controls = {freeze_links: null}
 
         /// keep only one copy of each relationship
-        links = links.filter((d,i) => i === links.findIndex(e => e.year === d.year && ((e.source.uri == d.source.uri && e.target.uri === d.target.uri) || 
-                                    (e.source.uri === d.target.uri && e.target.uri === d.source.uri))))
+        links = links.filter((d,i) => i === links.findIndex(e => e.year === d.year && 
+            ((e.source.name === d.source.name && e.target.name === d.target.name) || 
+            (e.source.name === d.target.name && e.target.name === d.source.name))))
 
         let nestedData = d3.nest()
             .key(function(d) { return d.authorName; })
@@ -205,35 +204,27 @@ class Timeline {
             width = this.width - margin.left - margin.right,
             chart = { width: width * .95, height: maxHeight * authors.length, symbolSize: 15 };
 
+        // resize svg according to chart
+        this.svg.attr('width', this.width).attr('height', chart.height + 150)
 
          // map color code: count of publications per country
-         let values = countryCodes.map(d => d.value);
-         let breaks = ss.jenks(values, values.length >= 5 ? 5 : values.length)
-         const countryColor = d3.scaleThreshold()
-             .domain(breaks)
-             .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
+        let values = countryCodes.map(d => d.value);
+        let breaks = ss.jenks(values, values.length >= 5 ? 5 : values.length)
+        const countryColor = d3.scaleThreshold()
+            .domain(breaks)
+            .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
 
+        console.log(chart.height + 150, this.height)
         if (chart.height + 150 > this.height)
-            this.svg.node().parentNode.style.height = chart.height + 150 + 'px';
-        
-        const svg = this.svg.attr('height', this.height)
-           
-        // svg.select('g#group-chart').remove()
+            d3.select('div.vis').style('height', (chart.height + 150) + 'px');
 
         createMap(this)
 
-        const chartGroup =  svg.append('g')
+        const chartGroup =  this.svg.append('g')
             .attr('id', 'group-chart')
             .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
         ///// axes ////////////////
-        const yScale = d3.scalePoint()
-            .domain(authors)
-            .range([chart.height, 0])
-            .padding(0.5)
-
-        const yAxis = d3.axisLeft()
-            .scale(yScale)
         
         let dates = nestedDataByyear.map(d => d.key)
         dates.sort((a,b) => +a - (+b))
@@ -260,6 +251,15 @@ class Timeline {
         chartGroup.append('g')
             .attr('transform', `translate(0, 0)`)
             .call(xTopAxis)
+
+        /// y axis (authors' names)
+        const yScale = d3.scalePoint()
+            .domain(authors)
+            .range([chart.height, 0])
+            .padding(0.5)
+
+        const yAxis = d3.axisLeft()
+            .scale(yScale)
         
         const yAxisGroup = chartGroup.append('g')
             .attr('transform', `translate(0, 0)`)
@@ -276,13 +276,15 @@ class Timeline {
             .style('cursor', 'pointer')
             .on('mouseenter', d => {
                 if (controls.freeze_links) return;
+                
                 let linkElem = chartGroup.selectAll('g.link')
-                    .style('opacity', e => e.source === d || e.target === d ? 1 : .02)
+                    .style('opacity', e => e.source.name === d || e.target.name === d ? 1 : .02)
 
                 linkElem.selectAll('line').style('stroke-width', 2)
 
                 // highlight documents within line of co-authors
-                let targets = links.filter(e => e.source === d || e.target === d).map(e => e.target === d ? e.source : e.target)
+                let targets = links.filter(e => e.source.name === d || e.target.name === d)
+                    .map(e => e.target.name === d ? e.source.name : e.target.name)
                 
                 chartGroup.selectAll('g.symbol-group')
                     .style('opacity', e => e.authorsList.includes(d) && e.authorsList.some(a => targets.includes(a)) ? 1 : .1)
@@ -295,13 +297,13 @@ class Timeline {
                 chartGroup.selectAll('path.profile').style('opacity', e => d === e.key || targets.includes(e.key) ? .8 : .1)
 
                 let countries = []
-                groupDocs.filter(e => e.authorsList.includes(d)).forEach(e => {
+                docs.filter(e => e.authorsList.includes(d)).forEach(e => {
                     countries = countries.concat(e.country)
                 })
-
+              
                 let countriesCodes = countryCodes.filter(e => countries.includes(e.country))
 
-                svg.select('g#map-group').selectAll('path')
+                this.svg.select('g#map-group').selectAll('path')
                     .style('fill', d => {
                         let res = countriesCodes.filter(e => e.alpha3 === d.properties.alpha3)
                         return res.length ? countryColor(res[0].value) : "#f4f4f4";
@@ -320,7 +322,7 @@ class Timeline {
                 
                 chartGroup.selectAll('path.profile').style('opacity', .5)
 
-                svg.select('g#map-group').selectAll('path')
+                this.svg.select('g#map-group').selectAll('path')
                     .style('fill', d => {
                         let res = countryCodes.filter(e => e.alpha3 === d.properties.alpha3)
                         return res.length ? countryColor(res[0].value) : "#f4f4f4";
@@ -441,20 +443,26 @@ class Timeline {
                 .attr("d", area)
                 .style('opacity', 0.5)
                 .on('mouseenter', d => {
+                    console.log(d)
                     let visitedCountries = countryCodes.filter(e => e.authors.some(a => a.name === d.key))
 
-                    svg.select('g#map-group').selectAll('path')
+                    this.svg.select('g#map-group').selectAll('path')
                         .style('fill', d => {
                             let res = visitedCountries.filter(e => e.alpha3 === d.properties.alpha3)
                             return res.length ? countryColor(res[0].value) : "#f4f4f4";
                         })
 
+                    this.svg.selectAll('path.profile')
+                        .style('opacity', e => e.key === d.key ? .8 : .2)
+
                 }).on('mouseleave', d => {
-                    svg.select('g#map-group').selectAll('path')
-                    .style('fill', d => {
-                        let res = countryCodes.filter(e => e.alpha3 === d.properties.alpha3)
-                        return res.length ? countryColor(res[0].value) : "#f4f4f4";
-                    })
+                    this.svg.select('g#map-group').selectAll('path')
+                        .style('fill', d => {
+                            let res = countryCodes.filter(e => e.alpha3 === d.properties.alpha3)
+                            return res.length ? countryColor(res[0].value) : "#f4f4f4";
+                        })
+
+                    this.svg.selectAll('path.profile').style('opacity', .5)
                 })
 
         ///------------------------------------------------------------------------------------------------------------------------------------
@@ -477,22 +485,21 @@ class Timeline {
             .style('stroke-opacity', 1)
 
         lines.filter(d => {
-            let items = docs.filter(e => e.authorsList.findIndex(x => x.uri === d.source.uri) > -1 && 
-                e.authorsList.findIndex(x => x.uri === d.target.uri) > -1 && e.pubYear === d.year)
+            let items = docs.filter(e => e.authorsList.includes(d.source.name) && 
+                e.authorsList.includes(d.target.name) && e.pubYear === d.year)
             
             let nestedItems = d3.nest().key(e => e.docURI).entries(items)
-            console.log(nestedItems)
             return nestedItems.every(e => e.values.length == 1)
         })
         .style('stroke-dasharray', 4)
 
-        let headLength = 5
+        let headLength = 7
         link.append('line')
             .attr('x1', d => xScale.bandwidth()/ 2 + xScale(d.year) - headLength/2)
             .attr('x2', d => xScale.bandwidth()/ 2 + xScale(d.year) + headLength/2)
             .attr('y1', d => yScale(d.source.name))   
             .attr('y2', d => yScale(d.source.name))   
-            .style('fill', '#000')
+            .style('stroke', '#000')
             .style('stroke-opacity', 1)
 
         link.append('line')
@@ -500,7 +507,7 @@ class Timeline {
             .attr('x2', d => xScale.bandwidth()/ 2 + xScale(d.year) + headLength/2)
             .attr('y1', d => yScale(d.target.name))   
             .attr('y2', d => yScale(d.target.name))   
-            .style('fill', '#000')
+            .style('stroke', '#000')
             .style('stroke-opacity', 1)
 
 
@@ -521,7 +528,7 @@ class Timeline {
                     .classed('symbol-group', true)
                     .style('cursor', 'pointer')
                     .on('click', d => {
-                        window.open(d.docURI)
+                        window.open(d.hal)
                     })
 
         // squares for conference, diplome and artistic/technical documents
@@ -599,7 +606,7 @@ class Timeline {
 
             let countriesCodes = countryCodes.filter(e => countries.includes(e.country))
 
-            svg.select('g#map-group').selectAll('path')
+            this.svg.select('g#map-group').selectAll('path')
                 // .style('stroke-width', d => countriesCodes.includes(d.properties.alpha3) ? 1.2 / k : .3)
                 // .style('stroke', d => countriesCodes.includes(d.properties.alpha3) ? '#000' : '#ccc')
                 .style('fill', d => {
@@ -611,7 +618,7 @@ class Timeline {
             if (!controls.freeze_links) 
                 symbolGroup.selectAll('.symbol').style('stroke', 'none')
                 
-                svg.select('g#map-group').selectAll('path')
+                this.svg.select('g#map-group').selectAll('path')
                     .style('fill', d => {
                         let res = countryCodes.filter(e => e.alpha3 === d.properties.alpha3)
                         return res.length ? countryColor(res[0].value) : "#f4f4f4";
@@ -655,12 +662,12 @@ class Timeline {
                         .attr('transform', d3.event.transform);
                 });
             
-            const svg = _this.svg.attr('width', chart.width)
-                .attr('height', chart.height)
+            // const svg = _this.svg.attr('width', chart.width)
+            //     .attr('height', chart.height)
     
             // svg.select('g#map-group').remove()
     
-            const mapGroup = svg.append('g')
+            const mapGroup = _this.svg.append('g')
                 .attr('id', 'map-group')
                 .attr('transform', `translate(${margin.left}, ${margin.top})`); 
                 
