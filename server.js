@@ -12,12 +12,12 @@ const datatools = require('./modules/datatools')
 const datafiletimeout = 1296000000;
 const datadir = 'data/';
 const datafile = {
+    'institutions': datadir + 'institution_data.json',
     'authors': datadir + 'authors.json',
     'coauthors': datadir + 'coauthors.json'
 }
 
-const cachefile = datadir + 'cache/';
-
+let queries = {}
 // default variables for testing
 const hal_uri = "http://sparql.archives-ouvertes.fr/sparql"
 const lab = "I3S";
@@ -49,7 +49,7 @@ app.get('/', function (req, res) {
                 data[key] = JSON.parse(rawdata);
             })
         } else { // retrieve data from sparql endpoint
-            const queries = loadFile(datadir + 'queries.json')
+            // const queries = loadFile(datadir + 'queries.json')
             let query = queries.prefixes + queries.query_authors.replace("$lab", lab)
             // retrieve a list of 100 authors to begin the exploration
             let authors = datatools.sparqlQuery(query, hal_uri);
@@ -106,9 +106,9 @@ app.post('/get_docs', async (req, res) => {
                 // retrieve docs for authors for whom we don't have data
                 if (keys.length) {
                     console.log('Retrieving docs for ' + keys.length + ' authors...')
-                    let queries = loadFile(datadir + 'queries.json')
+                    // let queries = loadFile(datadir + 'queries.json')
                     datatools.getData(docs, queries, keys)
-                    fs.writeFileSync(datadir + 'docs.json', JSON.stringify(docs))
+                    fs.writeFileSync(datadir + 'docs.json', JSON.stringify(docs, null, 4))
                 } 
 
                 // filter the docs to keep only the ones for the selected authors
@@ -150,7 +150,7 @@ app.post('/get_author_data', async (req, res) => {
             let docs = loadFile(datadir + 'docs.json')
 
             if ( Object.keys(docs).length ) {
-                let queries = loadFile(datadir + 'queries.json');
+                // let queries = loadFile(datadir + 'queries.json');
                 let author_list = fs.readFileSync(datadir + 'authors.json')    
                 result.authors = JSON.parse(author_list)
                 if (!Object.keys(result.authors).includes(data.author.uri)) { // if the author does not exits in the pre-loaded data then retrieve data from database
@@ -160,9 +160,9 @@ app.post('/get_author_data', async (req, res) => {
                     result.coauthors = datatools.getCoauthorsList(docs)
 
                     // save files to cache
-                    fs.writeFileSync(datadir + 'authors.json', JSON.stringify(result.authors))
-                    fs.writeFileSync(datadir + 'docs.json', JSON.stringify(docs))
-                    fs.writeFileSync(datadir + 'coauthors.json', JSON.stringify(result.coauthors))   
+                    fs.writeFileSync(datadir + 'authors.json', JSON.stringify(result.authors, null, 4))
+                    fs.writeFileSync(datadir + 'docs.json', JSON.stringify(docs, null, 4))
+                    fs.writeFileSync(datadir + 'coauthors.json', JSON.stringify(result.coauthors, null, 4))   
                 } else {
                     let coauthors = loadFile(datadir + 'coauthors.json')
                     result.coauthors = JSON.parse(coauthors)
@@ -195,6 +195,17 @@ function loadFile(filename) {
     return filedata;
 }
 
-
-app.listen(port, () => console.log(`Server started at port ${port}.`))
+app.listen(port, () => {
+    queries = loadFile(datadir + 'queries.json')
+    //--------------------------------------------------------------------------------------
+    // the following code was used once to retrieve the hierarchy of institutions from HAL
+    // let filename = datadir + 'institution_data.json'
+    // let data = loadFile(filename)
+    // if ( !Object.keys(data).length ){
+        // datatools.getInstitutionHierarchy(queries)
+        // fs.writeFileSync(filename, JSON.stringify(data, null, 4))
+    // }
+    //---------------------------------------------------------------------------------------
+    console.log(`Server started at port ${port}.`)
+})
 

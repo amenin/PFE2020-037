@@ -173,10 +173,36 @@ function wrap(text, width) {
 function showLoading(loadingInfo) {
     const loadingElem = document.getElementById("div-loading")
     loadingElem.style.display = 'block';
-    loadingElem.innerHTML = `${loadingInfo} <br><i class="fas fa-spinner fa-spin fa-2x loading"></i>`;
+    loadingElem.innerHTML = `${loadingInfo} <br><i class="fas fa-spinner fa-spin fa-2x"></i>`;
 }
 
 function hideLoading () {
     document.getElementById("div-loading").style.display = 'none';
 }
 
+
+function testVisualization(data) {
+    let author = data.authors.filter(d => d.name === 'Enrico Formenti')[0]
+    let coauthors = data.coauthors[author.uri].splice(0,10)
+
+    coauthors.concat(author)
+    // send request to server: retrieve documents for selected co-authors
+    const url = protocol + hostname + "/get_docs"; // local server
+    
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({'authors': coauthors})
+    }).then(response => {
+        return response.text();
+    }).then(res => {
+        hideLoading();
+        if (res.startsWith('Virtuoso')) {
+            // Syntax error message
+            window.alert(res);
+        } else {
+            timeline.update(JSON.parse(res))
+        }
+    }).catch(error => {
+        alert(error);
+    });
+}

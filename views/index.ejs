@@ -5,13 +5,21 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/dropdown.css">
     <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js" ></script>
     <script src="https://unpkg.com/simple-statistics@6.1.0/dist/simple-statistics.min.js" ></script>
+
     <script src="https://d3js.org/d3-array.v1.min.js"></script>
+    <script src="https://d3js.org/d3-array.v2.min.js"></script>
     <script src="https://d3js.org/d3-geo.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v0.4.min.js"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
+
     <script src="lib/ss-jenks.js"></script>
     
 
@@ -46,6 +54,44 @@
     <script src="js/utils.js"></script>
     <script>
         const data = <%- JSON.stringify(data) %>;
+        console.log(data)
+
+        // let france = data.institutions.filter(d => d.name === 'France')[0]
+        // france.children = france.children.slice(0,100)
+        
+        // // france = france.filter((d,i) => france.indexOf(d) === i)
+        // console.log(france)
+
+        // const width = 1200, height = 1000;
+        
+        
+        // zoomTo([root.x - root.r, root.y - root.r, root.r * 2]);
+
+        // function zoomTo(v) {
+        //     const k = width / v[2];
+
+        //     view = v;
+
+        //     node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+        //     node.attr("r", d => d.r * k);
+        // }
+        
+        // function zoom(d) {
+        //     console.log(d)
+        //     const focus0 = focus;
+
+        //     focus = d;
+
+        //     const transition = svg.transition()
+        //         .duration(d3.event.altKey ? 7500 : 750)
+        //         .tween("zoom", d => {
+        //             const i = d3.interpolateZoom(view, [focus.x - focus.r, focus.y - focus.r, focus.r * 2]);
+        //             return t => zoomTo(i(t));
+        //         });
+        // }
+
         setFilters(data)
+
+        testVisualization(data)
     </script>
 </body>

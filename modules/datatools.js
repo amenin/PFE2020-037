@@ -1,5 +1,7 @@
 const hal_uri = "http://sparql.archives-ouvertes.fr/sparql"
 
+const fs = require('fs');
+
 //--------------------------------
 // to send the query to the sparql endpoint
 function prepare(query) {
@@ -43,27 +45,27 @@ function getData (docs, queries, authors) {
         docs[author] = []
         console.log('author', author)
 
-        let res = sparqlQuery(query.replace('$uri', author).replace('$offset', offset), hal_uri)
-        try {
-            res = JSON.parse(res)
-        } catch (e) {
-            console.log(res)
-        }
+        let res = sendRequest(query.replace('$uri', author), offset)
         let bindings = res.results.bindings
 
         while ( bindings.length ) {
             docs[author] = docs[author].concat(bindings)
 
             offset += 10000;
-            res = sparqlQuery(query.replace('$uri', author).replace('$offset', offset), hal_uri)
-            try {
-                res = JSON.parse(res)
-                bindings = res.results.bindings
-            } catch (e) {
-                console.log(res)
-            }
+            res = sendRequest(query.replace('$uri', author), offset)
+            bindings = res.results.bindings
         }
     });
+}
+
+function sendRequest(query, offset){
+    let res = sparqlQuery(query.replace('$offset', offset), hal_uri)
+    try {
+        res = JSON.parse(res)
+    } catch (e) {
+        console.log(res)
+    }
+    return res;
 }
 
 function getCoauthorsList(docs) {
@@ -130,4 +132,83 @@ function transformData(data, authors_list) {
 
 }
 
-module.exports = { getData, sparqlQuery, getCoauthorsList, transformData }
+function getInstitutionHierarchy(queries) {
+    let query = queries.prefixes + queries.query_institutions;
+    let data = []   
+    let offset = 0;
+
+    let res = sendRequest(query, offset)
+    let bindings = res.results.bindings
+     
+    while ( bindings.length ) {
+        console.log(offset)
+        data = data.concat(bindings)
+
+        offset += 10000;
+        res = sendRequest(query, offset)
+        bindings = res.results ? res.results.bindings : []
+    }
+
+    try {
+        fs.writeFileSync('data/institution_data_raw.json', JSON.stringify(data, null, 4))
+    } catch (e) {
+        console.log(e)
+    }
+
+    console.log('Preparing hierarchy...')
+    // recover only the value of variables
+    data.forEach(d => {
+        Object.keys(d).forEach(key => {
+           d[key] = d[key].value; 
+        })
+    })
+
+    // normalize data
+    const hashTable = {};
+    data.forEach(d => {
+        let type = d.strType.split('/')
+        type = type[type.length - 1]
+        d.type = type;
+        d.key = d.strURI;
+        d.name = d.strName;
+        hashTable[d.country] = {}
+    })
+
+    data.forEach(d => hashTable[d.country][d.strURI] = {...d, children:[] } )
+
+    data.forEach(d => {
+        if ( d.parentURI && !Object.keys(hashTable[d.country]).includes(d.parentURI) ) {
+            let type = d.parentType.split('/')
+            type = type[type.length - 1]
+            d.type = type;
+            d.key = d.parentURI;
+            d.name = d.parentName;
+            hashTable[d.country][d.parentURI] = {...d, children:[] } 
+        }
+    })
+
+    data.forEach(d => {
+        if (d.parentURI) hashTable[d.country][d.parentURI].children.push(hashTable[d.country][d.strURI])
+    });
+
+    const dataTree = []
+    Object.keys(hashTable).forEach(country => {
+        let strData = []
+        Object.keys(hashTable[country]).forEach(str => {
+            strData.push(hashTable[country][str])
+        })
+        dataTree.push({
+            'name' : country,
+            'children': strData
+        })
+    })
+
+    try {
+        fs.writeFileSync('data/institution_data.json', JSON.stringify(dataTree, null, 4))
+    } catch (e) {
+        console.log(e)
+    }
+
+}
+
+module.exports = { getData, sparqlQuery, getCoauthorsList, transformData, getInstitutionHierarchy }
