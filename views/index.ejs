@@ -91,7 +91,9 @@
         // }
 
         setFilters(data)
-
-        testVisualization(data)
+        window.addEventListener('load', (event) => {
+            testVisualization(data)
+        });
+        
     </script>
 </body>

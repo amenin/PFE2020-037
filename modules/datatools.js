@@ -1,4 +1,5 @@
-const hal_uri = "http://sparql.archives-ouvertes.fr/sparql"
+const hal_uri = "http://sparql.archives-ouvertes.fr/sparql",
+    corese_url = "http://corese.inria.fr/sparql";
 
 const fs = require('fs');
 
@@ -45,21 +46,21 @@ function getData (docs, queries, authors) {
         docs[author] = []
         console.log('author', author)
 
-        let res = sendRequest(query.replace('$uri', author), offset)
+        let res = sendRequest(query.replace('$uri', author), offset, corese_url)
         let bindings = res.results.bindings
 
         while ( bindings.length ) {
             docs[author] = docs[author].concat(bindings)
 
             offset += 10000;
-            res = sendRequest(query.replace('$uri', author), offset)
+            res = sendRequest(query.replace('$uri', author), offset, corese_url)
             bindings = res.results.bindings
         }
     });
 }
 
-function sendRequest(query, offset){
-    let res = sparqlQuery(query.replace('$offset', offset), hal_uri)
+function sendRequest(query, offset, url){
+    let res = sparqlQuery(query.replace('$offset', offset), url)
     try {
         res = JSON.parse(res)
     } catch (e) {
@@ -95,7 +96,7 @@ function transformData(data, authors_list) {
         
         data[author.uri].forEach(item => {
             let authorsList = item.authorList.value.split('&&').map(d => { return {'name': d.split('&')[0], 'uri': d.split('&')[1]}}),
-                year = item.issuedAt.value.split('-')[0];
+                year = item.issued.value.split('-')[0];
 
             docs.push({
                 'authorURI': author.uri,
@@ -103,14 +104,14 @@ function transformData(data, authors_list) {
                 'docURI': item.doc.value,
                 'docTitle': item.title.value,
                 'versionOf': item.versionOf.value,
-                'pubDate': item.issuedAt.value,
+                'pubDate': item.issued.value,
                 'pubYear': year,
                 'lab': item.lab.value,
                 'labName': item.labName.value,
                 'docType': item.typeLabel.value,
                 'docTypeCode': item.typeCode.value,
                 'country': item.country.value,
-                'address': item.address.value,
+                'address': item.address ? item.address.value : '',
                 'citation': item.citation.value.replace(/--/g, ','),
                 'authorsList': authorsList,
                 'hal': item.hal.value
@@ -137,7 +138,7 @@ function getInstitutionHierarchy(queries) {
     let data = []   
     let offset = 0;
 
-    let res = sendRequest(query, offset)
+    let res = sendRequest(query, offset, hal_uri)
     let bindings = res.results.bindings
      
     while ( bindings.length ) {
@@ -145,7 +146,7 @@ function getInstitutionHierarchy(queries) {
         data = data.concat(bindings)
 
         offset += 10000;
-        res = sendRequest(query, offset)
+        res = sendRequest(query, offset, hal_uri)
         bindings = res.results ? res.results.bindings : []
     }
 

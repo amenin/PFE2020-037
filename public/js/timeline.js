@@ -17,11 +17,11 @@ class Timeline {
             'book': ['OUV', 'BOOK', 'COUV', 'DOUV'],
             'gray': ['MEM', 'MINUTES', 'OTHER', 'OTHERREPORT', 'REPACT', 'REPORT', 'SYNTHESE', 'NOTE', 'MEMLIC']
         }
-        this.symbol = {mainColor: '#ba5b5b', sndColor: '#e49b53', stroke: '#666666'}
+        this.symbol = {mainColor: '#dcdcdc', sndColor: '#7a7a7a', stroke: '#313131'}
     }
 
     loadData () {
-        var files = ['data/countries_fr.json', 'data/countries.geojson'];
+        var files = ['data/countries.json', 'data/countries.geojson'];
 
         Promise.all(files.map(url => d3.json(url)))
         .then(values => {
@@ -81,6 +81,9 @@ class Timeline {
         // this.width = this.width - this.margin.left - this.margin.right
         this.chart = { width: this.width - this.margin.left - this.margin.right, symbolSize : 15}
         
+        this.svg.append('g')
+            .attr('id', 'flag-pattern-group')
+
         this.mapGroup = this.svg.append('g')
             .attr('id', 'map-group')
             .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`); 
@@ -190,9 +193,9 @@ class Timeline {
             let maxHeight = d3.max(this.nestedDataPerYear, d => d.values.length) / 3
             maxHeight = 20 * maxHeight > 200 ? 20 * maxHeight : 200;
 
-            const authors = this.nestedDataPerAuthor.map(d => d.key)
+            this.authors = this.nestedDataPerAuthor.map(d => d.key)
 
-            this.chart.height =  maxHeight * authors.length
+            this.chart.height =  maxHeight * this.authors.length
 
             if (this.chart.height + 150 > this.height)
                 d3.select('div.vis').style('height', (this.chart.height + 150) + 'px');
@@ -208,7 +211,7 @@ class Timeline {
             this.xScale.domain(this.dates)
                 .range([0, this.chart.width])
     
-            this.yScale.domain(authors)
+            this.yScale.domain(this.authors)
                 .range([this.chart.height, 0])
 
             // group different countries, adresses and labs per document and author ///
@@ -226,11 +229,11 @@ class Timeline {
 
                     let countries = doc.values.map(d => d.country)
                     countries = countries.filter((d,i) => i === countries.indexOf(d))
-
+                   
                     let labs = doc.values.map(d => d.labName)
                     labs = labs.filter((d,i) => i === labs.indexOf(d))
 
-                    let docData = doc.values[0]
+                    let docData = JSON.parse(JSON.stringify(doc.values[0]))
                     docData.authorsList = docData.authorsList.map(d => d.name)
                     docData.address = addresses
                     docData.country = countries
@@ -239,12 +242,48 @@ class Timeline {
                 })
             })
 
+            this.setFlagPattern()
+
             resolve()
         });
 
         updateState.then(() => {
             this.draw()
         })
+    }
+
+    setFlagPattern(){
+        let patternWidth = 50,
+            patternHeight = 40;
+        this.svg.select('g#flag-pattern-group')
+            .selectAll('defs')
+            .data(this.selected_countries)
+            .join(
+                enter => enter.append('defs')
+                    .call(defs => defs.append("pattern")
+                        .attr("id", d => "flag_" + d.country)
+                        .attr("width", patternWidth)
+                        .attr("height", patternHeight)
+                        .attr("patternUnits", "userSpaceOnUse")
+                        .call(pattern => pattern.append('rect')
+                            .attr('width', patternWidth)
+                            .attr('height', patternHeight)
+                            .attr('fill', 'whitesmoke')
+                        )
+                        .call(pattern => pattern.append("svg:image")
+                            .attr("xlink:href", d => `flags/${d.alpha2}.svg`)
+                            .attr("width", patternWidth - 5)
+                            .attr("height", patternHeight - 5)
+                            .attr("x", 5)
+                            .attr("y", 2.5)
+                            .style('filter', 'blur(4px)')
+                            .style('opacity', '.9')
+                        )
+                    ),
+                update => update,
+                exit => exit.remove()
+            )
+
     }
 
     draw () { 
@@ -307,7 +346,7 @@ class Timeline {
                     .style('stroke-dasharray', 4)
                     .style('stroke', '#000')
 
-                this.chartGroup.selectAll('path.profile').style('opacity', e => d === e.key || targets.includes(e.key) ? .8 : .1)
+                this.chartGroup.selectAll('g.profile').style('opacity', e => d === e.author || targets.includes(e.author) ? .8 : .2)
 
                 let countries = []
                 this.data.docs.filter(e => e.authorsList.includes(d)).forEach(e => {
@@ -328,9 +367,9 @@ class Timeline {
                     .style('stroke-width', 1)
 
                 let symbolGroup = this.chartGroup.selectAll('g.symbol-group').style('opacity', 1)
-                symbolGroup.selectAll('.symbol').style('stroke-dasharray', 'none').style('stroke', 'none')//.style('stroke-width', 1)
+                symbolGroup.selectAll('.symbol').style('stroke-dasharray', 'none').style('stroke', this.symbol.stroke).style('stroke-width', 1)
                 
-                this.chartGroup.selectAll('path.profile').style('opacity', .5)
+                this.chartGroup.selectAll('g.profile').style('opacity', .8)
 
                 this.svg.select('g#map-group').selectAll('path').style('fill', d => this.getCountryColor(d))
                     
@@ -361,18 +400,29 @@ class Timeline {
             })
             .call(wrap, this.yScale.step()/2)
 
-        this.drawMap()
+        // this.drawMap()
         this.drawProfileWave()
         this.drawLinks()
         this.drawDocSymbols()
-       
+        // this.drawSpatialGlyphs()
        
     }
 
     drawSpatialGlyphs() {
-        console.log(this.nestedDataPerYear)
-        console.log(this.nestedDataPerCountry)
-        console.log(this.nestedDocsbyAuthor)
+
+        let nestedPerAuthorYearCountry = d3.nest()
+            .key(d => d.authorName)
+            .key(d => d.pubYear)
+            .key(d => typeof d.country == 'string' ? d.country : d.country[0])
+            .entries(this.data.docs)
+
+        console.log(nestedPerAuthorYearCountry)
+
+        // verufy whether there are dublons per country, like a person associated to multiple institutions for a single paper
+        // draw a glyph (pie chart) over each year to represent the amount of papers per country
+        // allow to click and to show a collaboration chart
+
+
     }
 
     drawDocSymbols() {
@@ -393,7 +443,7 @@ class Timeline {
                         .attr('width', this.chart.symbolSize)
                         .attr('height', this.chart.symbolSize)
                         .attr('fill', this.symbol.mainColor)
-                        .style('stroke', 'none')
+                        .style('stroke', this.symbol.stroke)
                         .classed('symbol rect', true)
                     ).call(g => g.filter(d => this.docTypes.book.includes(d.docTypeCode)) // whole books and editions
                         .selectAll('rect')
@@ -404,7 +454,7 @@ class Timeline {
                         .attr('width', this.chart.symbolSize * .75)
                         .attr('height', this.chart.symbolSize)
                         .attr('fill', this.symbol.sndColor)
-                        .style('stroke', 'none')
+                        .style('stroke', this.symbol.stroke)
                     ).call(g => g.filter(d => this.docTypes.journal.includes(d.docTypeCode)) // journals
                         .selectAll('rect')
                         .attr('height', this.chart.symbolSize * 1.5)
@@ -427,7 +477,7 @@ class Timeline {
                         .append('circle')
                         .attr('r', this.chart.symbolSize/2)
                         .attr('fill', this.symbol.mainColor)
-                        .style('stroke', 'none')
+                        .style('stroke', this.symbol.stroke)
                         .classed('symbol', true)
                     ).call(g => g.append('title')
                         .text(d => `${d.country.join(', ')}
@@ -468,7 +518,7 @@ class Timeline {
     
             }).on('mouseleave', d => {
                 if (!this.freeze_links) 
-                    symbolGroup.selectAll('.symbol').style('stroke', 'none')
+                    symbolGroup.selectAll('.symbol').style('stroke-width', 1).style('stroke', this.symbol.stroke)
                     
                     this.svg.select('g#map-group').selectAll('path').style('fill', d => this.getCountryColor(d))             
                 
@@ -519,7 +569,7 @@ class Timeline {
             return nestedItems.every(e => e.values.length == 1) ? 4 : 'none'
         }
 
-        let headLength = 4
+        let headLength = 6
         linksGroup.selectAll('g').data(this.data.links)
             .join(
                 enter => enter.append('g')
@@ -564,48 +614,56 @@ class Timeline {
         /// author group /////////
         const waveGroup = this.chartGroup.select('g#wave-group')
 
-        //// generate a list of values per year and author, containing even year without publications (this info does not come with the data from the server)
-        let nestedData = this.nestedDataPerAuthor.map(d => {
-            return {
-                'values': d3.nest().key(e => e.pubYear).entries(d.values),
-                'key': d.key
-            }
-        })
-
+        let countriesPerAuthor = {} 
         let completeDataPerYear = []
-        this.nestedDataPerAuthor.map(d => d.key).forEach(author => {
-            this.dates.forEach(year => {
-                if (!completeDataPerYear.some(x => x.key === year && x.authorName === author)){
-                    let res = nestedData.filter(d => d.key === author)[0].values.filter(d => d.key === year)
-                    res = res.length ? res[0].values.filter((d,i) => i === res[0].values.findIndex(e => e.docURI === d.docURI)) : []
+        this.authors.forEach(author => {
+            let authorCountries = this.data.docs.filter(d => d.authorName === author).map(d => d.country)
+            authorCountries = authorCountries.filter((d,i) => authorCountries.indexOf(d) === i)
+            countriesPerAuthor[author] = authorCountries
 
-                    let item = {
-                        'year': year,
-                        'author': author,
-                        'values': res,
-                    }
+            this.dates.forEach(year => {            
 
-                    item[author] = res.length
-
-                    completeDataPerYear.push(item)
+                let item = {
+                    'year': year,
+                    'author': author
                 }
-            })
 
+                authorCountries.forEach(country => {
+                    let res = this.data.docs.filter(d => d.authorName === author && d.pubYear === year && d.country === country)
+                    res = res.filter((d,i) => res.findIndex(e => e.docURI === d.docURI) === i)
+
+                    item[country] = res.length
+                    item.values = res;
+                })
+
+                completeDataPerYear.push(item)
+
+            })
         })
 
         const stack = d3.stack()
             .offset(d3.stackOffsetSilhouette)
 
-        const waveData = this.nestedDataPerAuthor.map(d => {
-            stack.keys([d.key])
-            return stack(completeDataPerYear.filter(e => e.author === d.key).sort((a,b) => +a.year - (+b.year)))[0]
+        let waveData = this.authors.map(author => {
+            const authorData = completeDataPerYear.filter(e => e.author === author)
+            
+            let keys = countriesPerAuthor[author]
+            stack.keys(keys)
+            return {
+                'author': author,
+                'data' : stack(authorData)
+            }
         })
 
         let min = 1000, max = -1000;
         waveData.forEach(d => {
-            d.forEach(e => {
-                if (min > e[0]) min = e[0];
-                if (max < e[1]) max = e[1];
+            d.data.forEach(item => {
+                item.forEach(e => {
+                    let min_e = d3.min(e),
+                        max_e = d3.max(e);
+                    if (min > min_e) min = min_e;
+                    if (max < max_e) max = max_e;
+                })
             })
         })
 
@@ -625,11 +683,13 @@ class Timeline {
             .data(waveData)
             .join(
                 enter => enter.append('g')
-                    .style('opacity', 0.5)
                     .classed('profile', true)
-                    .call(g => g.append('path')
-                        .datum(d => d)
-                        .style("fill", '#a3a3a3')
+                    .attr('opacity', .8)
+                    .call(g => g.selectAll('path')
+                        .data(d => d.data)
+                        .join('path')
+                        .attr("fill", d => `url(#flag_${d.key})`) 
+                        .attr('stroke', '#a3a3a3')
                         .attr("d", area)
                     ),
                 update => update.call(g => g.select('path').attr("d", area)),
@@ -643,15 +703,16 @@ class Timeline {
                 this.svg.select('g#map-group').selectAll('path')
                     .style('fill', e => visitedCountries.includes(e.properties.alpha3) ? this.getCountryColor(e) : "#f4f4f4")
 
+            
                 this.svg.selectAll('g.profile')
-                    .style('opacity', e => e.key === d.key ? .8 : .2)
+                    .style('opacity', e => e.author === d.author ? .8 : .2)
 
             }).on('mouseleave', d => {
                 if (this.freeze_links) return
 
                 this.svg.select('g#map-group').selectAll('path').style('fill', d => this.getCountryColor(d))
 
-                this.svg.selectAll('g.profile').style('opacity', .5)
+                this.svg.selectAll('g.profile').style('opacity', .8)
             })
             
     }
@@ -683,7 +744,6 @@ class Timeline {
         const gCountries = mapGroup.append('g')
             .attr('class', 'countries')
             .style('cursor', 'grab')
-        
         
         const gCountry = gCountries.selectAll('g')
             .data(this.world.features)
