@@ -1,3 +1,7 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 .header{
     background-color: whitesmoke;
     position: fixed;
@@ -6,7 +10,6 @@
     box-shadow: gray 5px;
     width: 100%;
     font-size: 14px;
-    font-family:Arial, Helvetica, sans-serif;
     height: 7%;
     z-index: 2;
 }

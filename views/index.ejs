@@ -52,9 +52,11 @@
     <div class="vis"></div>
 
     <script src="js/timeline.js"></script>
-    <script src="js/utils.js"></script>
+    
     <script>
         const data = <%- JSON.stringify(data) %>;
+        const timeline = new Timeline()
+
         console.log(data)
 
         // let france = data.institutions.filter(d => d.name === 'France')[0]
@@ -91,8 +93,10 @@
         //         });
         // }
 
-        setFilters(data)
+        
         window.addEventListener('load', (event) => {
+            timeline.init(data.doctypes)
+            setFilters(data)
             testVisualization(data)
         });
 
@@ -101,4 +105,5 @@
         }
         
     </script>
+    <script src="js/utils.js"></script>
 </body>

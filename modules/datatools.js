@@ -212,4 +212,22 @@ function getInstitutionHierarchy(queries) {
 
 }
 
-module.exports = { getData, sparqlQuery, getCoauthorsList, transformData, getInstitutionHierarchy }
+function getDocTypes(queries){
+    let query = queries.prefixes + queries.query_doctypes;
+    let res = sendRequest(query, 0, hal_uri)
+    let data = res.results.bindings
+
+    data.forEach(d => {
+        Object.keys(d).forEach(key => {
+           d[key] = d[key].value; 
+        })
+    })
+
+    try {
+        fs.writeFileSync('data/doctypes.json', JSON.stringify(data, null, 4))
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+module.exports = { getData, sparqlQuery, getCoauthorsList, transformData, getInstitutionHierarchy, getDocTypes }

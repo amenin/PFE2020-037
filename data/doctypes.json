@@ -1,0 +1,110 @@
+[
+    {
+        "code": "MAP",
+        "label": "Maps"
+    },
+    {
+        "code": "MEM",
+        "label": "Master thesis"
+    },
+    {
+        "code": "OTHER",
+        "label": "Other publications"
+    },
+    {
+        "code": "OTHERREPORT",
+        "label": "Other reports"
+    },
+    {
+        "code": "OUV",
+        "label": "Books"
+    },
+    {
+        "code": "PATENT",
+        "label": "Patents"
+    },
+    {
+        "code": "POSTER",
+        "label": "Poster communications"
+    },
+    {
+        "code": "PRESCONF",
+        "label": "Documents associated with scientific events"
+    },
+    {
+        "code": "REPACT",
+        "label": "Administrative Reports"
+    },
+    {
+        "code": "REPORT",
+        "label": "Reports"
+    },
+    {
+        "code": "SON",
+        "label": "Audios"
+    },
+    {
+        "code": "SYNTHESE",
+        "label": "Notes de synthèse"
+    },
+    {
+        "code": "ART",
+        "label": "Journal articles"
+    },
+    {
+        "code": "THESE",
+        "label": "Theses"
+    },
+    {
+        "code": "UNDEFINED",
+        "label": "Preprints, Working Papers, ..."
+    },
+    {
+        "code": "VIDEO",
+        "label": "Videos"
+    },
+    {
+        "code": "COMM",
+        "label": "Conference papers"
+    },
+    {
+        "code": "COUV",
+        "label": "Book sections"
+    },
+    {
+        "code": "DOUV",
+        "label": "Directions of work or proceedings"
+    },
+    {
+        "code": "HDR",
+        "label": "Habilitation à diriger des recherches"
+    },
+    {
+        "code": "IMG",
+        "label": "Photos"
+    },
+    {
+        "code": "NOTE",
+        "label": "Book reviews"
+    },
+    {
+        "code": "LECTURE",
+        "label": "Book reviews"
+    },
+    {
+        "code": "NOTE",
+        "label": "Lectures"
+    },
+    {
+        "code": "LECTURE",
+        "label": "Lectures"
+    },
+    {
+        "code": "ETABTHESE",
+        "label": "Thèse d'établissement"
+    },
+    {
+        "code": "MEMLIC",
+        "label": "typdoc_MEMLIC"
+    }
+]

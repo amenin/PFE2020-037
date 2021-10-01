@@ -13,6 +13,7 @@ const datafiletimeout = 1296000000;
 const datadir = 'data/';
 const datafile = {
     // 'institutions': datadir + 'institution_data.json',
+    'doctypes': datadir + 'doctypes.json',
     'authors': datadir + 'authors.json',
     'coauthors': datadir + 'coauthors.json'
 }
@@ -205,6 +206,8 @@ app.listen(port, () => {
         // datatools.getInstitutionHierarchy(queries)
         // fs.writeFileSync(filename, JSON.stringify(data, null, 4))
     // }
+
+    // datatools.getDocTypes(queries)
     //---------------------------------------------------------------------------------------
     console.log(`Server started at port ${port}.`)
 })

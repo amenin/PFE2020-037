@@ -1,9 +1,6 @@
 const protocol = window.location.protocol +'//';
 const hostname = window.location.host;
 
-const timeline = new Timeline()
-timeline.init()
-
 function setFilters(data) {
     let selected = arguments.length > 1 ? arguments[1] : null;
     

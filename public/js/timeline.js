@@ -6,21 +6,16 @@ class Timeline {
         this.svg = null
         this.width = null
         this.height = null
-        this.margin = { top: 100, right: 100, bottom: 100, left: 100 }
+        this.margin = { top: 20, right: 100, bottom: 100, left: 100 }
         this.data = null
         this.freeze_links = null
-        this.docTypes = {
-            'conf': ['COMM', 'POSTER', 'PRESCONF', 'UNDEFINED'],
-            'journal': ['ART'],
-            'diplome': ['ETABTHESE', 'THESE', 'HDR' ],
-            'art': ['MAP', 'PATENT', 'SON', 'VIDEO', 'IMG'],
-            'book': ['OUV', 'BOOK', 'COUV', 'DOUV'],
-            'gray': ['MEM', 'MINUTES', 'OTHER', 'OTHERREPORT', 'REPACT', 'REPORT', 'SYNTHESE', 'NOTE', 'MEMLIC']
-        }
+        
         this.symbol = {mainColor: '#dcdcdc', sndColor: '#7a7a7a', stroke: '#313131'}
     }
 
     loadData () {
+        
+
         var files = ['data/countries.json', 'data/countries.geojson'];
 
         Promise.all(files.map(url => d3.json(url)))
@@ -35,34 +30,37 @@ class Timeline {
         })
     }
 
-    init () {
+    init (doctypes) {
 
         this.loadData()
 
-        // const buttons = [{'icon': '🗘', 'row': 0, 'col': 0, 'value': 'reset', 'action': 'reset'},
-        //         {'icon': '+', 'row': 0, 'col': 1, 'value': 'plus', 'action': 'zoom'},
-        //         {'icon': '-', 'row': 0, 'col': 2, 'value': 'minus', 'action': 'zoom'},
-        //         {'icon': '>', 'row': 2.5, 'col': 2, 'value': 'right', 'action': 'pan'},
-        //         {'icon': '<', 'row': 2.5, 'col': 0, 'value': 'left', 'action': 'pan'},
-        //         {'icon': '>', 'row': 1.5, 'col': 1, 'value': 'up', 'action': 'pan'},
-        //         {'icon': '<', 'row': 3.5, 'col': 1, 'value': 'down', 'action': 'pan'}]
+        this.docTypes = [
+            {'name': 'Conference Paper', 'values': ['COMM', 'POSTER', 'PRESCONF', 'UNDEFINED']},
+            {'name': 'Journal Article', 'values': ['ART']},
+            {'name': 'Diploma', 'values': ['ETABTHESE', 'THESE', 'HDR' ]},
+            {'name': 'Artwork', 'values': ['MAP', 'PATENT', 'SON', 'VIDEO', 'IMG']},
+            {'name': 'Book', 'values': ['OUV', 'COUV', 'DOUV']},
+            {'name': 'Gray Area', 'values': ['MEM', 'OTHER', 'OTHERREPORT', 'REPACT', 'REPORT', 'SYNTHESE', 'NOTE', 'MEMLIC']}
+        ]
+        this.docTypeColor = d3.scaleOrdinal()   
+            .domain(this.docTypes.map(d => d.name))
+            .range(['#215f92','#4c87a3','#88adb4','#9ecfb6','#96c782','#aeb640'])
+
+        this.docTypes.forEach(d => {
+            d.values = d.values.map(e => {
+                return doctypes.filter(x => x.code === e)[0]
+            })
+        })
         
         const div = d3.select('div.vis')
-        this.width = div.node().clientWidth;
-        this.height = div.node().clientHeight;
-        this.svg = div.append('svg')
 
-        // div.append('div')
-        //     .classed('zoom-div', true)
-        //     .selectAll('button.zoom-control')
-        //     .data(buttons)
-        //     .enter()
-        //         .append('button')
-        //         .style('left', d => 10 + d.col * 35 + 'px')
-        //         .style('top', d => 5 + d.row * 25 + 'px')
-        //         .classed('zoom-control', true)
-        //         .style('transform', d => ['up', 'down'].includes(d.value) ? 'rotate(-90deg)' : null)
-        //         .text(d => d.icon)           
+        this.width = div.node().clientWidth;
+        this.height = div.node().clientHeight;   
+        this.legendHeight = 40
+
+        this.drawLegend()
+
+        this.svg = div.append('svg').attr('transform', `translate(0, ${this.legendHeight})`)     
 
         div.append('div')
             .classed('context-menu', true)
@@ -121,10 +119,43 @@ class Timeline {
                 d3.selectAll('div.zoom-div').style('display', 'none')
         })
 
-        this.docTypeColor = d3.scaleOrdinal()   
-            .domain(Object.keys(this.docTypes))
-            .range(['#215f92','#4c87a3','#88adb4','#9ecfb6','#96c782','#aeb640'])
+        
 
+    }
+
+    drawLegend(){
+        let legendSvg = d3.select('div.vis')
+            .append('svg')
+            .attr('id', 'color-legend')
+            .attr('width', this.width)
+            .attr('height', this.legendHeight)
+
+        legendSvg.append('text')
+            .text('Types of Documents')
+            .attr('transform', `translate(10, 35)`)
+
+        let legendGroup = legendSvg.selectAll('g')
+            .data(this.docTypes)
+            .enter()
+                .append('g')
+                .attr('transform', `translate(20, 20)`)
+                .style('cursor', 'help')
+
+        let radius = 10, textSize = 170
+    
+        legendGroup.append('circle')
+            .attr('cx', (_,i) => textSize + i * textSize)
+            .attr('cy', 10)         
+            .attr('r', radius)
+            .attr('fill', d => this.docTypeColor(d.name)) 
+            
+        legendGroup.append('text')
+            .attr('x', (_,i) => textSize + radius * 2 + i * textSize)
+            .attr('y', 15)
+            .text(d => d.name)
+
+        legendGroup.append('title')
+            .text(d => 'This category includes: ' + d.values.map(d => d.label)).join(' , ')
     }
 
     clear() {
@@ -346,15 +377,13 @@ class Timeline {
                 let targets = this.data.links.filter(e => e.source.name === d || e.target.name === d)
                     .map(e => e.target.name === d ? e.source.name : e.target.name)
                 
-                    console.log(targets)
                     // verify this part of the code, is not working to identify whether both symbols contain both authors 
-                let hasAuthor = e => { return e.authorsList.some(x => x.name === d) && e.authorsList.some(a => targets.includes(a.name)) }
-                let uncertainDoc = e => { return this.groupedDocs.filter(a => a.docURI === e.docURI).length == 1 }
+                let hasAuthor = e => { return e.authorsList.includes(d) && e.authorsList.some(a => targets.includes(a)) }
+                let uncertainDoc = e => { return this.groupedDocs.filter(a => a.docURI === e.docURI).length === 1 }
 
-                let symbolGroup = this.chartGroup.selectAll('.doc')
+                this.chartGroup.selectAll('.doc')
                     .style('opacity', e => hasAuthor(e) ? 1 : .2)
-    
-                symbolGroup.style('stroke-width', e => hasAuthor(e) ? 2 : 1)
+                    .style('stroke-width', e => hasAuthor(e) ? 2 : 1)
                     .style('stroke-dasharray', e => hasAuthor(e) && uncertainDoc(e) ? 4 : 'none')
                     .style('stroke', e => hasAuthor(e) && uncertainDoc(e) ? '#000' : 'none')
 
@@ -486,7 +515,10 @@ class Timeline {
                             .join('circle')
                             .classed('doc', true)
                             .attr('r', minRadius)
-                            .attr('fill', d => this.docTypeColor(Object.keys(this.docTypes).find(key => this.docTypes[key].includes(d.docTypeCode))))
+                            .attr('fill', d => {
+                                let item = this.docTypes.find(e => e.values.some(x => x.code === d.docTypeCode))
+                                return this.docTypeColor(item.name)
+                            })
                             .attr('stroke', 'none')
                             .on('click', d => {
                                 window.open(d.hal)
@@ -503,7 +535,7 @@ class Timeline {
                                 this.svg.selectAll('.doc').style('stroke-width', 1).style('stroke', 'none')
                             })
                             .call(circle => circle.append('title')
-                                .text(d => `Publication Year: ${d.pubYear}\nPublication Title: ${d.docTitle}\nDocument Type: ${d.docType}\n\nBibliographic Citation: ${d.citation.split('&')[0]}\n\n--------------------\nAbout the author\nName: ${d.authorName}\nAffiliation(s): ${d.labName.join('\n\t\t\t')}\nCountry: ${d.country.join(', ')}\n\nClick to go to source`)
+                                .text(d => `About the publication\nIssued on ${d.pubYear}\nTitle: ${d.docTitle}\nType: ${d.docType}\n\nBibliographic Citation: ${d.citation.split('&')[0]}\n\n--------------------\nAbout the author\nName: ${d.authorName}\nAffiliation(s): ${d.labName.join('\n\t\t\t')}\nCountry: ${d.country.join(', ')}\n\nClick to go to source`)
                             )
                         )
                     ),
