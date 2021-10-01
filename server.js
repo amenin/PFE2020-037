@@ -12,7 +12,7 @@ const datatools = require('./modules/datatools')
 const datafiletimeout = 1296000000;
 const datadir = 'data/';
 const datafile = {
-    'institutions': datadir + 'institution_data.json',
+    // 'institutions': datadir + 'institution_data.json',
     'authors': datadir + 'authors.json',
     'coauthors': datadir + 'coauthors.json'
 }
