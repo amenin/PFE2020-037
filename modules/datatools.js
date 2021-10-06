@@ -90,13 +90,28 @@ function getCoauthorsList(docs) {
 
 function transformData(data, authors_list) {
     const docs = [],
-        links = [];
+        links = [],
+        trees = {};
+    let institutions = null;
+
+    try {
+        institutions = fs.readFileSync('data/institution_data.json')
+        institutions = JSON.parse(institutions)
+        
+    } catch(e) {
+        console.log(e)
+    }
 
     authors_list.forEach(author => {
         
         data[author.uri].forEach(item => {
             let authorsList = item.authorList.value.split('&&').map(d => { return {'name': d.split('&')[0], 'uri': d.split('&')[1]}}),
                 year = item.issued.value.split('-')[0];
+
+            if (!Object.keys(trees).includes(item.lab.value)) {
+                let res = filterTree(institutions.filter(d => d.name === item.country.value)[0].children, item.lab.value)
+                trees[item.lab.value] = res
+            }
 
             docs.push({
                 'authorURI': author.uri,
@@ -117,6 +132,7 @@ function transformData(data, authors_list) {
                 'hal': item.hal.value
             })
 
+
             authorsList.filter(d => authors_list.map(e => e.name).includes(d.name)).forEach(coauthor => {
                 if (coauthor.name === author.name) return
 
@@ -129,8 +145,26 @@ function transformData(data, authors_list) {
         })
     })
 
-    return {'docs': docs, 'links': links}
+    return {'docs': docs, 'links': links, 'trees': trees}
 
+}
+
+function filterTree(root, key) {
+    const getNodes = (result, object) => {
+        if (object.key === key) {
+            let copy = JSON.parse(JSON.stringify(object))
+            copy.children = []
+            result.push(copy);
+            return result;
+        }
+        if (Array.isArray(object.children)) {
+            const children = object.children.reduce(getNodes, []);
+            if (children.length) result.push({ ...object, children });
+        }
+        return result;
+    };
+
+    return root.reduce(getNodes, []);
 }
 
 function getInstitutionHierarchy(queries) {
@@ -138,7 +172,7 @@ function getInstitutionHierarchy(queries) {
     let data = []   
     let offset = 0;
 
-    let res = sendRequest(query, offset, hal_uri)
+    let res = sendRequest(query, offset, corese_url)
     let bindings = res.results.bindings
      
     while ( bindings.length ) {
@@ -146,7 +180,7 @@ function getInstitutionHierarchy(queries) {
         data = data.concat(bindings)
 
         offset += 10000;
-        res = sendRequest(query, offset, hal_uri)
+        res = sendRequest(query, offset, corese_url)
         bindings = res.results ? res.results.bindings : []
     }
 

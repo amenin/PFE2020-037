@@ -270,14 +270,18 @@ class Timeline {
                     let countries = doc.values.map(d => d.country)
                     countries = countries.filter((d,i) => i === countries.indexOf(d))
                    
-                    let labs = doc.values.map(d => d.labName)
-                    labs = labs.filter((d,i) => i === labs.indexOf(d))
+                    let labs_names = doc.values.map(d => d.labName)
+                    labs_names = labs_names.filter((d,i) => i === labs_names.indexOf(d))
+
+                    let labs_uris = doc.values.map(d => d.lab)
+                    labs_uris = labs_uris.filter((d,i) => i === labs_uris.indexOf(d))
 
                     let docData = JSON.parse(JSON.stringify(doc.values[0]))
                     docData.authorsList = docData.authorsList.map(d => d.name)
                     docData.address = addresses
                     docData.country = countries
-                    docData.labName = labs
+                    docData.labName = labs_names
+                    docData.lab = labs_uris
                     this.groupedDocs.push(docData)
                 })
             })
@@ -431,28 +435,89 @@ class Timeline {
 
         // this.drawMap()
         this.drawProfileWave()
-        this.drawEllipses()
-        this.drawLinks()
+        // this.drawEllipses()
+        // this.drawLinks()
         // this.drawDocSymbols()
         // this.drawSpatialGlyphs()
+        this.drawInstitutionPacks()
        
     }
 
-    drawSpatialGlyphs() {
+    drawInstitutionPacks() {
+        let authorGroup = this.chartGroup.selectAll('g.author')
 
-        let nestedPerAuthorYearCountry = d3.nest()
-            .key(d => d.authorName)
-            .key(d => d.pubYear)
-            .key(d => typeof d.country == 'string' ? d.country : d.country[0])
-            .entries(this.data.docs)
+        let colorScale = d3.scaleOrdinal(d3.schemeAccent)
 
-        console.log(nestedPerAuthorYearCountry)
+        const pack = d3.pack()
+            .size([this.xScale.bandwidth(), this.yScale.step() * .5])
+            .padding(3)
 
-        // verufy whether there are dublons per country, like a person associated to multiple institutions for a single paper
-        // draw a glyph (pie chart) over each year to represent the amount of papers per country
-        // allow to click and to show a collaboration chart
+        /// to-do: keep only the longest and unique paths to an institution
 
+        let paths = {}
+        Object.keys(this.data.trees).forEach(key => {
+            paths[key] = []
+            this.data.trees[key].forEach((d,i) => {
+                paths[key].push([])
+                let node = d
+                while (node) {
+                    paths[key][i].push(node.name)
+                    node = node.children.filter(e => e.key === key)[0]
+                }
+            })
+        })
 
+        console.log(paths)
+        console.log(this.groupedDocs)
+        let packGroups = authorGroup.selectAll('g.ellipses')
+            .data(this.groupedDocs)
+            .enter()
+                .append('g')
+                .classed('ellipses', true)
+                // .attr('transform', d => `translate(${this.xScale(d.pubYear)}, ${this.yScale(d.authorName) - this.yScale.step() / 4})`)
+
+        let maxRadius = 0
+        packGroups.selectAll('circle')
+            .data(e => {
+                let labData = []
+                
+                e.lab.forEach(lab => {
+                    labData = labData.concat(this.data.trees[lab])
+                })
+                // labData = labData.filter(d => d.children.length > 0 && !e.lab.includes(d.key))
+
+                const root = d3.hierarchy({'name': 'root', 'children': labData})
+                    .count(d => d.children.length)
+                    .sort((a,b) => b.value - a.value)
+        
+                pack(root);
+                return root.descendants()   
+            })
+            .enter()
+            .append('circle')
+                .attrs({
+                    cx: d => d.x,
+                    cy: d => d.y,
+                    r: d => { if (maxRadius < d.r) maxRadius = d.r; return d.r }
+                }) 
+                .attr('fill', d => colorScale(d.data.type))
+                .attrs(function(d) {
+                    let parentData = d3.select(this.parentNode).datum()
+                    let parentLab = parentData.labName === d.data.name 
+                    return {
+                        'stroke': parentLab ? '#000' : 'none',
+                        'stroke-width': parentLab ? 1 : 'none'
+                    }
+                })   
+                .append('title')
+                .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" -> ")}`)
+
+        /// place circles close to each other using force simulation //////////////        
+        d3.forceSimulation(this.groupedDocs)
+            .force("x", d3.forceX().strength(0.7).x(d => this.xScale(d.pubYear) + this.xScale.bandwidth() / 3))
+            .force("y", d3.forceY().strength(0.1).y(d => this.yScale(d.authorName) - this.yScale.step() / 4))
+            .force("collide", d3.forceCollide().strength(1).radius(maxRadius).iterations(32)) // Force that avoids circle overlapping
+            .on("tick", () => authorGroup.selectAll('g.ellipses').attr('transform', e => `translate(${e.x}, ${e.y})`))
     }
 
     drawEllipses() {
