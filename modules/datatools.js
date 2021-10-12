@@ -152,9 +152,9 @@ function transformData(data, authors_list) {
 function filterTree(root, key) {
     const getNodes = (result, object) => {
         if (object.key === key) {
-            let copy = JSON.parse(JSON.stringify(object))
-            copy.children = []
-            result.push(copy);
+            // let copy = JSON.parse(JSON.stringify(object))
+            // copy.children = []
+            result.push(object);
             return result;
         }
         if (Array.isArray(object.children)) {

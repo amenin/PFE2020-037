@@ -179,7 +179,7 @@ function hideLoading () {
 
 
 function testVisualization(data) {
-    let author = data.authors.filter(d => d.name === 'Enrico Formenti')[0]
+    let author = data.authors.filter(d => d.name === 'Eric Thierry')[0]
     let coauthors = data.coauthors[author.uri].splice(0,10)
 
     coauthors.concat(author)
@@ -203,3 +203,13 @@ function testVisualization(data) {
         alert(error);
     });
 }
+
+
+function getTicksDistance(scale, breaks) {
+    const spaces = []
+    for(let i=0; i < breaks.length - 1; i++){
+      spaces.push(Math.abs(scale(breaks[i+1]) - scale(breaks[i]) - scale.padding()))
+    }
+    spaces.push(spaces[spaces.length - 1])
+    return spaces;
+};

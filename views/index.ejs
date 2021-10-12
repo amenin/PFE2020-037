@@ -22,6 +22,9 @@
 
     <script src="lib/ss-jenks.js"></script>
     <script src="lib/d3-ellipse-collision.js"></script>
+    <script src="lib/fisheye.js"></script>
+    <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script>
+
     
 
     <title>Timeline Viz</title>
@@ -56,53 +59,12 @@
     <script>
         const data = <%- JSON.stringify(data) %>;
         const timeline = new Timeline()
-
-        console.log(data)
-
-        // let france = data.institutions.filter(d => d.name === 'France')[0]
-        // france.children = france.children.slice(0,100)
-        
-        // // france = france.filter((d,i) => france.indexOf(d) === i)
-        // console.log(france)
-
-        // const width = 1200, height = 1000;
-        
-        
-        // zoomTo([root.x - root.r, root.y - root.r, root.r * 2]);
-
-        // function zoomTo(v) {
-        //     const k = width / v[2];
-
-        //     view = v;
-
-        //     node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-        //     node.attr("r", d => d.r * k);
-        // }
-        
-        // function zoom(d) {
-        //     console.log(d)
-        //     const focus0 = focus;
-
-        //     focus = d;
-
-        //     const transition = svg.transition()
-        //         .duration(d3.event.altKey ? 7500 : 750)
-        //         .tween("zoom", d => {
-        //             const i = d3.interpolateZoom(view, [focus.x - focus.r, focus.y - focus.r, focus.r * 2]);
-        //             return t => zoomTo(i(t));
-        //         });
-        // }
-
         
         window.addEventListener('load', (event) => {
             timeline.init(data.doctypes)
             setFilters(data)
             testVisualization(data)
         });
-
-        function testEllipsePack() {
-
-        }
         
     </script>
     <script src="js/utils.js"></script>

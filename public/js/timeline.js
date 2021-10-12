@@ -1,3 +1,4 @@
+
 class Timeline {
     constructor () {
         this.country_codes = []
@@ -40,7 +41,7 @@ class Timeline {
             {'name': 'Diploma', 'values': ['ETABTHESE', 'THESE', 'HDR' ]},
             {'name': 'Artwork', 'values': ['MAP', 'PATENT', 'SON', 'VIDEO', 'IMG']},
             {'name': 'Book', 'values': ['OUV', 'COUV', 'DOUV']},
-            {'name': 'Gray Area', 'values': ['MEM', 'OTHER', 'OTHERREPORT', 'REPACT', 'REPORT', 'SYNTHESE', 'NOTE', 'MEMLIC']}
+            {'name': 'Gray Knowledge', 'values': ['MEM', 'OTHER', 'OTHERREPORT', 'REPACT', 'REPORT', 'SYNTHESE', 'NOTE', 'MEMLIC']}
         ]
         this.docTypeColor = d3.scaleOrdinal()   
             .domain(this.docTypes.map(d => d.name))
@@ -60,28 +61,25 @@ class Timeline {
 
         this.drawLegend()
 
-        this.svg = div.append('svg').attr('transform', `translate(0, ${this.legendHeight})`)     
+        this.svg = div.append('svg')
+            .attr('transform', `translate(0, ${this.legendHeight})`)
+            .attr('width', this.width)
+            .attr('height', this.height - this.legendHeight)     
 
         div.append('div')
             .classed('context-menu', true)
 
         //// define scales ////
-        this.xScale = d3.scaleBand()
-            .paddingInner(0.2);
-        
-        this.yScale = d3.scalePoint()
-            .padding(0.5)
+        this.xScale = fisheye.scale(d3.scalePoint)//.paddingInner(0.2)
+        this.yScale = fisheye.scale(d3.scalePoint) 
+
+        this.stack = d3.stack().offset(d3.stackOffsetSilhouette)
 
         this.countryColor = d3.scaleThreshold()
             .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
 
+        this.chart = { width: this.width - this.margin.left - this.margin.right, height: this.height - this.margin.top - this.margin.bottom - this.legendHeight, symbolSize : 15}
         
-        // this.width = this.width - this.margin.left - this.margin.right
-        this.chart = { width: this.width - this.margin.left - this.margin.right, symbolSize : 15}
-        
-        this.svg.append('g')
-            .attr('id', 'flag-pattern-group')
-
         this.mapGroup = this.svg.append('g')
             .attr('id', 'map-group')
             .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`); 
@@ -89,6 +87,9 @@ class Timeline {
         this.chartGroup = this.svg.append('g')
             .attr('id', 'group-chart')
             .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
+
+        this.svg.append('g')
+            .attr('id', 'flag-pattern-group')
 
         this.chartGroup.append('g')
             .attr('id', 'bottom-axis')
@@ -119,7 +120,11 @@ class Timeline {
                 d3.selectAll('div.zoom-div').style('display', 'none')
         })
 
-        
+        this.docRadius = 10
+        this.docsSimulation = d3.forceSimulation()
+            .force("x", d3.forceX().strength(0.7).x(d => this.xScale(d.pubYear)))
+            .force("y", d3.forceY().strength(0.1).y(d => this.yScale(d.authorName)))
+            .force("collide", d3.forceCollide().strength(1).radius(() => this.docRadius).iterations(32)) // Force that avoids circle overlapping
 
     }
 
@@ -166,7 +171,7 @@ class Timeline {
         console.log(data)
         this.data = data;
 
-        d3.selectAll('div.zoom-div').style('display', 'none')
+        // d3.selectAll('div.zoom-div').style('display', 'none')
 
         if (!Object.keys(data).length) return;
 
@@ -222,19 +227,18 @@ class Timeline {
                 .entries(this.data.docs)
 
             /// update the chart's height according to the number of authors and publications per year ///
-            let maxHeight = d3.max(this.nestedDataPerYear, d => d.values.length) / 3
-            maxHeight = 20 * maxHeight > 200 ? 20 * maxHeight : 200;
+            // let maxHeight = d3.max(this.nestedDataPerYear, d => d.values.length) / 3
+            // maxHeight = 20 * maxHeight > 200 ? 20 * maxHeight : 200;
 
             this.authors = this.nestedDataPerAuthor.map(d => d.key)
 
-            this.chart.height =  maxHeight * this.authors.length
+            // this.chart.height = this.authors.length * 20
 
-            if (this.chart.height + 150 > this.height)
-                d3.select('div.vis').style('height', (this.chart.height + 150) + 'px');
+            // if (this.chart.height + 150 > this.height)
+            //     d3.select('div.vis').style('height', (this.chart.height + 150) + 'px');
 
             // resize svg according to chart
-            this.svg.attr('width', this.width)
-                .attr('height', this.chart.height + 150)
+            
    
             this.chartGroup.selectAll('g.author')
                 .data(this.authors)
@@ -250,9 +254,11 @@ class Timeline {
             /// update scales' domain and range ///
             this.xScale.domain(this.dates)
                 .range([0, this.chart.width])
+                .padding(.2)
     
             this.yScale.domain(this.authors)
                 .range([this.chart.height, 0])
+                .padding(.5)
 
             // group different countries, adresses and labs per document and author ///
             this.groupedDocs = []
@@ -270,21 +276,20 @@ class Timeline {
                     let countries = doc.values.map(d => d.country)
                     countries = countries.filter((d,i) => i === countries.indexOf(d))
                    
-                    let labs_names = doc.values.map(d => d.labName)
-                    labs_names = labs_names.filter((d,i) => i === labs_names.indexOf(d))
-
-                    let labs_uris = doc.values.map(d => d.lab)
-                    labs_uris = labs_uris.filter((d,i) => i === labs_uris.indexOf(d))
+                    let labs = doc.values.map(d => { return {'name': d.labName, 'key': d.lab} } )
+                    labs = labs.filter((d,i) => i === labs.findIndex(e => e.key === d.key))
 
                     let docData = JSON.parse(JSON.stringify(doc.values[0]))
                     docData.authorsList = docData.authorsList.map(d => d.name)
                     docData.address = addresses
                     docData.country = countries
-                    docData.labName = labs_names
-                    docData.lab = labs_uris
+                    docData.lab = labs
                     this.groupedDocs.push(docData)
                 })
             })
+
+            this.prepareWaveData()
+            this.prepareLabPacks()
             this.setFlagPattern()
 
             resolve()
@@ -295,331 +300,8 @@ class Timeline {
         })
     }
 
-    setFlagPattern(){
-        let patternWidth = 30,
-            patternHeight = 20;
-        this.svg.select('g#flag-pattern-group')
-            .selectAll('defs')
-            .data(this.selected_countries)
-            .join(
-                enter => enter.append('defs')
-                    .call(defs => defs.append("pattern")
-                        .attr("id", d => "flag_" + d.country)
-                        .attr("width", patternWidth)
-                        .attr("height", patternHeight)
-                        .attr("patternUnits", "userSpaceOnUse")
-                        .call(pattern => pattern.append('rect')
-                            .attr('width', patternWidth)
-                            .attr('height', patternHeight)
-                            .attr('fill', 'whitesmoke')
-                        )
-                        .call(pattern => pattern.append("svg:image")
-                            .attr("xlink:href", d => `flags/${d.alpha2}.svg`)
-                            .attr("width", patternWidth - 2)
-                            .attr("height", patternHeight - 2)
-                            .attr("x", 5)
-                            .attr("y", 2.5)
-                            .style('filter', 'blur(1px)')
-                            .style('opacity', 1)
-                        )
-                    ),
-                update => update,
-                exit => exit.remove()
-            )
-
-    }
-
-    draw () { 
-        
-
-        // // create an array with name and uris of authors
-        // let authorsInfo = []
-        // authors.forEach(author => {
-        //     let uris = docs.filter(d => d.authorName === author).map(d => d.authorURI)
-        //     uris = uris.filter((d,i) => i === uris.indexOf(d))
-        //     authorsInfo.push({
-        //         'name': author,
-        //         'uri': uris
-        //     })            
-        // })
-       
-
-        //// draw axes
-
-        const xBottomAxis = d3.axisBottom()
-            .ticks(this.dates.length)
-            .tickFormat(d => d.toString())
-            .scale(this.xScale)
-        
-        const xTopAxis = d3.axisTop()
-            .ticks(this.dates.length)
-            .tickFormat(d => d.toString())
-            .scale(this.xScale)
-
-        const yAxis = d3.axisLeft()
-            .scale(this.yScale)
-
-        this.svg.select('g#bottom-axis').attr('transform', `translate(0, ${this.chart.height})`).call(xBottomAxis)
-        this.svg.select('g#top-axis').call(xTopAxis)       
-        this.leftAxis.call(yAxis) 
-        
-        // add interaction to left axis
-        this.leftAxis.selectAll(".tick text")
-            .style('font-weight', 'bold')
-            .style('font-size', '12px')
-            .attr("dx", "-1em")
-            .style('cursor', 'pointer')
-            .on('mouseenter', d => {
-                if (this.freeze_links) return;
-                
-                let linkElem = this.chartGroup.selectAll('g.link')
-                    .style('opacity', e => e.source.name === d || e.target.name === d ? 1 : .02)
-
-                linkElem.selectAll('line').style('stroke-width', 2)
-
-                // highlight documents within line of co-authors
-                let targets = this.data.links.filter(e => e.source.name === d || e.target.name === d)
-                    .map(e => e.target.name === d ? e.source.name : e.target.name)
-                
-                    // verify this part of the code, is not working to identify whether both symbols contain both authors 
-                let hasAuthor = e => { return e.authorsList.includes(d) && e.authorsList.some(a => targets.includes(a)) }
-                let uncertainDoc = e => { return this.groupedDocs.filter(a => a.docURI === e.docURI).length === 1 }
-
-                this.chartGroup.selectAll('.doc')
-                    .style('opacity', e => hasAuthor(e) ? 1 : .2)
-                    .style('stroke-width', e => hasAuthor(e) ? 2 : 1)
-                    .style('stroke-dasharray', e => hasAuthor(e) && uncertainDoc(e) ? 4 : 'none')
-                    .style('stroke', e => hasAuthor(e) && uncertainDoc(e) ? '#000' : 'none')
-
-                this.chartGroup.selectAll('g.author').style('opacity', e => d === e || targets.includes(e) ? 1 : .2)
-
-            })
-            .on('mouseleave', () => {
-                if (this.freeze_links) return;
-                this.chartGroup.selectAll('g.link')
-                    .style('opacity', 1)
-                    .selectAll('line')
-                    .style('stroke-width', 1)
-
-                let symbolGroup = this.chartGroup.selectAll('.doc').style('opacity', 1)
-                symbolGroup.style('stroke-dasharray', 'none').style('stroke', 'none').style('stroke-width', 1)
-                
-                this.chartGroup.selectAll('g.author').style('opacity', 1)
-                    
-            })
-            .on('click', d => {
-                if (this.freeze_links && this.freeze_links != d) return;
-
-                this.freeze_links = d === this.freeze_links ? null : d;
-                
-                this.leftAxis.selectAll('.tick text').style('color', d => this.freeze_links === d ? '#b20000' : '#000')
-            })
-            .on('contextmenu', d => {
-                d3.event.preventDefault()
-                const x = d3.event.layerX,
-                    y = d3.event.layerY
-
-                d3.select('div.context-menu')
-                    .style('left', x + 'px')
-                    .style('top', y + 'px')
-                    .style('display', 'block')
-                    .html(`Fetch Data and Focus on ${d}`)
-                    .on('click', function() {
-                        // const author_data = authorsInfo.filter(e => e.name === d)[0]
-                        // author_data.uri = author_data.uri[0]
-                        // fetchData(author_data)
-                        // d3.select(this).style('display', 'none')
-                    })
-            })
-            .call(wrap, this.yScale.step()/2)
-
-        // this.drawMap()
-        this.drawProfileWave()
-        // this.drawEllipses()
-        // this.drawLinks()
-        // this.drawDocSymbols()
-        // this.drawSpatialGlyphs()
-        this.drawInstitutionPacks()
-       
-    }
-
-    drawInstitutionPacks() {
-        let authorGroup = this.chartGroup.selectAll('g.author')
-
-        let colorScale = d3.scaleOrdinal(d3.schemeAccent)
-
-        const pack = d3.pack()
-            .size([this.xScale.bandwidth(), this.yScale.step() * .5])
-            .padding(3)
-
-        /// to-do: keep only the longest and unique paths to an institution
-
-        let paths = {}
-        Object.keys(this.data.trees).forEach(key => {
-            paths[key] = []
-            this.data.trees[key].forEach((d,i) => {
-                paths[key].push([])
-                let node = d
-                while (node) {
-                    paths[key][i].push(node.name)
-                    node = node.children.filter(e => e.key === key)[0]
-                }
-            })
-        })
-
-        console.log(paths)
-        console.log(this.groupedDocs)
-        let packGroups = authorGroup.selectAll('g.ellipses')
-            .data(this.groupedDocs)
-            .enter()
-                .append('g')
-                .classed('ellipses', true)
-                // .attr('transform', d => `translate(${this.xScale(d.pubYear)}, ${this.yScale(d.authorName) - this.yScale.step() / 4})`)
-
-        let maxRadius = 0
-        packGroups.selectAll('circle')
-            .data(e => {
-                let labData = []
-                
-                e.lab.forEach(lab => {
-                    labData = labData.concat(this.data.trees[lab])
-                })
-                // labData = labData.filter(d => d.children.length > 0 && !e.lab.includes(d.key))
-
-                const root = d3.hierarchy({'name': 'root', 'children': labData})
-                    .count(d => d.children.length)
-                    .sort((a,b) => b.value - a.value)
-        
-                pack(root);
-                return root.descendants()   
-            })
-            .enter()
-            .append('circle')
-                .attrs({
-                    cx: d => d.x,
-                    cy: d => d.y,
-                    r: d => { if (maxRadius < d.r) maxRadius = d.r; return d.r }
-                }) 
-                .attr('fill', d => colorScale(d.data.type))
-                .attrs(function(d) {
-                    let parentData = d3.select(this.parentNode).datum()
-                    let parentLab = parentData.labName === d.data.name 
-                    return {
-                        'stroke': parentLab ? '#000' : 'none',
-                        'stroke-width': parentLab ? 1 : 'none'
-                    }
-                })   
-                .append('title')
-                .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" -> ")}`)
-
-        /// place circles close to each other using force simulation //////////////        
-        d3.forceSimulation(this.groupedDocs)
-            .force("x", d3.forceX().strength(0.7).x(d => this.xScale(d.pubYear) + this.xScale.bandwidth() / 3))
-            .force("y", d3.forceY().strength(0.1).y(d => this.yScale(d.authorName) - this.yScale.step() / 4))
-            .force("collide", d3.forceCollide().strength(1).radius(maxRadius).iterations(32)) // Force that avoids circle overlapping
-            .on("tick", () => authorGroup.selectAll('g.ellipses').attr('transform', e => `translate(${e.x}, ${e.y})`))
-    }
-
-    drawEllipses() {
-
-        let docs = [];
-
-        let ellipseData = this.authors.map(author => {
-
-            const authorData = this.countDocsPerYear.filter(e => e.author === author)
-            this.stack.keys([author])
-            let stackedData = this.stack(authorData)[0]
-
-            stackedData = stackedData.map(d => {
-                
-                let ry = this.yWave(d[1])
-                d.data.docs.forEach(doc => {
-                    doc.parentHeight = ry
-                })
-                docs = docs.concat(d.data.docs)
-
-                return {
-                    'ry': ry,
-                    'author': d.data.author,
-                    'parent': d.data.year,
-                    'docs': d.data.docs
-                }
-                
-            })
-            
-            return {
-                'author': author,
-                'data' : stackedData.filter(d => d.docs.length) 
-            }
-        }) 
-
-        let authorGroup = this.chartGroup.selectAll('g.author')
-
-        let minRadius = d3.min(docs.map(d => d.parentHeight)) * .9
-
-        authorGroup.selectAll('g.ellipses')
-            .data(d => ellipseData.filter(e => e.author === d))
-            .join(
-                enter => enter.append('g')
-                    .classed('ellipses', true)
-                    .call(g => g.selectAll('g')
-                        .data(d => d.data)
-                        .join('g')
-                        .call(g => g.append('ellipse')
-                            .attrs({
-                                cx: d => this.xScale(d.parent) + this.xScale.bandwidth()/2,
-                                cy: d => this.yScale(d.author),
-                                rx: this.xScale.bandwidth() * .4,
-                                ry: d => d.ry
-                            })
-                            .attr('fill', 'white')
-                            .attr('stroke', '#a3a3a3')
-                        )
-                        .call(g => g.selectAll('circle.doc')
-                            .data(d => d.docs)
-                            .join('circle')
-                            .classed('doc', true)
-                            .attr('r', minRadius)
-                            .attr('fill', d => {
-                                let item = this.docTypes.find(e => e.values.some(x => x.code === d.docTypeCode))
-                                return this.docTypeColor(item.name)
-                            })
-                            .attr('stroke', 'none')
-                            .on('click', d => {
-                                window.open(d.hal)
-                            })
-                            .on('mouseenter', d => {
-                                if (this.freeze_links)  return
-                                    // highlight documents within line of co-authors
-                                    this.svg.selectAll('.doc')
-                                        .filter(e => e.docURI === d.docURI)
-                                        .style('stroke', '#000')
-                                        .style('stroke-width', 2)
-                            }).on('mouseleave', d => {
-                                if (this.freeze_links)  return
-                                this.svg.selectAll('.doc').style('stroke-width', 1).style('stroke', 'none')
-                            })
-                            .call(circle => circle.append('title')
-                                .text(d => `About the publication\nIssued on ${d.pubYear}\nTitle: ${d.docTitle}\nType: ${d.docType}\n\nBibliographic Citation: ${d.citation.split('&')[0]}\n\n--------------------\nAbout the author\nName: ${d.authorName}\nAffiliation(s): ${d.labName.join('\n\t\t\t')}\nCountry: ${d.country.join(', ')}\n\nClick to go to source`)
-                            )
-                        )
-                    ),
-                update => update,
-                exit => exit.remove()
-            )
-        
-        /// place circles close to each other using force simulation //////////////        
-        d3.forceSimulation(docs)
-            .force("x", d3.forceX().strength(0.7).x(d => this.xScale(d.pubYear) + this.xScale.bandwidth()/2))
-            .force("y", d3.forceY().strength(0.1).y(d => this.yScale(d.authorName)))
-            .force("collide", d3.forceCollide().strength(1).radius(minRadius).iterations(32)) // Force that avoids circle overlapping
-            .on("tick", () => authorGroup.selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
-
-            
-    }
-
-    drawProfileWave() {
-        let countriesPerAuthor = {} 
+    prepareWaveData(){
+        this.countriesPerAuthor = {} 
         this.countDocsPerYear = []
         this.authors.forEach(author => {
 
@@ -627,7 +309,7 @@ class Timeline {
             this.groupedDocs.filter(d => d.authorName === author)
                 .forEach(d => authorCountries = authorCountries.concat(d.country))
             authorCountries = authorCountries.filter((d,i) => authorCountries.indexOf(d) === i)
-            countriesPerAuthor[author] = authorCountries
+            this.countriesPerAuthor[author] = authorCountries
 
             this.dates.forEach(year => {       
                 
@@ -653,13 +335,10 @@ class Timeline {
             })
         })
 
-        this.stack = d3.stack()
-            .offset(d3.stackOffsetSilhouette)
-
-        let waveData = this.authors.map(author => {
+        this.waveData = this.authors.map(author => {
             const authorData = this.countDocsPerYear.filter(e => e.author === author)
             
-            let keys = countriesPerAuthor[author]
+            let keys = this.countriesPerAuthor[author]
             this.stack.keys(keys)
             return {
                 'author': author,
@@ -668,7 +347,7 @@ class Timeline {
         })
 
         let min = 1000, max = -1000;
-        waveData.forEach(d => {
+        this.waveData.forEach(d => {
             d.data.forEach(item => {
                 item.forEach(e => {
                     let min_e = d3.min(e),
@@ -681,18 +360,487 @@ class Timeline {
 
         this.yWave = d3.scaleLinear()
             .domain([min, max])
-            .range([-this.yScale.step() * .5, this.yScale.step() *.5]);
+    }
+
+    prepareLabPacks(){
+        function isParent(foundkey, nodes, key){
+            if ( !nodes || !nodes.length) return foundkey;
+
+            foundkey = foundkey || nodes.some(d => d.key === key) 
+            nodes.forEach(node => foundkey = isParent(foundkey, node.children, key))
+            return foundkey
+        }
+
+        const _this = this;
+        function pushNode(node, key) {
+            let relation = isParent(false, node.children, key) ? "parent" : (node.key === key ? "target" : "children")
+            if (!_this.packedLabData[key].some(e => e.key === node.key && e.relation === relation)) {
+                node.relation = relation
+                node.children = []
+                _this.packedLabData[key].push(node)
+            }
+        }
+
+        this.packedLabData = {}
+        Object.keys(this.data.trees).forEach(key => {
+            this.packedLabData[key] = []
+            this.data.trees[key].forEach((d,i) => {
+                pushNode(JSON.parse(JSON.stringify(d)), key)
+
+                let children = d.children
+                while ( children ) {
+                    children.forEach(node => pushNode(JSON.parse(JSON.stringify(node)), key))
+                    children = children.children
+                }
+            })
+        })
+    }
+
+    setFlagPattern(){
+        let patternWidth = 30,
+            patternHeight = 20;
+
+        this.svg.select('g#flag-pattern-group')
+            .selectAll('defs')
+            .data(this.selected_countries)
+            .join(
+                enter => enter.append('defs')
+                    .call(defs => defs.append("pattern")
+                        .attr("id", d => "flag_" + d.country)
+                        .attr("width", patternWidth)
+                        .attr("height", patternHeight)
+                        .attr("patternUnits", "userSpaceOnUse")
+                        .attr('patternTransform', `translate(480,400) scale(1,1)`)
+                        .call(pattern => pattern.append('rect')
+                            .attr('width', patternWidth)
+                            .attr('height', patternHeight)
+                            .attr('fill', 'whitesmoke')
+                        )
+                        .call(pattern => pattern.append("svg:image")
+                            .attr("xlink:href", d => `flags/${d.alpha2}.svg`)
+                            .attr("width", patternWidth)
+                            .attr("height", patternHeight)
+                            // .attr("x", 5)
+                            // .attr("y", 2.5)
+                            .style('filter', 'blur(1px)')
+                            .style('opacity', 1)
+                        )
+                    ),
+                update => update
+                    .call(defs => defs.select('pattern')
+                        .attr("id", d => "flag_" + d.country))
+                    .call(pattern => pattern.select('svg:image')
+                        .attr("xlink:href", d => `flags/${d.alpha2}.svg`)
+                    ),
+                exit => exit.remove()
+            )
+
+    }
+
+    draw () { 
         
-        this.profileArea = d3.area()
-            .x(d =>  this.xScale.bandwidth()/ 2 + this.xScale(d.data.year))
-            .y0(d => this.yScale(d.data.author) + this.yWave(d[0]))
-            .y1(d => this.yScale(d.data.author) + this.yWave(d[1]))
+
+        // // create an array with name and uris of authors
+        // let authorsInfo = []
+        // authors.forEach(author => {
+        //     let uris = docs.filter(d => d.authorName === author).map(d => d.authorURI)
+        //     uris = uris.filter((d,i) => i === uris.indexOf(d))
+        //     authorsInfo.push({
+        //         'name': author,
+        //         'uri': uris
+        //     })            
+        // })
+       
+
+        //// draw axes
+
+        const handleFisheye = d => {
+            // console.log(this.parentNode.parentNode)
+            if (this.authors.includes(d)) {
+                this.yScale.distortion(this.yDistortionAt === d ? 0 : 5).focus(refYScale(d))
+                this.svg.select("g#left-axis").call(yAxis)
+                this.yTickDistances = getTicksDistance(this.yScale, this.authors)
+                this.yDistortionAt = this.yDistortionAt == d ? null : d
+            } else {
+                this.xScale.distortion(this.xDistortionAt === d ? 0 : 5).focus(refXScale(d))
+                this.svg.select("g#bottom-axis").call(xBottomAxis);
+                this.svg.select("g#top-axis").call(xTopAxis);
+                this.xTickDistances = getTicksDistance(this.xScale, this.dates)
+                this.xDistortionAt = this.xDistortionAt === d ? null : d
+            }
+            
+            this.drawProfileWave()
+            this.drawEllipses()
+            this.drawLinks()
+            
+            this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
+        }
+
+
+        const xBottomAxis = d3.axisBottom()
+            .ticks(this.dates.length)
+            .tickFormat(d => d.toString())
+            .scale(this.xScale)
+        
+        const xTopAxis = d3.axisTop()
+            .ticks(this.dates.length)
+            .tickFormat(d => d.toString())
+            .scale(this.xScale)
+
+        const yAxis = d3.axisLeft()
+            .scale(this.yScale)
+
+        this.xTickDistances = getTicksDistance(this.xScale, this.dates)
+        this.yTickDistances = getTicksDistance(this.yScale, this.authors)
+
+        this.svg.select('g#bottom-axis')
+            .attr('transform', `translate(0, ${this.chart.height})`)
+            .style('cursor', 'pointer')
+            .call(xBottomAxis)
+            .selectAll(".tick text")
+            .on('click', handleFisheye)
+
+        this.svg.select('g#top-axis')
+            .style('cursor', 'pointer')
+            .call(xTopAxis)       
+            .selectAll(".tick text")
+            .on('click', handleFisheye)
+
+        this.leftAxis
+            .call(yAxis)
+            .selectAll(".tick text")
+            .on('click', handleFisheye) 
+        
+    
+        // this.svg.on('mousemove', handleFisheye)
+            // .on('mouseout', handleFisheye)
+
+        let refYScale = d3.scalePoint().domain(this.authors).range([this.chart.height, 0])
+        let refXScale = d3.scalePoint().domain(this.dates).range([0, this.chart.width])
+
+        this.yDistortionAt = null 
+        this.xDistortionAt = null
+
+        
+        
+        // add interaction to left axis
+        this.leftAxis.selectAll(".tick text")
+            .style('font-weight', 'bold')
+            .style('font-size', '12px')
+            .attr("dx", "-1em")
+            .style('cursor', 'pointer')
+            // .on('mouseenter', d => {
+            //     if (this.freeze_links) return;
+                
+            //     let linkElem = this.chartGroup.selectAll('g.link')
+            //         .style('opacity', e => e.source.name === d || e.target.name === d ? 1 : .02)
+
+            //     linkElem.selectAll('line').style('stroke-width', 2)
+
+            //     // highlight documents within line of co-authors
+            //     let targets = this.data.links.filter(e => e.source.name === d || e.target.name === d)
+            //         .map(e => e.target.name === d ? e.source.name : e.target.name)
+                
+            //         // verify this part of the code, is not working to identify whether both symbols contain both authors 
+            //     let hasAuthor = e => { return e.authorsList.includes(d) && e.authorsList.some(a => targets.includes(a)) }
+            //     let uncertainDoc = e => { return this.groupedDocs.filter(a => a.docURI === e.docURI).length === 1 }
+
+            //     this.chartGroup.selectAll('.doc')
+            //         .style('opacity', e => hasAuthor(e) ? 1 : .2)
+            //         .style('stroke-width', e => hasAuthor(e) ? 2 : 1)
+            //         .style('stroke-dasharray', e => hasAuthor(e) && uncertainDoc(e) ? 4 : 'none')
+            //         .style('stroke', e => hasAuthor(e) && uncertainDoc(e) ? '#000' : 'none')
+
+            //     this.chartGroup.selectAll('g.author').style('opacity', e => d === e || targets.includes(e) ? 1 : .2)
+
+            // })
+            // .on('mouseleave', () => {
+            //     if (this.freeze_links) return;
+            //     this.chartGroup.selectAll('g.link')
+            //         .style('opacity', 1)
+            //         .selectAll('line')
+            //         .style('stroke-width', 1)
+
+            //     let symbolGroup = this.chartGroup.selectAll('.doc').style('opacity', 1)
+            //     symbolGroup.style('stroke-dasharray', 'none').style('stroke', 'none').style('stroke-width', 1)
+                
+            //     this.chartGroup.selectAll('g.author').style('opacity', 1)
+                    
+            // })
+            // .on('click', d => {
+            //     if (this.freeze_links && this.freeze_links != d) return;
+
+            //     this.freeze_links = d === this.freeze_links ? null : d;
+                
+            //     this.leftAxis.selectAll('.tick text').style('color', d => this.freeze_links === d ? '#b20000' : '#000')
+            // })
+            .on('contextmenu', d => {
+                d3.event.preventDefault()
+                const x = d3.event.layerX,
+                    y = d3.event.layerY
+
+                d3.select('div.context-menu')
+                    .style('left', x + 'px')
+                    .style('top', y + 'px')
+                    .style('display', 'block')
+                    .html(`Fetch Data and Focus on ${d}`)
+                    .on('click', function() {
+                        // const author_data = authorsInfo.filter(e => e.name === d)[0]
+                        // author_data.uri = author_data.uri[0]
+                        // fetchData(author_data)
+                        // d3.select(this).style('display', 'none')
+                    })
+            })
+            .call(wrap, d => this.getYScaleStep(d) / 2)
+
+        // this.drawMap()
+        this.drawProfileWave()
+        this.drawEllipses()
+        this.drawLinks()
+        // this.drawDocSymbols()
+        // this.drawSpatialGlyphs()
+        // this.drawInstitutionPacks2()
+
+        this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
+       
+        
+
+    }
+
+    getXScaleStep(value) {
+        // return this.xScale.step()
+        return this.xTickDistances[this.dates.indexOf(value)]
+    }
+
+    getYScaleStep(value) {
+        // return this.yScale.step()
+        return this.yTickDistances[this.authors.indexOf(value)]
+    }
+
+    drawEllipses() {
+
+        let docs = [];
+
+        let ellipseData = this.authors.map((author,i) => {
+
+            const authorData = this.countDocsPerYear.filter(e => e.author === author)
+            this.stack.keys([author])
+            let stackedData = this.stack(authorData)[0]
+
+            let height = this.yTickDistances[i] / 2
+            this.yWave.range([-height, height]);
+
+            stackedData = stackedData.map(d => {
+                let ry = this.yWave(d[1])
+                d.data.docs.forEach(doc => {
+                    doc.parentHeight = ry
+                })
+                docs = docs.concat(d.data.docs)
+
+                return {
+                    'ry': ry,
+                    'author': d.data.author,
+                    'parent': d.data.year,
+                    'docs': d.data.docs
+                }
+                
+            })
+            
+            return {
+                'author': author,
+                'data' : stackedData.filter(d => d.docs.length) 
+            }
+        }) 
+
+        const ellipseAttrs = {
+            cx: d => this.xScale(d.parent),
+            cy: d => this.yScale(d.author),
+            rx: d => this.getXScaleStep(d.parent) * .5,
+            ry: d => d.ry
+        }
+
+        let authorGroup = this.chartGroup.selectAll('g.author')
+        this.docRadius = d3.min(this.yDistortionAt ? docs.filter(d => d.authorName === this.yDistortionAt).map(d => d.parentHeight) : docs.map(d => d.parentHeight)) * .9
+        let _this = this;
+        // draw one group per author
+        let ellipseGroup = authorGroup.selectAll('g.ellipses')
+            .data(d => {
+                let data = ellipseData.filter(e => e.author === d)
+                return !this.yDistortionAt ? data : (this.yDistortionAt === d ? data : [])
+            })
+            .join(
+                enter => enter.append('g')
+                    .classed('ellipses', true),
+                update => update,
+                exit => exit.remove()
+            )
+        
+        // draw one group and one ellipse per year
+        let docsGroup = ellipseGroup.selectAll('g')
+            .data(d => d.data || [])
+            .join(
+                enter => enter.append('g')    
+                    .call(g => g.append('ellipse')
+                        .attr('fill', 'white')
+                        .attr('stroke', '#a3a3a3')
+                        .attrs(ellipseAttrs)
+                    ),
+                update => update.call(g => g.select('ellipse').attrs(ellipseAttrs)),
+                exit => exit.remove()
+            )
+            .on('dblclick', function(d) {
+                if (!d.visibleLabPack) return
+                let selection = d3.select(this.parentNode)
+                selection.selectAll('.labpack').transition().duration(500).style('opacity', 0).style('display', 'none')
+                selection.selectAll('circle.doc').transition().duration(500).style('opacity', 1).style('display', 'block')
+                selection.selectAll('title.doctitle').remove()
+                d.visibleLabPack = false
+            })
+
+        const docInfo = d => `About the publication\nIssued on ${d.pubYear}\nTitle: ${d.docTitle}\nType: ${d.docType}\n\nBibliographic Citation: ${d.citation.split('&')[0]}   \n\n--------------------\nAbout the author\nName: ${d.authorName}\nAffiliation(s): ${d.lab.map(lab => lab.name).join('\n\t\t\t')}\nCountry: ${d.country.join(', ')}\n\nClick to go to source`
+        
+        const docFill = d => {
+            let item = this.docTypes.find(e => e.values.some(x => x.code === d.docTypeCode))
+            return this.docTypeColor(item.name)
+        }
+
+        // draw the documents inside each ellipse
+        docsGroup.selectAll('circle.doc')
+            .data(d => d.docs)
+            .join(
+                enter => enter.append('circle')
+                    .attr('stroke', 'none')
+                    .classed('doc', true)
+                    .attr('fill', docFill)
+                    .attr('r', this.docRadius)
+                    .call(circle => circle.append('title').text(docInfo)),
+                update => update.attr('fill', docFill).attr('r', this.docRadius)
+                    .call(circle => circle.select('title').text(docInfo)),
+                exit => exit.remove()        
+            )
+            .on('contextmenu', d => {
+                d3.event.preventDefault()
+                const x = d3.event.layerX,
+                    y = d3.event.layerY
+
+                d3.select('div.context-menu')
+                    .style('left', x + 'px')
+                    .style('top', y + 'px')
+                    .style('display', 'block')
+                    .html(`Go to Source`)
+                    .on('click', () => window.open(d.hal))
+            })
+            .on('dblclick', function(d) { 
+                let selection = d3.select(this.parentNode)
+                let parentData = selection.datum()
+                if (parentData.visibleLabPack) return
+                selection.selectAll('circle.doc').transition().duration(500).style('opacity', 0).style('display', 'none')
+                selection.selectAll('g.labpack').transition().duration(500).style('opacity', 1).style('display', 'block')
+                selection.selectAll('ellipse').append('title').classed('doctitle', true).text(`Zoomed at "${d.docTitle}"`)
+                parentData.visibleLabPack = true;
+                _this.drawInstitutionPacks(selection, d)
+            })
+            .on('mouseenter', d => {
+                if (this.freeze_links)  return
+                    // highlight documents within line of co-authors
+                    this.svg.selectAll('.doc')
+                        .filter(e => e.docURI === d.docURI)
+                        .style('stroke', '#000')
+                        .style('stroke-width', 2)
+            }).on('mouseleave', d => {
+                if (this.freeze_links)  return
+                this.svg.selectAll('.doc').style('stroke-width', 1).style('stroke', 'none')
+            })
+          
+        
+        /// place circles close to each other using force simulation //////////////        
+        this.docsSimulation.force('collide').initialize(docs)
+        this.docsSimulation.nodes(docs).on("tick", () => this.chartGroup.selectAll('g.author').selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
+                        
+    }
+
+    drawInstitutionPacks(group, doc){
+        
+        let radius = this.getXScaleStep(doc.pubYear)
+        const pack = d3.pack()
+            .size([radius, radius])
+            .padding(3)
+
+        let colorScale = d3.scaleOrdinal(d3.schemeAccent)
+
+        let radiusScale = d3.scaleOrdinal()
+            .domain(['parent', 'target', 'children'])
+            .range([6, 15, 3])
+            
+        group.selectAll('g')
+            .data(doc.lab)
+            .join(
+                enter => enter.append('g')
+                    .classed('labpack', true)
+                    .call(g => g.selectAll('circle')
+                        .data(lab => {
+                            let labData = this.packedLabData[lab.key]
+                            const root = d3.hierarchy({"name": labData[0].country, "children": labData})
+                                // .count(d => d.children.length)
+                                .sum(d => radiusScale(d.relation))
+                                .sort((a,b) => b.value - a.value)
+
+                            pack(root)
+                            return root.descendants()
+                        })
+                        .join('circle')
+                            .attrs({
+                                cx: d => d.x,
+                                cy: d => d.y,
+                                r: d => d.r
+                            }) 
+                            .attr('fill', d => d.data.type ? colorScale(d.data.type) : `url(#flag_${d.data.name})`)
+                            .attr('stroke', function(d) {
+                                let parentData = d3.select(this.parentNode).datum()
+                                return parentData.key === d.data.key ? '#000' : 'none'
+                            })
+                            .call(circle => circle.append('title')
+                                .text(d => d.data.name + (d.data.type ? ' (' + d.data.type.replace('StructureType', '') + ')' : ''))),
+                        ),
+                update => update.call(g => g.selectAll('circle')
+                            .attr('fill', d => d.data.type ? colorScale(d.data.type) : `url(#flag_${d.data.name})`)
+                            .attr('stroke', function(d) {
+                                let parentData = d3.select(this.parentNode).datum()
+                                return parentData.key === d.data.key ? '#000' : 'none'
+                            })
+                            .call(circle => circle.select('title')
+                                .text(d => d.data.name + (d.data.type ? ' (' + d.data.type.replace('StructureType', '') + ')' : '')))),
+                exit => exit.remove()
+            )
+        
+        d3.forceSimulation(doc.lab)
+            .force("x", d3.forceX().strength(1).x(this.xScale(doc.pubYear) + this.getXScaleStep(doc.pubYear) * .3))
+            .force("y", d3.forceY().strength(.5).y(this.yScale(doc.authorName) - this.getYScaleStep(doc.authorName) * .07)) 
+            .force("collide", d3.forceCollide().strength(1).radius(radius * .5).iterations(32)) // Force that avoids circle overlapping
+            .on("tick", () => group.selectAll('g.labpack').attr('transform', e => `translate(${e.x}, ${e.y})`))    
+    }
+
+    drawProfileWave() {
+        
+        const _this = this;
+
+        let profileArea = d3.area()
+            .x(d => _this.xScale(d.data.year))
+            .y0(d => _this.yScale(d.data.author) + _this.yWave(d[0]))
+            .y1(d => _this.yScale(d.data.author) + _this.yWave(d[1]))
             .curve(d3.curveMonotoneX)
+
+        function setProfile(d) {
+            let parentData = d3.select(this.parentNode).datum()
+            let height = _this.getYScaleStep(parentData.author) / 2
+            _this.yWave.range([-height, height]);
+            return profileArea(d)
+        }
         
         /// wave ////////
         this.chartGroup.selectAll('g.author')
             .selectAll('g.profile')
-            .data(d => waveData.filter(e => e.author === d))
+            .data(d => this.waveData.filter(e => e.author === d))
             .join(
                 enter => enter.append('g')
                     .classed('profile', true)
@@ -702,9 +850,10 @@ class Timeline {
                         .join('path')
                         .attr('fill', '#f5f5f5')
                         .attr('stroke', '#a3a3a3')
-                        .attr("d", this.profileArea)
+                        .attr("d", setProfile)
                     ),
-                update => update.call(g => g.select('path').attr("d", this.profileArea)),
+                update => update.call(g => g.selectAll('path')
+                    .attr("d", setProfile)),
                 exit => exit.remove()
             )
             .on('mouseenter', d => {
@@ -733,131 +882,21 @@ class Timeline {
             
     }
 
-
-    drawDocSymbols() {
-        /// publications per author, year and type ///////////////
-        
-        // group of documents
-        const docsGroup = this.chartGroup.select('g#symbol-group')
-
-        // group per symbol (some symbols include more than one info)
-        const symbolGroup = docsGroup.selectAll('g')
-            .data(this.groupedDocs)
-            .join(
-                enter => enter.append('g')
-                    .classed('symbol-group', true)
-                    .style('cursor', 'pointer')
-                    .call(g => g.filter(d => !this.docTypes.gray.includes(d.docTypeCode)) // squares for conference, diplome and artistic/technical documents
-                        .append('rect')
-                        .attr('width', this.chart.symbolSize)
-                        .attr('height', this.chart.symbolSize)
-                        .attr('fill', this.symbol.mainColor)
-                        .style('stroke', this.symbol.stroke)
-                        .classed('symbol rect', true)
-                    ).call(g => g.filter(d => this.docTypes.book.includes(d.docTypeCode)) // whole books and editions
-                        .selectAll('rect')
-                        .attr('width', this.chart.symbolSize * 1.5) 
-                        .attr('fill', d => ['OUV', 'BOOK'].includes(d.docTypeCode) ? this.symbol.sndColor : this.symbol.mainColor)   
-                    ).call(g => g.filter(d => d.docTypeCode == 'COUV') /// book chapters
-                        .append('rect')
-                        .attr('width', this.chart.symbolSize * .75)
-                        .attr('height', this.chart.symbolSize)
-                        .attr('fill', this.symbol.sndColor)
-                        .style('stroke', this.symbol.stroke)
-                    ).call(g => g.filter(d => this.docTypes.journal.includes(d.docTypeCode)) // journals
-                        .selectAll('rect')
-                        .attr('height', this.chart.symbolSize * 1.5)
-                        .attr('fill', this.symbol.sndColor)
-                    ).call(g => g.filter(d => this.docTypes.diplome.includes(d.docTypeCode)) // D in the center of square representing diplomes    
-                        .append('text')
-                        .style('text-anchor', 'middle')
-                        .style('font-weight', 'bold')
-                        .attr('x', this.chart.symbolSize / 2)
-                        .attr('y', this.chart.symbolSize * .85)
-                        .text('D')
-                    ).call(g => g.filter(d => this.docTypes.art.includes(d.docTypeCode)) // colorful rectangle representing art
-                        .append('rect')
-                        .attr('height', this.chart.symbolSize * .3)
-                        .attr('width', this.chart.symbolSize * .9)
-                        .attr('fill', this.symbol.sndColor)
-                        .attr('y', this.chart.symbolSize * .65)
-                        .attr('x', this.chart.symbolSize * .05)
-                    ).call(g => g.filter(d => this.docTypes.gray.includes(d.docTypeCode))
-                        .append('circle')
-                        .attr('r', this.chart.symbolSize/2)
-                        .attr('fill', this.symbol.mainColor)
-                        .style('stroke', this.symbol.stroke)
-                        .classed('symbol', true)
-                    ).call(g => g.append('title')
-                        .text(d => `${d.country.join(', ')}
-                            Author of Reference: ${d.authorName}
-                            Affiliation(s): ${d.labName.join('\n\t\t\t')}\n
-                            Title: ${d.docTitle}
-                            Publication Year: ${d.pubYear}
-                            Document Type: ${d.docType}\n
-                            Bibliographic Citation: ${d.citation.split('&')[0]}\n
-                            Click to go to source`)
-                    ),
-                update => update,
-                exit => exit.remove()
-            )
-            .on('click', d => {
-                window.open(d.hal)
-            })
-            .on('mouseenter', d => {
-            
-                if (!this.freeze_links)  {
-                    // highlight documents within line of co-authors
-                    symbolGroup.selectAll('.symbol')
-                        .filter(e => e.docURI === d.docURI)
-                        .style('stroke', '#000')
-                        .style('stroke-width', 2)
-                }
-    
-                /// highlight countries of co-authors
-                let countries = []
-                this.groupedDocs.filter(e => e.docURI === d.docURI).forEach(e => {
-                    countries = countries.concat(e.country)
-                })
-    
-                let countriesCodes = this.selected_countries.filter(e => countries.includes(e.country)).map(e => e.alpha3)
-    
-                this.svg.select('g#map-group').selectAll('path')
-                    .style('fill', e => countriesCodes.includes(e.properties.alpha3) ? this.getCountryColor(e) : "#f4f4f4")
-    
-            }).on('mouseleave', d => {
-                if (!this.freeze_links) 
-                    symbolGroup.selectAll('.symbol').style('stroke-width', 1).style('stroke', this.symbol.stroke)
-                    
-                    this.svg.select('g#map-group').selectAll('path').style('fill', d => this.getCountryColor(d))             
-                
-            })
-
-        /// place circles close to each other using force simulation //////////////
-        d3.forceSimulation()
-            .force("x", d3.forceX().strength(0.4).x(d => this.xScale(d.pubYear)))
-            .force("y", d3.forceY().strength(0.2).y(d => this.yScale(d.authorName) - this.chart.symbolSize / 2))
-            .force("collide", d3.forceCollide().strength(.1).radius(this.chart.symbolSize).iterations(32)) // Force that avoids circle overlapping
-            .nodes(this.groupedDocs)
-            .on("tick", () => symbolGroup.attr('transform', e => `translate(${this.xScale.bandwidth()/2 + e.x}, ${e.y})`))
-        
-    }
-
     drawLinks() {
         ///------------------------------------------------------------------------------------------------------------------------------------
         //// co-authorship links ////////////
 
         const linksGroup = this.chartGroup.select('g#link-group')
 
-        const lineAttrs = { x1: d => this.xScale.bandwidth()/ 2 + this.xScale(d.year),
-            x2: d => this.xScale.bandwidth()/ 2 + this.xScale(d.year),
+        const lineAttrs = { x1: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year),
+            x2: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year),
             y1: d => this.yScale(d.source.name),
             y2: d => this.yScale(d.target.name)
         }
 
         const xTicks = {
-            x1: d => this.xScale.bandwidth()/ 2 + this.xScale(d.year) - headLength/2,
-            x2: d => this.xScale.bandwidth()/ 2 + this.xScale(d.year) + headLength/2     
+            x1: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year) - headLength/2,
+            x2: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year) + headLength/2     
         }
 
         const sourceYTicks = {
@@ -1014,60 +1053,180 @@ class Timeline {
             })            
     }
 
-    drawPack(element, data, width, height) {
-        const color = d3.scaleOrdinal(d3.schemeAccent);
+    drawInstitutionPacks2() {
+        let authorGroup = this.chartGroup.selectAll('g.author')
 
-        const svg = element.append('svg')
-            .attr('width', width)
-            .attr('height', height)
-            .attr("viewBox", [0, 0, width, height])
-            .style("font", "10px sans-serif")
-            .attr("text-anchor", "middle")
-            .on("click", (event) => zoom(event, root));
-
-        const root = d3.hierarchy(data)
-            .count(d => d.children.length)
-            .sort((a,b) => b.value - a.value)
+        let colorScale = d3.scaleOrdinal(d3.schemeAccent)
 
         const pack = d3.pack()
-            .size([width - 200, height])
+            .size([this.xScale.step(), this.yScale.step() * .5])
             .padding(3)
 
-        pack(root);      
-        console.log(root.descendants())  
+        /// to-do: keep only the longest and unique paths to an institution
 
-        let types = []
-        const node = svg.append("g")
-            .selectAll("circle")
-            .data(root.descendants())
-                .join("circle")
-                .attr("fill", d => {
-                    if (!types.includes(d.data.type))
-                        types.push(d.data.type)
-                    return color(d.data.type)
-                })
-                .attr("pointer-events", d => !d.children ? "none" : null)
-                .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-                .on("mouseout", function() { d3.select(this).attr("stroke", null); })
-                
-            node.append('title')
-                .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" -> ")}`)
-        
-        svg.append('rect')
-            .attr('fill', 'whitesmoke')
-            .attr('x', 1005)
-            .attr('y', 5)
-            .attr('width', 200)
-            .attr('height', 120)
 
-        svg.selectAll('text')
-            .data(types)
+
+        console.log(this.packedLabData)
+        console.log(this.groupedDocs)
+        let packGroups = authorGroup.selectAll('g.ellipses')
+            .data(this.data.docs)
             .enter()
-                .append('text')
-                .text(d => d)
-                .attr('x', 1010)
-                .attr('y', (_,i) => 20 * i + 10)
-                .attr('fill', d => color(d))
-                .attr('text-anchor', 'start')
+                .append('g')
+                .classed('ellipses', true)
+                // .attr('transform', d => `translate(${this.xScale(d.pubYear)}, ${this.yScale(d.authorName) - this.yScale.step() / 4})`)
+
+        let maxRadius = 0
+        packGroups.selectAll('circle')
+            .data(e => {
+                
+                let labData = this.packedLabData[e.lab]
+
+                // e.lab.forEach(lab => {
+                //     labData = labData.concat(packedData[lab])
+                // })
+                // labData = labData.filter(d => d.children.length > 0 && !e.lab.includes(d.key))
+                const root = d3.hierarchy({'name': e.docTitle, 'children': labData})
+                    .count(d => d.children.length)
+                    .sort((a,b) => b.value - a.value)
+        
+                pack(root);
+                return root.descendants()   
+            })
+            // .data(packedData)
+            .enter()
+            .append('circle')
+                .attrs({
+                    cx: d => d.x,
+                    cy: d => d.y,
+                    r: d => { if (maxRadius < d.r) maxRadius = d.r; return d.r }
+                }) 
+                .attr('fill', d => colorScale(d.data.type))
+                .attrs(function(d) {
+                    let parentData = d3.select(this.parentNode).datum()
+                    let parentLab = parentData.labName === d.data.name 
+                    return {
+                        'stroke': parentLab ? '#000' : 'none',
+                        'stroke-width': parentLab ? 1 : 'none'
+                    }
+                })   
+                .append('title')
+                .text(d => `${d.ancestors().map(d => d.data.name).reverse().join(" -> ")}`)
+
+        /// place circles close to each other using force simulation //////////////        
+        d3.forceSimulation(this.data.docs)
+            .force("x", d3.forceX().strength(0.7).x(d => this.xScale(d.pubYear) + this.xScale.step() / 3))
+            .force("y", d3.forceY().strength(0.1).y(d => this.yScale(d.authorName) - this.yScale.step() / 4))
+            .force("collide", d3.forceCollide().strength(1).radius(maxRadius).iterations(32)) // Force that avoids circle overlapping
+            .on("tick", () => authorGroup.selectAll('g.ellipses').attr('transform', e => `translate(${e.x}, ${e.y})`))
+    }
+
+    drawDocSymbols() {
+        /// publications per author, year and type ///////////////
+        
+        // group of documents
+        const docsGroup = this.chartGroup.select('g#symbol-group')
+
+        // group per symbol (some symbols include more than one info)
+        const symbolGroup = docsGroup.selectAll('g')
+            .data(this.groupedDocs)
+            .join(
+                enter => enter.append('g')
+                    .classed('symbol-group', true)
+                    .style('cursor', 'pointer')
+                    .call(g => g.filter(d => !this.docTypes.gray.includes(d.docTypeCode)) // squares for conference, diplome and artistic/technical documents
+                        .append('rect')
+                        .attr('width', this.chart.symbolSize)
+                        .attr('height', this.chart.symbolSize)
+                        .attr('fill', this.symbol.mainColor)
+                        .style('stroke', this.symbol.stroke)
+                        .classed('symbol rect', true)
+                    ).call(g => g.filter(d => this.docTypes.book.includes(d.docTypeCode)) // whole books and editions
+                        .selectAll('rect')
+                        .attr('width', this.chart.symbolSize * 1.5) 
+                        .attr('fill', d => ['OUV', 'BOOK'].includes(d.docTypeCode) ? this.symbol.sndColor : this.symbol.mainColor)   
+                    ).call(g => g.filter(d => d.docTypeCode == 'COUV') /// book chapters
+                        .append('rect')
+                        .attr('width', this.chart.symbolSize * .75)
+                        .attr('height', this.chart.symbolSize)
+                        .attr('fill', this.symbol.sndColor)
+                        .style('stroke', this.symbol.stroke)
+                    ).call(g => g.filter(d => this.docTypes.journal.includes(d.docTypeCode)) // journals
+                        .selectAll('rect')
+                        .attr('height', this.chart.symbolSize * 1.5)
+                        .attr('fill', this.symbol.sndColor)
+                    ).call(g => g.filter(d => this.docTypes.diplome.includes(d.docTypeCode)) // D in the center of square representing diplomes    
+                        .append('text')
+                        .style('text-anchor', 'middle')
+                        .style('font-weight', 'bold')
+                        .attr('x', this.chart.symbolSize / 2)
+                        .attr('y', this.chart.symbolSize * .85)
+                        .text('D')
+                    ).call(g => g.filter(d => this.docTypes.art.includes(d.docTypeCode)) // colorful rectangle representing art
+                        .append('rect')
+                        .attr('height', this.chart.symbolSize * .3)
+                        .attr('width', this.chart.symbolSize * .9)
+                        .attr('fill', this.symbol.sndColor)
+                        .attr('y', this.chart.symbolSize * .65)
+                        .attr('x', this.chart.symbolSize * .05)
+                    ).call(g => g.filter(d => this.docTypes.gray.includes(d.docTypeCode))
+                        .append('circle')
+                        .attr('r', this.chart.symbolSize/2)
+                        .attr('fill', this.symbol.mainColor)
+                        .style('stroke', this.symbol.stroke)
+                        .classed('symbol', true)
+                    ).call(g => g.append('title')
+                        .text(d => `${d.country.join(', ')}
+                            Author of Reference: ${d.authorName}
+                            Affiliation(s): ${d.labName.join('\n\t\t\t')}\n
+                            Title: ${d.docTitle}
+                            Publication Year: ${d.pubYear}
+                            Document Type: ${d.docType}\n
+                            Bibliographic Citation: ${d.citation.split('&')[0]}\n
+                            Click to go to source`)
+                    ),
+                update => update,
+                exit => exit.remove()
+            )
+            .on('click', d => {
+                window.open(d.hal)
+            })
+            .on('mouseenter', d => {
+            
+                if (!this.freeze_links)  {
+                    // highlight documents within line of co-authors
+                    symbolGroup.selectAll('.symbol')
+                        .filter(e => e.docURI === d.docURI)
+                        .style('stroke', '#000')
+                        .style('stroke-width', 2)
+                }
+    
+                /// highlight countries of co-authors
+                let countries = []
+                this.groupedDocs.filter(e => e.docURI === d.docURI).forEach(e => {
+                    countries = countries.concat(e.country)
+                })
+    
+                let countriesCodes = this.selected_countries.filter(e => countries.includes(e.country)).map(e => e.alpha3)
+    
+                this.svg.select('g#map-group').selectAll('path')
+                    .style('fill', e => countriesCodes.includes(e.properties.alpha3) ? this.getCountryColor(e) : "#f4f4f4")
+    
+            }).on('mouseleave', d => {
+                if (!this.freeze_links) 
+                    symbolGroup.selectAll('.symbol').style('stroke-width', 1).style('stroke', this.symbol.stroke)
+                    
+                    this.svg.select('g#map-group').selectAll('path').style('fill', d => this.getCountryColor(d))             
+                
+            })
+
+        /// place circles close to each other using force simulation //////////////
+        d3.forceSimulation()
+            .force("x", d3.forceX().strength(0.4).x(d => this.xScale(d.pubYear)))
+            .force("y", d3.forceY().strength(0.2).y(d => this.yScale(d.authorName) - this.chart.symbolSize / 2))
+            .force("collide", d3.forceCollide().strength(.1).radius(this.chart.symbolSize).iterations(32)) // Force that avoids circle overlapping
+            .nodes(this.groupedDocs)
+            .on("tick", () => symbolGroup.attr('transform', e => `translate(${this.xScale.step()/2 + e.x}, ${e.y})`))
+        
     }
 }
+
