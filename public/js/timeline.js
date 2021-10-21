@@ -78,7 +78,9 @@ class Timeline {
         this.countryColor = d3.scaleThreshold()
             .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
 
-        this.chart = { width: this.width - this.margin.left - this.margin.right, height: this.height - this.margin.top - this.margin.bottom - this.legendHeight, symbolSize : 15}
+        this.chart = { width: this.width - this.margin.left - this.margin.right, 
+                height: this.height - this.margin.top - this.margin.bottom - this.legendHeight, 
+                symbolSize : 15}
         
         this.mapGroup = this.svg.append('g')
             .attr('id', 'map-group')
@@ -105,14 +107,8 @@ class Timeline {
         this.leftAxis.join('title')
             .text(`Click to pause/play the links animation\n\nRight click for more options`)
 
-       
         this.chartGroup.append('g')
             .attr('id', 'link-group')
-
-
-        // this.chartGroup.append('g')
-        //     .attr('id', 'symbol-group')
-
         
         d3.select('body').on('click', function(){
             d3.selectAll('div.context-menu').style('display', 'none')
@@ -122,9 +118,10 @@ class Timeline {
 
         this.docRadius = 10
         this.docsSimulation = d3.forceSimulation()
-            .force("x", d3.forceX().strength(0.7).x(d => this.xScale(d.pubYear)))
-            .force("y", d3.forceY().strength(0.1).y(d => this.yScale(d.authorName)))
+            .force("x", d3.forceX().strength(() => !this.yDistortionAt && this.xDistortionAt ? 0.1 : 0.7).x(d => this.xScale(d.pubYear)))
+            .force("y", d3.forceY().strength(() => this.yDistortionAt && !this.xDistortionAt ? 0.1 : (this.xDistortionAt ? 0.7 : 0.3)).y(d => this.yScale(d.authorName)))
             .force("collide", d3.forceCollide().strength(1).radius(() => this.docRadius).iterations(32)) // Force that avoids circle overlapping
+            .on("tick", () => this.chartGroup.selectAll('g.author').selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
 
     }
 
@@ -226,20 +223,8 @@ class Timeline {
                 .sortKeys((a,b) => +a.pubYear - (+b.pubYear))
                 .entries(this.data.docs)
 
-            /// update the chart's height according to the number of authors and publications per year ///
-            // let maxHeight = d3.max(this.nestedDataPerYear, d => d.values.length) / 3
-            // maxHeight = 20 * maxHeight > 200 ? 20 * maxHeight : 200;
-
             this.authors = this.nestedDataPerAuthor.map(d => d.key)
-
-            // this.chart.height = this.authors.length * 20
-
-            // if (this.chart.height + 150 > this.height)
-            //     d3.select('div.vis').style('height', (this.chart.height + 150) + 'px');
-
-            // resize svg according to chart
             
-   
             this.chartGroup.selectAll('g.author')
                 .data(this.authors)
                 .join(
@@ -254,7 +239,7 @@ class Timeline {
             /// update scales' domain and range ///
             this.xScale.domain(this.dates)
                 .range([0, this.chart.width])
-                .padding(.2)
+                .padding(.5)
     
             this.yScale.domain(this.authors)
                 .range([this.chart.height, 0])
@@ -289,6 +274,7 @@ class Timeline {
             })
 
             this.prepareWaveData()
+            this.prepareEllipsesData()
             this.prepareLabPacks()
             this.setFlagPattern()
 
@@ -360,6 +346,30 @@ class Timeline {
 
         this.yWave = d3.scaleLinear()
             .domain([min, max])
+    }
+
+    prepareEllipsesData(){
+        this.ellipseData = this.authors.map((author,i) => {
+
+            const authorData = this.countDocsPerYear.filter(e => e.author === author)
+            this.stack.keys([author])
+            let stackedData = this.stack(authorData)[0]
+
+            stackedData = stackedData.map(d => {
+                return {
+                    'height': d[1],
+                    'author': d.data.author,
+                    'year': d.data.year,
+                    'docs': d.data.docs
+                }
+                
+            })
+            
+            return {
+                'author': author,
+                'data' : stackedData.filter(d => d.docs.length) 
+            }
+        }) 
     }
 
     prepareLabPacks(){
@@ -453,15 +463,17 @@ class Timeline {
        
 
         //// draw axes
-
+        
         const handleFisheye = d => {
-            // console.log(this.parentNode.parentNode)
             if (this.authors.includes(d)) {
                 this.yScale.distortion(this.yDistortionAt === d ? 0 : 5).focus(refYScale(d))
                 this.svg.select("g#left-axis").call(yAxis)
                 this.yTickDistances = getTicksDistance(this.yScale, this.authors)
                 this.yDistortionAt = this.yDistortionAt == d ? null : d
             } else {
+
+                if (d3.sum(this.countDocsPerYear.filter(e => this.yDistortionAt ? this.yDistortionAt === e.author && e.year === d : e.year === d), e => e.docs.length) === 0) return;
+
                 this.xScale.distortion(this.xDistortionAt === d ? 0 : 5).focus(refXScale(d))
                 this.svg.select("g#bottom-axis").call(xBottomAxis);
                 this.svg.select("g#top-axis").call(xTopAxis);
@@ -471,11 +483,11 @@ class Timeline {
             
             this.drawProfileWave()
             this.drawEllipses()
+            this.drawDocs()
             this.drawLinks()
             
-            this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
+            
         }
-
 
         const xBottomAxis = d3.axisBottom()
             .ticks(this.dates.length)
@@ -510,18 +522,12 @@ class Timeline {
             .call(yAxis)
             .selectAll(".tick text")
             .on('click', handleFisheye) 
-        
-    
-        // this.svg.on('mousemove', handleFisheye)
-            // .on('mouseout', handleFisheye)
 
         let refYScale = d3.scalePoint().domain(this.authors).range([this.chart.height, 0])
         let refXScale = d3.scalePoint().domain(this.dates).range([0, this.chart.width])
 
         this.yDistortionAt = null 
         this.xDistortionAt = null
-
-        
         
         // add interaction to left axis
         this.leftAxis.selectAll(".tick text")
@@ -596,76 +602,49 @@ class Timeline {
         // this.drawMap()
         this.drawProfileWave()
         this.drawEllipses()
+        this.drawDocs()
         this.drawLinks()
         // this.drawDocSymbols()
         // this.drawSpatialGlyphs()
         // this.drawInstitutionPacks2()
 
-        this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
+        // this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
        
         
 
     }
 
     getXScaleStep(value) {
-        // return this.xScale.step()
         return this.xTickDistances[this.dates.indexOf(value)]
     }
 
     getYScaleStep(value) {
-        // return this.yScale.step()
         return this.yTickDistances[this.authors.indexOf(value)]
     }
 
     drawEllipses() {
 
-        let docs = [];
+        // let docs = [];
 
-        let ellipseData = this.authors.map((author,i) => {
-
-            const authorData = this.countDocsPerYear.filter(e => e.author === author)
-            this.stack.keys([author])
-            let stackedData = this.stack(authorData)[0]
-
-            let height = this.yTickDistances[i] / 2
+        const ellipseAttrs = (d) => {
+            let height = this.getYScaleStep(d.author)
+            if (!this.yDistortionAt) height /= 2
             this.yWave.range([-height, height]);
-
-            stackedData = stackedData.map(d => {
-                let ry = this.yWave(d[1])
-                d.data.docs.forEach(doc => {
-                    doc.parentHeight = ry
-                })
-                docs = docs.concat(d.data.docs)
-
-                return {
-                    'ry': ry,
-                    'author': d.data.author,
-                    'parent': d.data.year,
-                    'docs': d.data.docs
-                }
-                
-            })
             
             return {
-                'author': author,
-                'data' : stackedData.filter(d => d.docs.length) 
+                cx: this.xScale(d.year),
+                cy: this.yScale(d.author),
+                rx: this.getXScaleStep(d.year) * .5,
+                ry: this.yWave(d.height)
             }
-        }) 
-
-        const ellipseAttrs = {
-            cx: d => this.xScale(d.parent),
-            cy: d => this.yScale(d.author),
-            rx: d => this.getXScaleStep(d.parent) * .5,
-            ry: d => d.ry
         }
 
         let authorGroup = this.chartGroup.selectAll('g.author')
-        this.docRadius = d3.min(this.yDistortionAt ? docs.filter(d => d.authorName === this.yDistortionAt).map(d => d.parentHeight) : docs.map(d => d.parentHeight)) * .9
-        let _this = this;
+
         // draw one group per author
         let ellipseGroup = authorGroup.selectAll('g.ellipses')
             .data(d => {
-                let data = ellipseData.filter(e => e.author === d)
+                let data = this.ellipseData.filter(e => e.author === d)
                 return !this.yDistortionAt ? data : (this.yDistortionAt === d ? data : [])
             })
             .join(
@@ -674,10 +653,10 @@ class Timeline {
                 update => update,
                 exit => exit.remove()
             )
-        
+       
         // draw one group and one ellipse per year
-        let docsGroup = ellipseGroup.selectAll('g')
-            .data(d => d.data || [])
+        ellipseGroup.selectAll('g')
+            .data(d => this.xDistortionAt ? d.data.filter(e => e.year === this.xDistortionAt) : d.data)
             .join(
                 enter => enter.append('g')    
                     .call(g => g.append('ellipse')
@@ -688,14 +667,33 @@ class Timeline {
                 update => update.call(g => g.select('ellipse').attrs(ellipseAttrs)),
                 exit => exit.remove()
             )
-            .on('dblclick', function(d) {
+            .on('contextmenu', function(d) {
+                d3.event.preventDefault()
+                    
                 if (!d.visibleLabPack) return
                 let selection = d3.select(this.parentNode)
-                selection.selectAll('.labpack').transition().duration(500).style('opacity', 0).style('display', 'none')
-                selection.selectAll('circle.doc').transition().duration(500).style('opacity', 1).style('display', 'block')
-                selection.selectAll('title.doctitle').remove()
-                d.visibleLabPack = false
+
+                const x = d3.event.layerX,
+                    y = d3.event.layerY
+                
+
+                d3.select('div.context-menu')
+                    .style('left', x + 'px')
+                    .style('top', y + 'px')
+                    .style('display', 'block')
+                    .html(`Change to Document`)
+                    .on('click', () => { 
+                        selection.selectAll('.labpack').transition().duration(500).style('opacity', 0).style('display', 'none')
+                        selection.selectAll('circle.doc').transition().duration(500).style('opacity', 1).style('display', 'block')
+                        selection.selectAll('title.doctitle').remove()
+                        d.visibleLabPack = false
+                    })
             })
+                        
+    }
+
+    drawDocs() {
+        let docsGroup = this.chartGroup.selectAll('g.ellipses').selectAll('g')
 
         const docInfo = d => `About the publication\nIssued on ${d.pubYear}\nTitle: ${d.docTitle}\nType: ${d.docType}\n\nBibliographic Citation: ${d.citation.split('&')[0]}   \n\n--------------------\nAbout the author\nName: ${d.authorName}\nAffiliation(s): ${d.lab.map(lab => lab.name).join('\n\t\t\t')}\nCountry: ${d.country.join(', ')}\n\nClick to go to source`
         
@@ -704,9 +702,40 @@ class Timeline {
             return this.docTypeColor(item.name)
         }
 
+        let res;
+        if (this.xDistortionAt && this.yDistortionAt) {
+            res = this.ellipseData.find(d => d.author === this.yDistortionAt).data.find(d => d.year === this.xDistortionAt)
+        } else if (this.yDistortionAt) {
+            res = this.ellipseData.find(d => d.author === this.yDistortionAt)
+        } else if (this.xDistortionAt) {
+            res = this.ellipseData.reduce( (a, b) => { 
+                let b_value = b.data.find(e => e.year === this.xDistortionAt),
+                    a_value = a.data.find(e => e.year === this.xDistortionAt)
+                if (!b_value) return a
+                if (!a_value) return b
+                return (b_value.height < a_value.height) ? b : a
+            })
+            res = res.data.find(d => d.year === this.xDistortionAt)
+        } else {
+            res = this.ellipseData.reduce( (a, b) => (d3.min(b.data, d => d.height) < d3.min(a.data, d => d.height)) ? b : a)
+        }
+        
+        let height = this.getYScaleStep(res.author) / 2
+        this.yWave.range([-height, height]);
+
+        // narrowest wave
+        height = this.xDistortionAt || (this.yDistortionAt && this.xDistortionAt) ? res.height : d3.min(res.data, d => d.height)
+        
+        this.docRadius = (this.yDistortionAt && this.xDistortionAt) ? this.yWave(height) / res.height : this.yWave(height)
+        this.docRadius *= .85
+
+        let docs = []
         // draw the documents inside each ellipse
         docsGroup.selectAll('circle.doc')
-            .data(d => d.docs)
+            .data(d => { 
+                docs = docs.concat(d.docs); 
+                return d.docs; 
+            })
             .join(
                 enter => enter.append('circle')
                     .attr('stroke', 'none')
@@ -718,7 +747,14 @@ class Timeline {
                     .call(circle => circle.select('title').text(docInfo)),
                 exit => exit.remove()        
             )
-            .on('contextmenu', d => {
+            .on('click', d => {
+                 window.open(d.hal)
+            })
+            .on('contextmenu', function(d) { 
+                let selection = d3.select(this.parentNode)
+                let parentData = selection.datum()
+                if (parentData.visibleLabPack) return
+
                 d3.event.preventDefault()
                 const x = d3.event.layerX,
                     y = d3.event.layerY
@@ -727,18 +763,14 @@ class Timeline {
                     .style('left', x + 'px')
                     .style('top', y + 'px')
                     .style('display', 'block')
-                    .html(`Go to Source`)
-                    .on('click', () => window.open(d.hal))
-            })
-            .on('dblclick', function(d) { 
-                let selection = d3.select(this.parentNode)
-                let parentData = selection.datum()
-                if (parentData.visibleLabPack) return
-                selection.selectAll('circle.doc').transition().duration(500).style('opacity', 0).style('display', 'none')
-                selection.selectAll('g.labpack').transition().duration(500).style('opacity', 1).style('display', 'block')
-                selection.selectAll('ellipse').append('title').classed('doctitle', true).text(`Zoomed at "${d.docTitle}"`)
-                parentData.visibleLabPack = true;
-                _this.drawInstitutionPacks(selection, d)
+                    .html(`Change to Research Institutions`)
+                    .on('click', () => {
+                        selection.selectAll('circle.doc').transition().duration(500).style('opacity', 0).style('display', 'none')
+                        selection.selectAll('g.labpack').transition().duration(500).style('opacity', 1).style('display', 'block')
+                        selection.selectAll('ellipse').append('title').classed('doctitle', true).text(`Zoomed at "${d.docTitle}"`)
+                        parentData.visibleLabPack = true;
+                        _this.drawInstitutionPacks(selection, d)
+                    })
             })
             .on('mouseenter', d => {
                 if (this.freeze_links)  return
@@ -752,11 +784,12 @@ class Timeline {
                 this.svg.selectAll('.doc').style('stroke-width', 1).style('stroke', 'none')
             })
           
-        
-        /// place circles close to each other using force simulation //////////////        
+        /// place circles close to each other using force simulation //////////////  
+        this.docsSimulation.nodes(docs)
+        this.docsSimulation.force('y').initialize(docs)      
+        this.docsSimulation.force('x').initialize(docs)
         this.docsSimulation.force('collide').initialize(docs)
-        this.docsSimulation.nodes(docs).on("tick", () => this.chartGroup.selectAll('g.author').selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
-                        
+        this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
     }
 
     drawInstitutionPacks(group, doc){
@@ -781,7 +814,6 @@ class Timeline {
                         .data(lab => {
                             let labData = this.packedLabData[lab.key]
                             const root = d3.hierarchy({"name": labData[0].country, "children": labData})
-                                // .count(d => d.children.length)
                                 .sum(d => radiusScale(d.relation))
                                 .sort((a,b) => b.value - a.value)
 
@@ -814,7 +846,7 @@ class Timeline {
             )
         
         d3.forceSimulation(doc.lab)
-            .force("x", d3.forceX().strength(1).x(this.xScale(doc.pubYear) + this.getXScaleStep(doc.pubYear) * .3))
+            .force("x", d3.forceX().strength(1).x(this.xScale(doc.pubYear) - this.getXScaleStep(doc.pubYear) * .5))
             .force("y", d3.forceY().strength(.5).y(this.yScale(doc.authorName) - this.getYScaleStep(doc.authorName) * .07)) 
             .force("collide", d3.forceCollide().strength(1).radius(radius * .5).iterations(32)) // Force that avoids circle overlapping
             .on("tick", () => group.selectAll('g.labpack').attr('transform', e => `translate(${e.x}, ${e.y})`))    
@@ -832,7 +864,8 @@ class Timeline {
 
         function setProfile(d) {
             let parentData = d3.select(this.parentNode).datum()
-            let height = _this.getYScaleStep(parentData.author) / 2
+            let height = _this.getYScaleStep(parentData.author)
+            if (!_this.yDistortionAt) height /= 2
             _this.yWave.range([-height, height]);
             return profileArea(d)
         }
@@ -888,15 +921,15 @@ class Timeline {
 
         const linksGroup = this.chartGroup.select('g#link-group')
 
-        const lineAttrs = { x1: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year),
-            x2: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year),
+        const lineAttrs = { x1: d => this.xScale(d.year),
+            x2: d => this.xScale(d.year),
             y1: d => this.yScale(d.source.name),
             y2: d => this.yScale(d.target.name)
         }
 
         const xTicks = {
-            x1: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year) - headLength/2,
-            x2: d => this.getXScaleStep(d.year) / 2 + this.xScale(d.year) + headLength/2     
+            x1: d => this.xScale(d.year) - headLength/2,
+            x2: d => this.xScale(d.year) + headLength/2     
         }
 
         const sourceYTicks = {
