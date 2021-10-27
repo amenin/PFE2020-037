@@ -52,7 +52,16 @@
         <button class='submitbtn'>Submit</button>
     </div>
     <div class='loading' id='div-loading'></div>
-    <div class="vis"></div>
+    <div class="vis">
+        <svg id='color-legend'></svg>
+        <svg id="chart">
+            <filter id="blur-image">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10"></feGaussianBlur>
+            </filter>
+            <g id='flag-pattern-group'></g>
+            <g id='group-chart'></g>            
+        </svg>
+    </div>
 
     <script src="js/timeline.js"></script>
     

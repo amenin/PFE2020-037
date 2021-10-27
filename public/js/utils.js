@@ -129,7 +129,6 @@ function fetchData(author){
 
 /// generic interface's functions ////////
 function openDropdown(){
-    const _this = this;
    
     const dropdownContent = this.nextElementSibling;
     d3.select(this.parentNode.parentNode)
@@ -179,10 +178,10 @@ function hideLoading () {
 
 
 function testVisualization(data) {
-    let author = data.authors.filter(d => d.name === 'Eric Thierry')[0]
+    let author = data.authors.filter(d => d.name === 'Enrico Formenti')[0]
     let coauthors = data.coauthors[author.uri].splice(0,10)
 
-    coauthors.concat(author)
+    coauthors = coauthors.concat(author)
     // send request to server: retrieve documents for selected co-authors
     const url = protocol + hostname + "/get_docs"; // local server
     
