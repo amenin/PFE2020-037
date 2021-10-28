@@ -438,12 +438,12 @@ class Timeline {
     draw () { 
         
 
-        // // create an array with name and uris of authors
-        // let authorsInfo = []
+        // create an array with name and uris of authors
+        // let authorsURIs = []
         // authors.forEach(author => {
         //     let uris = docs.filter(d => d.authorName === author).map(d => d.authorURI)
         //     uris = uris.filter((d,i) => i === uris.indexOf(d))
-        //     authorsInfo.push({
+        //     authorsURIs.push({
         //         'name': author,
         //         'uri': uris
         //     })            
@@ -471,6 +471,7 @@ class Timeline {
             }
             
             this.drawProfileWave()
+            
             this.drawEllipses()
             this.drawDocs()
             this.drawLinks()
@@ -568,7 +569,7 @@ class Timeline {
                     .style('display', 'block')
                     .html(`Fetch Data and Focus on ${d}`)
                     .on('click', function() {
-                        // const author_data = authorsInfo.filter(e => e.name === d)[0]
+                        // const author_data = authorsURIs.filter(e => e.name === d)[0]
                         // author_data.uri = author_data.uri[0]
                         // fetchData(author_data)
                         // d3.select(this).style('display', 'none')
@@ -614,7 +615,7 @@ class Timeline {
         let ellipseGroup = authorGroup.selectAll('g.ellipses')
             .data(d => {
                 let data = this.ellipseData.filter(e => e.author === d)
-                return !this.yDistortionAt ? data : (this.yDistortionAt === d ? data : [])
+                return this.yDistortionAt === d ? data : []
             })
             .join(
                 enter => enter.append('g')
