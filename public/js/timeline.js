@@ -2,12 +2,12 @@
 class Timeline {
     constructor () {
         this.country_codes = []
-        this.world = {}
+        this.geo = {}
         this.selected_countries = []
         this.svg = null
         this.width = null
         this.height = null
-        this.margin = { top: 20, right: 100, bottom: 100, left: 100 }
+        this.margin = { top: 20, right: 20, bottom: 100, left: 110 }
         this.data = null
         this.freeze_links = null
         this.selected_docs = []
@@ -15,26 +15,7 @@ class Timeline {
         this.symbol = {mainColor: '#dcdcdc', sndColor: '#7a7a7a', stroke: '#313131'}
     }
 
-    loadData () {
-        
-
-        var files = ['data/countries.json', 'data/countries.geojson'];
-
-        Promise.all(files.map(url => d3.json(url)))
-        .then(values => {
-            let worldData = values[1]
-            worldData.features.forEach(d => {
-                d.properties.alpha3 = d.properties.ISO_A3.toLowerCase()
-            })
-
-            this.country_codes = values[0]
-            this.world = worldData
-        })
-    }
-
-    init (doctypes) {
-
-        this.loadData()
+    init (data) {
 
         this.docTypes = [
             {'name': 'Conference Paper', 'values': ['COMM', 'POSTER', 'PRESCONF', 'UNDEFINED']},
@@ -50,7 +31,7 @@ class Timeline {
 
         this.docTypes.forEach(d => {
             d.values = d.values.map(e => {
-                return doctypes.filter(x => x.code === e)[0]
+                return data.doctypes.filter(x => x.code === e)[0]
             })
         })
         
@@ -60,12 +41,20 @@ class Timeline {
         this.height = div.node().clientHeight;   
         this.legendHeight = 40
 
+        this.map = {width: this.width * .3, height: this.height/2}
+
         this.drawLegend()
 
         this.svg = div.select('svg#chart')
             .attr('transform', `translate(0, ${this.legendHeight})`)
-            .attr('width', this.width)
+            .attr('width', this.width - this.map.width)
             .attr('height', this.height - this.legendHeight)     
+
+        this.map.svg = d3.select('svg#geo')
+            .style('cursor', 'grab')
+            .attr('width', this.map.width)
+            .attr('height', this.map.height)
+            .attr('transform', `translate(0, ${this.legendHeight})`)
 
         div.append('div')
             .classed('context-menu', true)
@@ -76,32 +65,15 @@ class Timeline {
 
         this.stack = d3.stack().offset(d3.stackOffsetSilhouette)
 
-        this.countryColor = d3.scaleThreshold()
-            .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
+        // this.countryColor = d3.scaleThreshold()
+        //     .range(['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'])
 
-        this.chart = { width: this.width - this.margin.left - this.margin.right, 
+        this.chart = { width: this.width - this.map.width - this.margin.right, 
                 height: this.height - this.margin.top - this.margin.bottom - this.legendHeight, 
                 symbolSize : 15}
 
         this.chartGroup = this.svg.select('g#group-chart')
-            .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
-
-        this.chartGroup.append('g')
-            .attr('id', 'bottom-axis')
-
-        this.chartGroup.append('g')
-            .attr('id', 'top-axis')
-            .attr('transform', `translate(0, 0)`)
-
-        this.leftAxis = this.chartGroup.append('g')
-            .attr('id', 'left-axis')
-            .attr('transform', `translate(0, 0)`)
-
-        this.leftAxis.join('title')
-            .text(`Click to pause/play the links animation\n\nRight click for more options`)
-
-        this.chartGroup.append('g')
-            .attr('id', 'link-group')
+            .attr('transform', `translate(0, ${this.margin.top})`)
         
         d3.select('body').on('click', function(){
             d3.selectAll('div.context-menu').style('display', 'none')
@@ -115,6 +87,26 @@ class Timeline {
             .force("y", d3.forceY().strength(() => this.yDistortionAt && !this.xDistortionAt ? 0.1 : (this.xDistortionAt ? 0.7 : 0.3)).y(d => this.yScale(d.authorName)))
             .force("collide", d3.forceCollide().strength(1).radius(() => this.docRadius).iterations(32)) // Force that avoids circle overlapping
             .on("tick", () => this.chartGroup.selectAll('g.author').selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
+
+        var files = ['data/countries.json', 'data/countries.geojson', 'data/country_per_continent.json'];
+
+        Promise.all(files.map(url => d3.json(url)))
+            .then(values => {
+                let geodata = values[1]
+                geodata.features.forEach(d => {
+                    d.properties.alpha3 = d.properties.ISO_A3.toLowerCase()
+                    let continent = values[2].find(e => e.Three_Letter_Country_Code === d.properties.ISO_A3)
+                    if (continent) {
+                        d.properties.continentName = continent.Continent_Name
+                        d.properties.continentCode = continent.Continent_Code
+                    }
+                })
+
+                this.country_codes = values[0]
+                this.map.data = geodata
+
+                testVisualization(data)
+            })
 
     }
 
@@ -156,7 +148,6 @@ class Timeline {
     }
 
     update(data) {
-        console.log(data)
         this.data = data;
 
         // d3.selectAll('div.zoom-div').style('display', 'none')
@@ -169,6 +160,35 @@ class Timeline {
             this.data.links = this.data.links.filter((d,i) => i === this.data.links.findIndex(e => e.year === d.year && 
                 ((e.source.name === d.source.name && e.target.name === d.target.name) || 
                 (e.source.name === d.target.name && e.target.name === d.source.name))))
+
+            /// keep only information for selected countries /////
+
+            let nestedDataPerCountry = d3.nest()
+                .key(d => d.country)
+                .entries(data.docs)
+
+            this.selected_countries = nestedDataPerCountry.map(d => {
+                let authors = d.values.map(e => e.authorName)
+                authors = authors.filter((d,i) => i === authors.indexOf(d))
+    
+                authors = authors.map(e => {
+                    return {
+                        'name': e,
+                        'value': d.values.filter(v => v.authorName === e).length
+                    }
+                })
+                
+                let res = this.country_codes.filter(item => item.name === d.key);
+                return {
+                    'name': d.key, 
+                    'authors': authors,
+                    'value': d.values.length,
+                    'alpha3': res.length ? res[0].alpha3 : null,
+                    'alpha2': res.length ? res[0].alpha2 : null
+                }
+            })
+
+            //////// end filtering selected countries ///////////////////
 
             // map color code: count of publications per country
             // let values = this.selected_countries.map(d => d.value);
@@ -201,7 +221,7 @@ class Timeline {
 
             /// update scales' domain and range ///
             this.xScale.domain(this.dates)
-                .range([0, this.chart.width])
+                .range([this.margin.left, this.chart.width])
                 .padding(.5)
     
             this.yScale.domain(this.authors)
@@ -239,7 +259,7 @@ class Timeline {
             this.prepareWaveData()
             this.prepareEllipsesData()
             this.prepareLabPacks()
-            this.setFlagPattern()
+            // this.setFlagPattern()
 
             resolve()
         });
@@ -370,71 +390,6 @@ class Timeline {
         })
     }
 
-    setFlagPattern(){
-
-        /// keep only information for selected countries /////
-
-        let nestedDataPerCountry = d3.nest()
-            .key(d => d.country)
-            .entries(this.data.docs)
-
-        // console.log(this.country_codes)
-        this.selected_countries = nestedDataPerCountry.map(d => {
-            let authors = d.values.map(e => e.authorName)
-            authors = authors.filter((d,i) => i === authors.indexOf(d))
-
-            authors = authors.map(e => {
-                return {
-                    'name': e,
-                    'value': d.values.filter(v => v.authorName === e).length
-                }
-            })
-            
-            let res = this.country_codes.filter(item => item.name === d.key || item.name.includes(d.key));
-            return {
-                'country': d.key, 
-                'authors': authors,
-                'value': d.values.length,
-                'alpha3': res.length ? res[0].alpha3 : null,
-                'alpha2': res.length ? res[0].alpha2 : null
-            }
-        })
-
-        let patternWidth = 30,
-            patternHeight = 25;
-
-        let defs = this.svg.select('g#flag-pattern-group')
-            .selectAll('defs')
-            .data(this.selected_countries)
-            .join(
-                enter => enter.append('defs'),
-                update => update,
-                exit => exit.remove()
-            )
-
-        let pattern = defs.append("pattern")
-            .attr("id", d => "flag_" + d.country.replaceAll(' ', '_'))
-            .attr("width", patternWidth)
-            .attr("height", patternHeight)
-            .attr("patternUnits", "userSpaceOnUse")
-            .attr('patternTransform', `translate(480,400) scale(1,1)`)
-
-        pattern.append('rect')
-            .attr('width', patternWidth)
-            .attr('height', patternHeight)
-            .attr('fill', '#f5f5f5') 
-            
-        pattern.append("image")
-            .attr("xlink:href", d => `flags/${d.alpha2}.svg`)
-            .attr("width", patternWidth)
-            .attr("height", patternHeight - 2)
-            // .attr('filter', "url(#blur-image)")
-            // .attr("x", 5)
-            // .attr("y", 2.5)
-            // .style('-webkit-filter', 'blur(1px)')
-            // .style('opacity', 1)
-    }
-
     draw () { 
         
 
@@ -451,74 +406,128 @@ class Timeline {
        
 
         //// draw axes
-        
-        const handleFisheye = (d) => {
-            
-            if (this.authors.includes(d)) {
-                this.yScale.distortion(this.yDistortionAt === d ? 0 : 5).focus(refYScale(d))
-                this.svg.select("g#left-axis").call(yAxis)
-                this.yTickDistances = getTicksDistance(this.yScale, this.authors)
-                this.yDistortionAt = this.yDistortionAt == d ? null : d
-            } else {
 
-                if (d3.sum(this.countDocsPerYear.filter(e => this.yDistortionAt ? this.yDistortionAt === e.author && e.year === d : e.year === d), e => e.docs.length) === 0) return;
-
-                this.xScale.distortion(this.xDistortionAt === d ? 0 : 5).focus(refXScale(d))
-                this.svg.select("g#bottom-axis").call(xBottomAxis);
-                this.svg.select("g#top-axis").call(xTopAxis);
-                this.xTickDistances = getTicksDistance(this.xScale, this.dates)
-                this.xDistortionAt = this.xDistortionAt === d ? null : d
-            }
-            
-            this.drawProfileWave()
-            
-            this.drawEllipses()
-            this.drawDocs()
-            this.drawLinks()
-        }
-
-        const xBottomAxis = d3.axisBottom()
+        this.bottomAxis = d3.axisBottom()
             .ticks(this.dates.length)
             .tickFormat(d => d.toString())
             .scale(this.xScale)
         
-        const xTopAxis = d3.axisTop()
+        this.topAxis = d3.axisTop()
             .ticks(this.dates.length)
             .tickFormat(d => d.toString())
             .scale(this.xScale)
 
-        const yAxis = d3.axisLeft()
-            .scale(this.yScale)
+        // this.leftAxis = d3.axisLeft()
+        //     .scale(this.yScale)
 
-        this.xTickDistances = getTicksDistance(this.xScale, this.dates)
-        this.yTickDistances = getTicksDistance(this.yScale, this.authors)
-
+        // this.xTickDistances = this.getTicksDistance(this.xScale, this.dates, this.margin.left)
+        // this.yTickDistances = this.getTicksDistance(this.yScale, this.authors, this.margin.top)
+       
         this.svg.select('g#bottom-axis')
             .attr('transform', `translate(0, ${this.chart.height})`)
             .style('cursor', 'pointer')
-            .call(xBottomAxis)
+            .call(this.bottomAxis)
             .selectAll(".tick text")
-            .on('click', handleFisheye)
+            .on('click', d => this.handleFisheye(d))
 
         this.svg.select('g#top-axis')
             .style('cursor', 'pointer')
-            .call(xTopAxis)       
+            .call(this.topAxis)       
             .selectAll(".tick text")
-            .on('click', handleFisheye)
+            .on('click', d => this.handleFisheye(d))
 
-        this.leftAxis
-            .call(yAxis)
-            .selectAll(".tick text")
-            .on('click', handleFisheye) 
+        // this.svg.select('g#left-axis')
+        //     .call(this.leftAxis)
+        //     .selectAll(".tick")
+        //     .style('display', 'none')
+       
+        this.yDistortionAt = null
+        this.xDistortionAt = null
 
+        this.handleFisheye("Enrico Formenti")
+
+
+
+    }
+
+    handleFisheye(d) {
         let refYScale = d3.scalePoint().domain(this.authors).range([this.chart.height, 0])
         let refXScale = d3.scalePoint().domain(this.dates).range([0, this.chart.width])
+            
+        if (this.authors.includes(d)) {
+            this.yScale.distortion(this.yDistortionAt === d ? 0 : 5).focus(refYScale(d))
+            this.yTickDistances = this.getTicksDistance(this.yScale, this.authors, this.margin.top)
+            this.yDistortionAt = this.yDistortionAt == d ? null : d
+        } else {
+
+            if (d3.sum(this.countDocsPerYear.filter(e => this.yDistortionAt ? this.yDistortionAt === e.author && e.year === d : e.year === d), e => e.docs.length) === 0) return;
+
+            this.xScale.distortion(this.xDistortionAt === d ? 0 : 5).focus(refXScale(d))
+            this.svg.select("g#bottom-axis").call(this.bottomAxis);
+            this.svg.select("g#top-axis").call(this.topAxis);
+            this.xTickDistances = this.getTicksDistance(this.xScale, this.dates, this.margin.left)
+            this.xDistortionAt = this.xDistortionAt === d ? null : d
+        }   
         
-        // add interaction to left axis
-        this.leftAxis.selectAll(".tick text")
+        this.drawMap()
+        this.drawProfileWave()
+        
+        this.drawEllipses()
+        // this.drawDocs()
+        this.drawLinks()
+        this.drawLabels()
+        
+    }
+
+    getTicksDistance(scale, breaks, axisPosition) {
+        const spaces = []
+        for(let i=0; i < breaks.length - 1; i++){
+          spaces.push(Math.abs(scale(breaks[i+1]) - scale(breaks[i]) - scale.padding()))
+        }
+        spaces.push(Math.abs(scale(breaks[breaks.length - 1]) - axisPosition) - scale.padding())
+        return spaces;
+    };
+
+    getXScaleStep(value) {
+        return this.xTickDistances ? this.xTickDistances[this.dates.indexOf(value)] : this.xScale.step()
+    }
+
+    getYScaleStep(value) {
+        return this.yTickDistances ? this.yTickDistances[this.authors.indexOf(value)] : this.yScale.step()
+    }
+
+    drawLabels() {
+
+        let breaks = ss.jenks(this.nestedDataPerAuthor.map(d => d.values.length), 7)
+        let labelColor = d3.scaleThreshold()
+            .domain(breaks)
+            .range(['#93adba', '#809cb3', '#748aac', '#7077a1', '#716392', '#744d7e', '#763565', '#741b47'])
+
+        let rectheight = 15
+        let labelGroup = this.chartGroup.selectAll('g.author-label')
+            .data(this.authors)
+            .join(
+                enter => enter.append('g')
+                    .classed('author-label', true)
+                    .attr('transform', d => `translate(10, ${this.yScale(d) - rectheight / 2})`),
+                update => update.attr('transform', d => `translate(10, ${this.yScale(d) - rectheight / 2})`),
+                exit => exit.remove()
+            )
+
+        labelGroup.append('rect')
+            .attrs({
+                width: d => d.length * 7,
+                height: rectheight,
+                fill: d => labelColor(this.nestedDataPerAuthor.find(e => e.key === d).values.length) 
+            })
+
+        labelGroup.append('text')
+            .text(d => d)
             .style('font-weight', 'bold')
             .style('font-size', '12px')
-            .attr("dx", "-1em")
+            .attr('dx', '5px')
+            .attr('dy', '1px')
+            .attr('fill', '#fff')
             .style('cursor', 'pointer')
             .on('mouseenter', d => {
                 if (this.freeze_links) return;
@@ -575,21 +584,8 @@ class Timeline {
                         // d3.select(this).style('display', 'none')
                     })
             })
+            .on('click', d => this.handleFisheye(d))
             .call(wrap, d => this.getYScaleStep(d) / 2)
-       
-        this.yDistortionAt = null
-        this.xDistortionAt = null
-
-        handleFisheye("Enrico Formenti")
-
-    }
-
-    getXScaleStep(value) {
-        return this.xTickDistances[this.dates.indexOf(value)]
-    }
-
-    getYScaleStep(value) {
-        return this.yTickDistances[this.authors.indexOf(value)]
     }
 
     drawEllipses() {
@@ -604,7 +600,7 @@ class Timeline {
             return {
                 cx: this.xScale(d.year),
                 cy: this.yScale(d.author),
-                rx: this.getXScaleStep(d.year) * .5,
+                rx: this.getXScaleStep(d.year) * .4,
                 ry: this.yWave(d.height)
             }
         }
@@ -629,7 +625,7 @@ class Timeline {
             .data(d => this.xDistortionAt ? d.data.filter(e => e.year === this.xDistortionAt) : d.data)
             .join(
                 enter => enter.append('g')
-                    .classed('year', true)    
+                    .classed('year', true)
                     .call(g => g.append('ellipse')
                         .attr('fill', 'white')
                         .attr('stroke', '#a3a3a3')
@@ -639,8 +635,10 @@ class Timeline {
                 exit => exit.remove()
             )
         
-        console.log(yearGroup)
-        yearGroup.selectAll('ellipse')
+        yearGroup.append('title')
+            .text(d => d.docs.length + ' items:\n' + d.docs.map(e => `- ${e.docTitle} (${e.docType})`).join('\n'))
+
+        yearGroup
             .on('contextmenu', function(d) {
                 d3.event.preventDefault()
 
@@ -672,7 +670,7 @@ class Timeline {
 
         let docsGroup = this.chartGroup.selectAll('g.ellipses').selectAll('g.year')
 
-        const docInfo = d => `About the publication\nIssued on ${d.pubYear}\nTitle: ${d.docTitle}\nType: ${d.docType}\n\nBibliographic Citation: ${d.citation.split('&')[0]}   \n\n--------------------\nAbout the author\nName: ${d.authorName}\nAffiliation(s): ${d.lab.map(lab => lab.name).join('\n\t\t\t')}\nCountry: ${d.country.join(', ')}\n\nClick to go to source`
+        const docInfo = d => `${d.docTitle} (${d.docType})\nClick to go to source`
         
         const docFill = d => {
             let item = this.docTypes.find(e => e.values.some(x => x.code === d.docTypeCode))
@@ -863,6 +861,9 @@ class Timeline {
     drawProfileWave() {
         const _this = this;
 
+        let colorScale = d3.scaleOrdinal()
+            .range(['#f5f5f5', '#ededed', '#e5e5e5', '#dddddd', '#d6d6d6', '#cecece', '#c6c6c6', '#b5b5b5', '#a4a4a4', '#939393', '#828282', '#727272', '#626262'])
+
         let profileArea = d3.area()
             .x(d => this.xScale(d.data.year))
             .y0(d => this.yScale(d.data.author) + (!this.yDistortionAt || this.yDistortionAt === d.data.author ? this.yWave(d[0]) : 0))
@@ -878,43 +879,47 @@ class Timeline {
         }
         
         /// wave ////////
-        this.chartGroup.selectAll('g.author')
+        let waveGroup = this.chartGroup.selectAll('g.author')
             .selectAll('g.profile')
             .data(d => this.waveData.filter(e => e.author === d))
             .join(
                 enter => enter.append('g')
-                    .classed('profile', true)
-                    .call(g => g.selectAll('path')
-                        .data(d => d.data)
-                        .join('path')
-                        .attr('fill', '#f5f5f5')
-                        .attr('stroke', '#a3a3a3')
-                        .attr("d", setProfile)
-                    ),
+                    .classed('profile', true),
                 update => update.call(g => g.selectAll('path')
                     .attr("d", setProfile)),
                 exit => exit.remove()
             )
+
+
+        waveGroup.selectAll('path')
+            .data(d => d.data)
+            .join('path')
+            .attr('fill', d => colorScale(d.key))
+            .attr('stroke', '#a3a3a3')
+            .attr("d", setProfile)    
             .on('mouseenter', d => {
                 if (this.freeze_links) return
 
                 this.chartGroup.select('g#link-group')
                     .selectAll('g.link')
                     .style('opacity', e => e.source.name === d.author || e.target.name === d.author ? 1 : .1)
-
-                this.svg.selectAll('g.author')
-                    .style('opacity', e => e === d.author ? 1 : .2)
-                    .filter(e => e === d.author)
-                    .selectAll('path')
-                    .attr("fill", d => `url(#flag_${d.key.replace(' ', '_')})`) 
+                
+                waveGroup.selectAll('path')
+                    .style('opacity', e => e.key === d.key ? 1 : .2)
+                    // .filter(e => e === d.author)
+                    // .selectAll('path')
+                    // .attr("fill", d => `url(#flag_${d.key.replace(' ', '_')})`) 
 
             }).on('mouseleave', d => {
                 if (this.freeze_links) return
 
                 this.chartGroup.select('g#link-group').selectAll('g.link').style('opacity', 1)
 
-                this.svg.selectAll('g.author').style('opacity', 1)
-                    .selectAll('path').attr('fill', '#f5f5f5')
+                waveGroup.selectAll('path')
+                    .style('opacity', 1)
+
+                // this.svg.selectAll('g.author').style('opacity', 1)
+                //     .selectAll('path').attr('fill', '#f5f5f5')
 
             })
             
@@ -998,6 +1003,107 @@ class Timeline {
     getCountryColor(d) {
         let res = this.selected_countries.filter(e => e.alpha3 === d.properties.alpha3)
         return res.length ? this.countryColor(res[0].value) : "#f4f4f4";
+    }
+
+    drawMap () {           
+
+        const _this = this
+        const accent = d3.scaleOrdinal(d3.schemeAccent);
+
+        const drag = d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+
+        this.map.svg.call(drag)
+
+        ///// world map ////////////
+        const projection = d3.geoOrthographic()
+            .scale(200)
+            .translate([this.map.width/2, this.map.height/2])
+            .rotate([ -3.0827457688710598, -30.46385623276532, -0.7224498702519475 ])
+
+        const path = d3.geoPath().projection(projection)
+        
+        const gCountry = this.map.svg.selectAll('g')
+            .data(this.map.data.features)
+            .join(
+                enter => enter.append('g'),
+                update => update,
+                exit => exit.remove()
+            )
+        
+        const countryFill = d => {
+            if (this.yDistortionAt && this.countriesPerAuthor[this.yDistortionAt].includes(d.properties.ADMIN)) return '#1B4774' 
+            else if (!this.yDistortionAt && this.selected_countries.some(x => x.alpha3 === d.properties.alpha3)) return '#1B4774' 
+            return '#f5f5f5'   
+        }
+
+        this.map.svg.selectAll('path.polygon')
+            .data(this.map.data.features)
+            .join(
+                enter => enter.append('path')   
+                    .classed('polygon', true)
+                    .attr('d', path)
+                    .style('cursor', 'pointer')
+                    .style('fill', countryFill)
+                    .style('stroke', '#888')
+                    .style('stroke-width', '1px')
+                    .style('opacity', 0.8)
+                    .style('stroke-width', 0.3),
+                update => update.style('fill', countryFill),
+                exit => exit.remove()   
+            )           
+            .on('mouseover', d => {
+                if (this.yDistortionAt) return;
+
+                let country = this.selected_countries.find(x => x.alpha3 === d.properties.alpha3)
+                if (!country) return;
+               
+                d3.selectAll('g.author').selectAll('path')
+                    .style('opacity', e => country.name === e.key ? 1 : .1)
+
+                let validAuthors = country.authors.map(e => e.name)
+                d3.selectAll('g.ellipses').style('opacity', e => validAuthors.includes(e.author) ? 1 : .1)
+            })
+            .on('mouseout', () => {
+                if (this.yDistortionAt) return;
+
+                d3.selectAll('g.author').selectAll('path').style('opacity', 1)
+                d3.selectAll('g.ellipses').style('opacity', 1)
+            })
+
+        // gCountry.append('title')
+        //     .text(d => `${d.properties.ADMIN} (${d.properties.continentName})`)
+
+        const graticule = d3.geoGraticule()
+            .step([10, 10]);
+
+        if (!this.map.svg.selectAll('path.graticule').size()) {
+            this.map.svg.append("path")
+                .datum(graticule)
+                .attr("class", "graticule")
+                .attr("d", path)
+                .style("fill", "none")
+                .style("stroke", "#ccc");
+        }
+
+        //// drag functions //////////////
+        /// see why the drag and drop is so slow
+        var gpos0, o0;
+        function dragstarted() {
+            gpos0 = projection.invert(d3.mouse(this));
+            o0 = projection.rotate();
+        }
+        
+        function dragged() {
+            var gpos1 = projection.invert(d3.mouse(this));
+            o0 = projection.rotate();
+            var o1 = eulerAngles(gpos0, gpos1, o0);
+            projection.rotate(o1);
+            _this.map.svg.selectAll("path").attr("d", path);
+        }
+
+        ///////// end drag functions ////////////////////////////////////////////   
     }
 
 }
