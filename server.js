@@ -203,7 +203,7 @@ app.listen(port, () => {
     // let filename = datadir + 'institution_data.json'
     // let data = loadFile(filename)
     // if ( !Object.keys(data).length ){
-        // datatools.getInstitutionHierarchy(queries)
+        datatools.getInstitutionHierarchy(queries)
         // fs.writeFileSync(filename, JSON.stringify(data, null, 4))
     // }
 

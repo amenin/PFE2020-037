@@ -7,10 +7,10 @@ class Timeline {
         this.svg = null
         this.width = null
         this.height = null
-        this.margin = { top: 20, right: 20, bottom: 100, left: 110 }
+        this.margin = { top: 20, right: 20, bottom: 20, left: 110 }
         this.data = null
         this.freeze_links = null
-        this.selected_docs = []
+        this.selected_item = null
 
         this.symbol = {mainColor: '#dcdcdc', sndColor: '#7a7a7a', stroke: '#313131'}
     }
@@ -37,24 +37,30 @@ class Timeline {
         
         const div = d3.select('div.vis')
 
-        this.width = div.node().clientWidth;
-        this.height = div.node().clientHeight;   
         this.legendHeight = 40
+        this.width = div.node().clientWidth;
+        this.height = div.node().clientHeight - this.legendHeight;   
 
         this.map = {width: this.width * .3, height: this.height/2}
+        this.treemap = {width: this.width * .3, height: this.height/2}
 
         this.drawLegend()
 
         this.svg = div.select('svg#chart')
             .attr('transform', `translate(0, ${this.legendHeight})`)
             .attr('width', this.width - this.map.width)
-            .attr('height', this.height - this.legendHeight)     
+            .attr('height', this.height)     
 
         this.map.svg = d3.select('svg#geo')
             .style('cursor', 'grab')
             .attr('width', this.map.width)
             .attr('height', this.map.height)
-            .attr('transform', `translate(0, ${this.legendHeight})`)
+            // .attr('transform', `translate(0, ${this.legendHeight})`)
+
+        this.treemap.svg = d3.select('svg#treemap')
+            .attr('width', this.treemap.width)
+            .attr('height', this.treemap.height)
+            // .attr('transform', `translate(0, ${this.legendHeight + this.map.height})`)
 
         div.append('div')
             .classed('context-menu', true)
@@ -83,8 +89,8 @@ class Timeline {
 
         this.docRadius = 10
         this.docsSimulation = d3.forceSimulation()
-            .force("x", d3.forceX().strength(() => !this.yDistortionAt && this.xDistortionAt ? 0.1 : 0.7).x(d => this.xScale(d.pubYear)))
-            .force("y", d3.forceY().strength(() => this.yDistortionAt && !this.xDistortionAt ? 0.1 : (this.xDistortionAt ? 0.7 : 0.3)).y(d => this.yScale(d.authorName)))
+            .force("x", d3.forceX().strength(() => !this.yDistortionAt && this.xDistortionAt ? 0.1 : 1).x(d => this.xScale(d.pubYear)))
+            .force("y", d3.forceY().strength(() => this.yDistortionAt && !this.xDistortionAt ? 0.1 : (this.xDistortionAt ? 0.7 : 0)).y(d => this.yScale(d.authorName)))
             .force("collide", d3.forceCollide().strength(1).radius(() => this.docRadius).iterations(32)) // Force that avoids circle overlapping
             .on("tick", () => this.chartGroup.selectAll('g.author').selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
 
@@ -259,7 +265,6 @@ class Timeline {
             this.prepareWaveData()
             this.prepareEllipsesData()
             this.prepareLabPacks()
-            // this.setFlagPattern()
 
             resolve()
         });
@@ -364,14 +369,16 @@ class Timeline {
             return foundkey
         }
 
-        const _this = this;
-        function pushNode(node, key) {
-            let relation = isParent(false, node.children, key) ? "parent" : (node.key === key ? "target" : "children")
-            if (!_this.packedLabData[key].some(e => e.key === node.key && e.relation === relation)) {
+        this.institutionTypes = []
+        const pushNode = (node, key) => {
+            if (!this.institutionTypes.includes(node.type))
+                this.institutionTypes.push(node.type)
+            // let relation = isParent(false, node.children, key) ? "parent" : (node.key === key ? "target" : "children")
+            if (!this.packedLabData[key].some(e => e.key === node.key)) {
                 // console.log(node)
-                node.relation = relation
+                // node.relation = relation
                 node.children = []
-                _this.packedLabData[key].push(node)
+                this.packedLabData[key].push(node)
             }
         }
 
@@ -388,6 +395,16 @@ class Timeline {
                 }
             })
         })
+
+        
+        let last = this.institutionTypes.pop()
+        this.institutionTypes.splice(0, 0, last)
+        this.institutionTypes.reverse()
+
+        this.institutionColor = d3.scaleOrdinal()
+            .domain(this.institutionTypes)
+            .range(['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02'])
+        
     }
 
     draw () { 
@@ -416,12 +433,6 @@ class Timeline {
             .ticks(this.dates.length)
             .tickFormat(d => d.toString())
             .scale(this.xScale)
-
-        // this.leftAxis = d3.axisLeft()
-        //     .scale(this.yScale)
-
-        // this.xTickDistances = this.getTicksDistance(this.xScale, this.dates, this.margin.left)
-        // this.yTickDistances = this.getTicksDistance(this.yScale, this.authors, this.margin.top)
        
         this.svg.select('g#bottom-axis')
             .attr('transform', `translate(0, ${this.chart.height})`)
@@ -435,11 +446,6 @@ class Timeline {
             .call(this.topAxis)       
             .selectAll(".tick text")
             .on('click', d => this.handleFisheye(d))
-
-        // this.svg.select('g#left-axis')
-        //     .call(this.leftAxis)
-        //     .selectAll(".tick")
-        //     .style('display', 'none')
        
         this.yDistortionAt = null
         this.xDistortionAt = null
@@ -473,16 +479,24 @@ class Timeline {
         this.drawProfileWave()
         
         this.drawEllipses()
-        // this.drawDocs()
+        this.drawDocs()
         this.drawLinks()
         this.drawLabels()
+
+        this.drawInstitutionHierarchy(this.selected_item)
+
         
     }
 
     getTicksDistance(scale, breaks, axisPosition) {
         const spaces = []
         for(let i=0; i < breaks.length - 1; i++){
-          spaces.push(Math.abs(scale(breaks[i+1]) - scale(breaks[i]) - scale.padding()))
+            let s1, s2;
+            if (breaks[i-1]) {
+                s1 = Math.abs(scale(breaks[i]) - scale(breaks[i-1]))
+                s2 = Math.abs(scale(breaks[i+1]) - scale(breaks[i]))
+                spaces.push(Math.min(s1, s2))
+            } else spaces.push(Math.abs(scale(breaks[i+1]) - scale(breaks[i]) - scale.padding()))
         }
         spaces.push(Math.abs(scale(breaks[breaks.length - 1]) - axisPosition) - scale.padding())
         return spaces;
@@ -526,7 +540,7 @@ class Timeline {
             .style('font-weight', 'bold')
             .style('font-size', '12px')
             .attr('dx', '5px')
-            .attr('dy', '1px')
+            .attr('dy', '1em')
             .attr('fill', '#fff')
             .style('cursor', 'pointer')
             .on('mouseenter', d => {
@@ -585,7 +599,6 @@ class Timeline {
                     })
             })
             .on('click', d => this.handleFisheye(d))
-            .call(wrap, d => this.getYScaleStep(d) / 2)
     }
 
     drawEllipses() {
@@ -625,12 +638,12 @@ class Timeline {
             .data(d => this.xDistortionAt ? d.data.filter(e => e.year === this.xDistortionAt) : d.data)
             .join(
                 enter => enter.append('g')
-                    .classed('year', true)
-                    .call(g => g.append('ellipse')
-                        .attr('fill', 'white')
-                        .attr('stroke', '#a3a3a3')
-                        .attrs(ellipseAttrs)
-                    ),
+                    .classed('year', true),
+                    // .call(g => g.append('ellipse')
+                    //     .attr('fill', 'white')
+                    //     .attr('stroke', '#a3a3a3')
+                    //     .attrs(ellipseAttrs)
+                    // ),
                 update => update.call(g => g.select('ellipse').attrs(ellipseAttrs)),
                 exit => exit.remove()
             )
@@ -638,30 +651,29 @@ class Timeline {
         yearGroup.append('title')
             .text(d => d.docs.length + ' items:\n' + d.docs.map(e => `- ${e.docTitle} (${e.docType})`).join('\n'))
 
-        yearGroup
-            .on('contextmenu', function(d) {
-                d3.event.preventDefault()
+        // yearGroup.on('contextmenu', function(d) {
+        //         d3.event.preventDefault()
 
-                let exist = d.docs.some(e => _this.selected_docs.includes(e.docURI))
-                if (!exist) return
-                let selection = d3.select(this.parentNode)
+        //         let exist = d.docs.some(e => _this.selected_docs.includes(e.docURI))
+        //         if (!exist) return
+        //         let selection = d3.select(this.parentNode)
 
-                const x = d3.event.layerX,
-                    y = d3.event.layerY
+        //         const x = d3.event.layerX,
+        //             y = d3.event.layerY
 
-                d3.select('div.context-menu')
-                    .style('left', x + 'px')
-                    .style('top', y + 'px')
-                    .style('display', 'block')
-                    .html(`Go back to documents`)
-                    .on('click', () => { 
-                        selection.selectAll('.labpack').transition().duration(500).style('opacity', 0).style('display', 'none')
-                        selection.selectAll('circle.doc').transition().duration(500).style('opacity', 1).style('display', 'block')
-                        selection.selectAll('title.doctitle').remove()
-                        let index = _this.selected_docs.indexOf(d.docURI)
-                        if (index !== -1) _this.selected_docs.splice(index)
-                    })
-            })
+        //         d3.select('div.context-menu')
+        //             .style('left', x + 'px')
+        //             .style('top', y + 'px')
+        //             .style('display', 'block')
+        //             .html(`Go back to documents`)
+        //             .on('click', () => { 
+        //                 selection.selectAll('.labpack').transition().duration(500).style('opacity', 0).style('display', 'none')
+        //                 selection.selectAll('circle.doc').transition().duration(500).style('opacity', 1).style('display', 'block')
+        //                 selection.selectAll('title.doctitle').remove()
+        //                 let index = _this.selected_docs.indexOf(d.docURI)
+        //                 if (index !== -1) _this.selected_docs.splice(index)
+        //             })
+        //     })
                         
     }
 
@@ -727,11 +739,7 @@ class Timeline {
                     .call(circle => circle.select('title').text(docInfo)),
                 exit => exit.remove()        
             )
-            .on('click', d => {
-                 window.open(d.hal)
-            })
             .on('contextmenu', function(d) { 
-                _this.selected_docs.push(d.docURI)
 
                 d3.event.preventDefault()
                 const x = d3.event.layerX,
@@ -741,8 +749,14 @@ class Timeline {
                     .style('left', x + 'px')
                     .style('top', y + 'px')
                     .style('display', 'block')
-                    .html(`Explore Research Institutions`)
-                    .on('click', () => changeFocus(d3.select(this.parentNode), d))
+                    .html(`Go to Source`)
+                    .on('click', () => window.open(d.hal))
+            })
+            .on('click', d => {
+                if (this.selected_item === d) return
+
+                this.selected_item = d
+                this.drawInstitutionHierarchy(d)
             })
             .on('mouseenter', d => {
                 if (this.freeze_links)  return
@@ -763,21 +777,112 @@ class Timeline {
         this.docsSimulation.force('collide').initialize(docs)
         this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
 
-        // replace circles by previously drawn institution packs
-        if (this.selected_docs.length) {
-            d3.selectAll('circle.doc').filter(d => this.selected_docs.includes(d.docURI)).each(function(d) {
-                changeFocus(d3.select(this.parentNode), d)
-            })
-        }
-
-        function changeFocus(selection, d) {
-            selection.selectAll('circle.doc').transition().duration(500).style('opacity', 0).style('display', 'none')
-            selection.selectAll('g.labpack').transition().duration(500).style('opacity', 1).style('display', 'block')
-            selection.selectAll('ellipse').append('title').classed('doctitle', true).text(`Zoomed at "${d.docTitle}"`)
-            _this.drawInstitutionPacks(selection, d)
-        }
     }
 
+    drawInstitutionHierarchy(doc) {
+        if (!doc) {
+            if (!this.treemap.svg.selectAll('text.info').size())
+                this.treemap.svg.append('text')
+                    .classed('info', true)
+                    .style('text-anchor', 'middle')
+                    .attr('x', this.treemap.width / 2)
+                    .attr('y', this.treemap.height / 2)
+                    .text('Click on a document to display the institution hierarchy.')
+
+            return
+        }
+
+        this.treemap.svg.selectAll('text.info').remove()
+
+        let data = {children: []}
+        doc.lab.forEach(d => {
+            let labData = this.packedLabData[d.key]    
+            labData.forEach(e => e.selected = e.key === d.key)
+            data.children.push({"name": labData[0].country, "children": labData})
+        })
+
+
+        let root = d3.hierarchy(data)
+            .sum(d => d.type ? this.institutionTypes.indexOf(d.type) + 1 : 0)
+            .sort((a,b) => b.value - a.value)
+
+        d3.treemap()
+            .size([this.treemap.width, this.treemap.height - 20])
+            .paddingTop(25)
+            .paddingRight(7)
+            .paddingInner(3)
+            (root)
+
+        let rectAttrs = { width: d => d.x1 - d.x0, height: d => d.y1 - d.y0, 
+                fill: d => d.data.type ? this.institutionColor(d.data.type) : '#f5f5f5', 
+                'stroke-width': d => d.data.selected ? 2 : 1, 
+                stroke: '#000'},
+            titleText = d => { return d.data.strAcro || (d.data.name.split('/').length > 1 ? d.data.name.split('/')[1] : d.data.name.trim()) },
+            subtitleText = d => { return d.data.type.match(/[A-Z][a-z]+/g).filter(e => !['Structure', 'Type'].includes(e)).join(' ') },
+            wrapText = function(d) { wrap_ellipsis(d3.select(this), d.x1 - d.x0)},
+            tooltipText = d => { return `${d.data.name} (${subtitleText(d)})` }
+        
+        this.treemap.svg.selectAll('g')
+            .data(root.leaves())
+            .join(
+                enter => enter.append('g')
+                    .call(g => g.append('rect')
+                        .attrs(rectAttrs))
+                    .call(g => g.append('text')
+                        .attr('font-size', '12px')
+                        .attr('fill', 'black')
+                        .attrs({ x: 2, y: 8, dy: '.2em' })
+                        .classed('titles', true)
+                        .text(titleText)
+                        .each(wrapText))
+                    .call(g => g.append('text')
+                        .attr('font-size', '9px')
+                        .classed('subtitles', true)
+                        .attrs({ x: 2, y: 20 })
+                        .text(subtitleText)
+                        .each(wrapText))
+                    .call(g => g.append('title')
+                        .text(tooltipText)),
+                update => update
+                    .call(g => g.select('rect').transition().duration(500).attrs(rectAttrs))
+                    .call(g => g.select('text.titles').text(titleText).each(wrapText))
+                    .call(g => g.select('text.subtitles').text(subtitleText).each(wrapText))
+                    .call(g => g.select('title').text(tooltipText)),
+                exit => exit.remove()
+            )
+            .attr('transform', d => `translate(${d.x0}, ${d.y0})`)
+    
+        // labels on groups of rectangles (countries)
+        let titleAttrs = { x: d => d.x0, y: d => d.y0 + 21 }
+        this.treemap.svg.selectAll('.group-titles')
+            .data(root.descendants().filter(d => d.depth === 1))
+            .join(
+                enter => enter.append('text')
+                    .classed('group-titles', true)
+                    .attr('font-size', '19px'),
+                update => update,
+                exit => exit.remove()
+            )
+            .text(d => d.data.name)
+            .attrs(titleAttrs)
+
+        this.treemap.svg
+            .on('mouseenter', () => {
+                
+                this.svg.selectAll('.doc')
+                    .style('stroke', d => d.docURI === doc.docURI ? '#000' : 'none')
+                    .style('stroke-width', d => d.docURI === doc.docURI ? 2 : 1)
+            })
+            .on('mouseleave', () => {
+                this.svg.selectAll('.doc')
+                    .style('stroke', 'none')
+                    .style('stroke-width', 1)
+            })
+
+        
+    }
+
+    // modify this function to display children of circles (like songs of an album)
     drawInstitutionPacks(group, doc){
         
         // let radius = this.getXScaleStep(doc.pubYear)
@@ -800,7 +905,6 @@ class Timeline {
                 exit => exit.remove()
             )
 
-        
         packGroup.append('image')
             .attr('width', this.docRadius * 2.1)
             .attr('height', this.docRadius * 2.1)
@@ -898,28 +1002,29 @@ class Timeline {
             .attr('stroke', '#a3a3a3')
             .attr("d", setProfile)    
             .on('mouseenter', d => {
-                if (this.freeze_links) return
+                if (this.yDistortionAt) return
 
                 this.chartGroup.select('g#link-group')
                     .selectAll('g.link')
                     .style('opacity', e => e.source.name === d.author || e.target.name === d.author ? 1 : .1)
                 
                 waveGroup.selectAll('path')
-                    .style('opacity', e => e.key === d.key ? 1 : .2)
-                    // .filter(e => e === d.author)
-                    // .selectAll('path')
-                    // .attr("fill", d => `url(#flag_${d.key.replace(' ', '_')})`) 
+                    .style('opacity', e => e.key === d.key ? 1 : .2) 
+
+
+                d3.select('svg#geo').selectAll('path.polygon')
+                    .style('fill', e => e.properties.ADMIN === d.key ? "#1B4774" : '#f5f5f5')
 
             }).on('mouseleave', d => {
-                if (this.freeze_links) return
+                if (this.yDistortionAt) return
 
                 this.chartGroup.select('g#link-group').selectAll('g.link').style('opacity', 1)
 
                 waveGroup.selectAll('path')
                     .style('opacity', 1)
 
-                // this.svg.selectAll('g.author').style('opacity', 1)
-                //     .selectAll('path').attr('fill', '#f5f5f5')
+                d3.select('svg#geo').selectAll('path.polygon')
+                    .style('fill', d => this.getCountryColor(d))
 
             })
             
@@ -1001,8 +1106,11 @@ class Timeline {
 
     
     getCountryColor(d) {
-        let res = this.selected_countries.filter(e => e.alpha3 === d.properties.alpha3)
-        return res.length ? this.countryColor(res[0].value) : "#f4f4f4";
+        if (this.yDistortionAt && this.countriesPerAuthor[this.yDistortionAt].includes(d.properties.ADMIN)) return '#1B4774' 
+        else if (!this.yDistortionAt && this.selected_countries.some(x => x.alpha3 === d.properties.alpha3)) return '#1B4774' 
+        return '#f5f5f5'   
+        // let res = this.selected_countries.filter(e => e.alpha3 === d.properties.alpha3)
+        // return res.length ? this.countryColor(res[0].value) : "#f4f4f4";
     }
 
     drawMap () {           
@@ -1010,11 +1118,11 @@ class Timeline {
         const _this = this
         const accent = d3.scaleOrdinal(d3.schemeAccent);
 
-        const drag = d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
+        // const drag = d3.drag()
+        //     .on("start", dragstarted)
+        //     .on("drag", dragged)
 
-        this.map.svg.call(drag)
+        // this.map.svg.call(drag)
 
         ///// world map ////////////
         const projection = d3.geoOrthographic()
@@ -1022,21 +1130,7 @@ class Timeline {
             .translate([this.map.width/2, this.map.height/2])
             .rotate([ -3.0827457688710598, -30.46385623276532, -0.7224498702519475 ])
 
-        const path = d3.geoPath().projection(projection)
-        
-        const gCountry = this.map.svg.selectAll('g')
-            .data(this.map.data.features)
-            .join(
-                enter => enter.append('g'),
-                update => update,
-                exit => exit.remove()
-            )
-        
-        const countryFill = d => {
-            if (this.yDistortionAt && this.countriesPerAuthor[this.yDistortionAt].includes(d.properties.ADMIN)) return '#1B4774' 
-            else if (!this.yDistortionAt && this.selected_countries.some(x => x.alpha3 === d.properties.alpha3)) return '#1B4774' 
-            return '#f5f5f5'   
-        }
+        let path = d3.geoPath().projection(projection)
 
         this.map.svg.selectAll('path.polygon')
             .data(this.map.data.features)
@@ -1044,16 +1138,17 @@ class Timeline {
                 enter => enter.append('path')   
                     .classed('polygon', true)
                     .attr('d', path)
-                    .style('cursor', 'pointer')
-                    .style('fill', countryFill)
+                    .style('fill', d => this.getCountryColor(d))
                     .style('stroke', '#888')
                     .style('stroke-width', '1px')
                     .style('opacity', 0.8)
-                    .style('stroke-width', 0.3),
-                update => update.style('fill', countryFill),
+                    .style('stroke-width', 0.3)
+                    .call(path => path.append('title')
+                        .text(d => `${d.properties.ADMIN} (${d.properties.continentName})`)),
+                update => update.style('fill', d => this.getCountryColor(d)),
                 exit => exit.remove()   
             )           
-            .on('mouseover', d => {
+            .on('mouseenter', d => {
                 if (this.yDistortionAt) return;
 
                 let country = this.selected_countries.find(x => x.alpha3 === d.properties.alpha3)
@@ -1065,18 +1160,14 @@ class Timeline {
                 let validAuthors = country.authors.map(e => e.name)
                 d3.selectAll('g.ellipses').style('opacity', e => validAuthors.includes(e.author) ? 1 : .1)
             })
-            .on('mouseout', () => {
+            .on('mouseleave', () => {
                 if (this.yDistortionAt) return;
 
                 d3.selectAll('g.author').selectAll('path').style('opacity', 1)
                 d3.selectAll('g.ellipses').style('opacity', 1)
             })
 
-        // gCountry.append('title')
-        //     .text(d => `${d.properties.ADMIN} (${d.properties.continentName})`)
-
-        const graticule = d3.geoGraticule()
-            .step([10, 10]);
+        const graticule = d3.geoGraticule().step([10, 10]);
 
         if (!this.map.svg.selectAll('path.graticule').size()) {
             this.map.svg.append("path")
@@ -1087,21 +1178,45 @@ class Timeline {
                 .style("stroke", "#ccc");
         }
 
+        const sensitivity = 75
+        const initialScale = projection.scale()
+        this.map.svg
+            .call(d3.drag().on('drag', function() {
+                const rotate = projection.rotate()
+                const k = sensitivity / projection.scale()
+                projection.rotate([
+                    rotate[0] + d3.event.dx * k,
+                    rotate[1] - d3.event.dy * k
+                ])
+                path = d3.geoPath().projection(projection)
+                d3.select(this).selectAll("path").attr("d", path)
+            }))
+            .call(d3.zoom().on('zoom', function() {
+                if(d3.event.transform.k > 0.3) {
+                    projection.scale(initialScale * d3.event.transform.k)
+                    path = d3.geoPath().projection(projection)
+                    d3.select(this).selectAll("path").attr("d", path)
+                }
+                else {
+                    d3.event.transform.k = 0.3
+                }
+          }))
+
         //// drag functions //////////////
         /// see why the drag and drop is so slow
-        var gpos0, o0;
-        function dragstarted() {
-            gpos0 = projection.invert(d3.mouse(this));
-            o0 = projection.rotate();
-        }
+        // var gpos0, o0;
+        // function dragstarted() {
+        //     gpos0 = projection.invert(d3.mouse(this));
+        //     o0 = projection.rotate();
+        // }
         
-        function dragged() {
-            var gpos1 = projection.invert(d3.mouse(this));
-            o0 = projection.rotate();
-            var o1 = eulerAngles(gpos0, gpos1, o0);
-            projection.rotate(o1);
-            _this.map.svg.selectAll("path").attr("d", path);
-        }
+        // function dragged() {
+        //     var gpos1 = projection.invert(d3.mouse(this));
+        //     o0 = projection.rotate();
+        //     var o1 = eulerAngles(gpos0, gpos1, o0);
+        //     projection.rotate(o1);
+        //     d3.select(this).selectAll("path").attr("d", path);
+        // }
 
         ///////// end drag functions ////////////////////////////////////////////   
     }

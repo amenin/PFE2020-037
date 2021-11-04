@@ -55,11 +55,14 @@
     </div>
     <div class='loading' id='div-loading'></div>
     <div class="vis">
-        <svg id='color-legend'></svg>
-        <div id='map-div' style="float:left;">
-            <svg id='geo'></svg>
+        <div class='legend'>
+            <svg id='color-legend'></svg>
         </div>
-        <div id='chart-div' style='float:left;'>
+        <div class='details'>
+            <svg id='geo'></svg>
+            <svg id='treemap'></svg>
+        </div>
+        <div class='timeline'>
             <svg id="chart">
                 <filter id="blur-image">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="10"></feGaussianBlur>

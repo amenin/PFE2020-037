@@ -31,3 +31,21 @@
     padding: 5px;
     box-shadow: 10px 5px 5px #dbdbdb;
 }
+
+.timeline {
+    float: left;
+    width: 70%;
+    height: calc(100% - 40px);
+}
+
+.details {
+    float: left;
+    width: 30%;
+    height: calc(100% - 40px);
+}
+
+.legend {
+    float: left;
+    width: 100%;
+    height: 40px;
+}
