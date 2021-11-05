@@ -98,7 +98,7 @@ app.post('/get_docs', async (req, res) => {
             if ( Object.keys(docs).length ){
                 // verify for which authors we already have the data
                 let keys = []
-                data.authors.forEach(author => {
+                data.forEach(author => {
                     if (!Object.keys(docs).includes(author.uri)) {
                         keys.push(author.uri)
                     } 
@@ -113,12 +113,12 @@ app.post('/get_docs', async (req, res) => {
                 } 
 
                 // filter the docs to keep only the ones for the selected authors
-                data.authors.forEach(author => {
+                data.forEach(author => {
                     result[author.uri] = docs[author.uri]
                 })
 
                
-                result = datatools.transformData(result, data.authors)
+                result = datatools.transformData(result, data)
             } 
 
             // send result back to client: HTML + JS graphic specification
@@ -203,7 +203,7 @@ app.listen(port, () => {
     // let filename = datadir + 'institution_data.json'
     // let data = loadFile(filename)
     // if ( !Object.keys(data).length ){
-        datatools.getInstitutionHierarchy(queries)
+        // datatools.getInstitutionHierarchy(queries)
         // fs.writeFileSync(filename, JSON.stringify(data, null, 4))
     // }
 

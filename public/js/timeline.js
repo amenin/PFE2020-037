@@ -13,6 +13,31 @@ class Timeline {
         this.selected_item = null
 
         this.symbol = {mainColor: '#dcdcdc', sndColor: '#7a7a7a', stroke: '#313131'}
+
+        this.docContextMenu = [
+            {
+                title: 'Go to source',
+                action: function(d) {
+                    window.open(d.hal)
+                },
+                disabled: false // optional, defaults to false
+            },
+            {
+                title: "Explore author's affiliations",
+                action: function(d) {
+                    timeline.drawInstitutionHierarchy(d)
+                }
+            },
+            {
+                title: "Explore affiliations of all authors",
+                action: function(d) {
+                    /// find labs of all authors
+                    // then draw the hierarchy
+                    timeline.drawInstitutionHierarchy(d)
+                }
+            }
+
+        ]
     }
 
     init (data) {
@@ -89,9 +114,10 @@ class Timeline {
 
         this.docRadius = 10
         this.docsSimulation = d3.forceSimulation()
-            .force("x", d3.forceX().strength(() => !this.yDistortionAt && this.xDistortionAt ? 0.1 : 1).x(d => this.xScale(d.pubYear)))
-            .force("y", d3.forceY().strength(() => this.yDistortionAt && !this.xDistortionAt ? 0.1 : (this.xDistortionAt ? 0.7 : 0)).y(d => this.yScale(d.authorName)))
-            .force("collide", d3.forceCollide().strength(1).radius(() => this.docRadius).iterations(32)) // Force that avoids circle overlapping
+            .force("x", d3.forceX().strength(() => !this.yDistortionAt && this.xDistortionAt ? 0.1 : 1.5).x(d => this.xScale(d.pubYear)))
+            .force("y", d3.forceY().strength(() => this.yDistortionAt && !this.xDistortionAt ? 0.1 : (this.xDistortionAt ? 0.7 : 0.1)).y(d => this.yScale(d.authorName)))
+            // .force("y", d3.forceY().y(d => this.yScale(d.authorName)))
+            .force("collide", d3.forceCollide().strength(1).radius(() => this.docRadius * 1.1).iterations(32)) // Force that avoids circle overlapping
             .on("tick", () => this.chartGroup.selectAll('g.author').selectAll('.doc').attrs({cx: e => e.x, cy: e => e.y}))
 
         var files = ['data/countries.json', 'data/countries.geojson', 'data/country_per_continent.json'];
@@ -111,7 +137,7 @@ class Timeline {
                 this.country_codes = values[0]
                 this.map.data = geodata
 
-                testVisualization(data)
+                // testVisualization(data)
             })
 
     }
@@ -153,8 +179,9 @@ class Timeline {
         this.svg.selectAll('g').remove()
     }
 
-    update(data) {
+    update(data, selected) {
         this.data = data;
+        this.selectedAuthor = selected.name;
 
         // d3.selectAll('div.zoom-div').style('display', 'none')
 
@@ -265,6 +292,8 @@ class Timeline {
             this.prepareWaveData()
             this.prepareEllipsesData()
             this.prepareLabPacks()
+
+            d3.select('div.legend').style('display', 'block')
 
             resolve()
         });
@@ -450,9 +479,7 @@ class Timeline {
         this.yDistortionAt = null
         this.xDistortionAt = null
 
-        this.handleFisheye("Enrico Formenti")
-
-
+        this.handleFisheye(this.selectedAuthor)
 
     }
 
@@ -461,7 +488,7 @@ class Timeline {
         let refXScale = d3.scalePoint().domain(this.dates).range([0, this.chart.width])
             
         if (this.authors.includes(d)) {
-            this.yScale.distortion(this.yDistortionAt === d ? 0 : 5).focus(refYScale(d))
+            if (this.authors.length > 1) this.yScale.distortion(this.yDistortionAt === d ? 0 : 5).focus(refYScale(d))
             this.yTickDistances = this.getTicksDistance(this.yScale, this.authors, this.margin.top)
             this.yDistortionAt = this.yDistortionAt == d ? null : d
         } else {
@@ -484,8 +511,6 @@ class Timeline {
         this.drawLabels()
 
         this.drawInstitutionHierarchy(this.selected_item)
-
-        
     }
 
     getTicksDistance(scale, breaks, axisPosition) {
@@ -512,11 +537,12 @@ class Timeline {
 
     drawLabels() {
 
-        let breaks = ss.jenks(this.nestedDataPerAuthor.map(d => d.values.length), 7)
-        let labelColor = d3.scaleThreshold()
-            .domain(breaks)
-            .range(['#93adba', '#809cb3', '#748aac', '#7077a1', '#716392', '#744d7e', '#763565', '#741b47'])
+        // let breaks = ss.jenks(this.nestedDataPerAuthor.map(d => d.values.length), 7)
+        // let labelColor = d3.scaleThreshold()
+        //     .domain(breaks)
+        //     .range(['#93adba', '#809cb3', '#748aac', '#7077a1', '#716392', '#744d7e', '#763565', '#741b47'])
 
+        const _this = this
         let rectheight = 15
         let labelGroup = this.chartGroup.selectAll('g.author-label')
             .data(this.authors)
@@ -530,9 +556,10 @@ class Timeline {
 
         labelGroup.append('rect')
             .attrs({
-                width: d => d.length * 7,
+                width: this.margin.left,
                 height: rectheight,
-                fill: d => labelColor(this.nestedDataPerAuthor.find(e => e.key === d).values.length) 
+                //fill: d => labelColor(this.nestedDataPerAuthor.find(e => e.key === d).values.length) 
+                fill: '#741b47'
             })
 
         labelGroup.append('text')
@@ -543,6 +570,7 @@ class Timeline {
             .attr('dy', '1em')
             .attr('fill', '#fff')
             .style('cursor', 'pointer')
+            .each(function() { wrap_ellipsis(d3.select(this), _this.margin.left)})
             .on('mouseenter', d => {
                 if (this.freeze_links) return;
                 
@@ -604,7 +632,6 @@ class Timeline {
     drawEllipses() {
 
         // let docs = [];
-        const _this = this
         const ellipseAttrs = (d) => {
             let height = this.getYScaleStep(d.author)
             if (!this.yDistortionAt) height /= 2
@@ -718,7 +745,7 @@ class Timeline {
 
         let docs = []
         
-        docsGroup.selectAll('g.labpack').remove()
+        // docsGroup.selectAll('g.labpack').remove()
         // draw the documents inside each ellipse
         docsGroup.selectAll('circle.doc')
             .data(d => { 
@@ -731,48 +758,33 @@ class Timeline {
                     .classed('doc', true)
                     .attr('fill', docFill)
                     .attr('r', this.docRadius)
+                    .attr('cx', d => this.xScale(d.pubYear))
+                    .attr('cy', d => this.yScale(d.authorName))
                     .call(circle => circle.append('title').text(docInfo)),
-                update => update.attr('fill', docFill)
+                update => update.transition().duration(500)
+                    .attr('fill', docFill)
                     .attr('r', this.docRadius)
                     .style('display', 'block')
                     .style('opacity', 1)
                     .call(circle => circle.select('title').text(docInfo)),
                 exit => exit.remove()        
             )
-            .on('contextmenu', function(d) { 
-
-                d3.event.preventDefault()
-                const x = d3.event.layerX,
-                    y = d3.event.layerY
-
-                d3.select('div.context-menu')
-                    .style('left', x + 'px')
-                    .style('top', y + 'px')
-                    .style('display', 'block')
-                    .html(`Go to Source`)
-                    .on('click', () => window.open(d.hal))
-            })
-            .on('click', d => {
-                if (this.selected_item === d) return
-
-                this.selected_item = d
-                this.drawInstitutionHierarchy(d)
-            })
+            .on('contextmenu', d3.contextMenu(this.docContextMenu))
             .on('mouseenter', d => {
-                if (this.freeze_links)  return
+                if (this.yDistortionAt)  return
                 // highlight documents within line of co-authors
                 this.svg.selectAll('.doc')
                     .filter(e => e.docURI === d.docURI)
                     .style('stroke', '#000')
                     .style('stroke-width', 2)
             }).on('mouseleave', d => {
-                if (this.freeze_links)  return
+                if (this.yDistortionAt)  return
                 this.svg.selectAll('.doc').style('stroke-width', 1).style('stroke', 'none')
             })
           
         /// place circles close to each other using force simulation //////////////  
         this.docsSimulation.nodes(docs)
-        this.docsSimulation.force('y').initialize(docs)      
+        // this.docsSimulation.force('y').initialize(docs)      
         this.docsSimulation.force('x').initialize(docs)
         this.docsSimulation.force('collide').initialize(docs)
         this.docsSimulation.alpha(0.5).alphaTarget(0.3).restart();
@@ -1002,26 +1014,26 @@ class Timeline {
             .attr('stroke', '#a3a3a3')
             .attr("d", setProfile)    
             .on('mouseenter', d => {
-                if (this.yDistortionAt) return
-
-                this.chartGroup.select('g#link-group')
-                    .selectAll('g.link')
-                    .style('opacity', e => e.source.name === d.author || e.target.name === d.author ? 1 : .1)
                 
-                waveGroup.selectAll('path')
-                    .style('opacity', e => e.key === d.key ? 1 : .2) 
-
+                if (!this.yDistortionAt) {
+                    this.chartGroup.select('g#link-group')
+                        .selectAll('g.link')
+                        .style('opacity', e => e.source.name === d.author || e.target.name === d.author ? 1 : .1)
+                    
+                    waveGroup.selectAll('path')
+                        .style('opacity', e => e.key === d.key ? 1 : .2) 
+                }
 
                 d3.select('svg#geo').selectAll('path.polygon')
                     .style('fill', e => e.properties.ADMIN === d.key ? "#1B4774" : '#f5f5f5')
 
             }).on('mouseleave', d => {
-                if (this.yDistortionAt) return
+                if (!this.yDistortionAt) {
+                    this.chartGroup.select('g#link-group').selectAll('g.link').style('opacity', 1)
 
-                this.chartGroup.select('g#link-group').selectAll('g.link').style('opacity', 1)
-
-                waveGroup.selectAll('path')
-                    .style('opacity', 1)
+                    waveGroup.selectAll('path')
+                        .style('opacity', 1)
+                }
 
                 d3.select('svg#geo').selectAll('path.polygon')
                     .style('fill', d => this.getCountryColor(d))

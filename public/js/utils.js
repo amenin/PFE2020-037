@@ -19,19 +19,12 @@ function setFilters(data) {
     authorsItems.append('input')
         .attr('type', 'radio')
         .property('checked', d => selected && selected.uri == d.uri ? true : false)
-        .on('change', function(d) {
+        .on('change', function() {
             let _this = this;
             d3.select(this.parentNode.parentNode)
                 .selectAll('input')
-                .property('checked', function() { return this === _this ? true : false })   
-
-            d3.select('div.coauthors').style('display', 'inline-block')
-            
-            const selectedAuthor = d3.select(this.parentNode).datum()
-            setCoauthorsList(selectedAuthor)
+                .property('checked', function() { return this === _this ? true : false })  
         })
-
-    if (selected) setCoauthorsList(selected)
 
     authorsItems.append('text')                
         .text(d => d.name)
@@ -39,27 +32,6 @@ function setFilters(data) {
     d3.select('button.submitbtn').on('click', submitForm)
 
     d3.selectAll('button.dropbtn').on('click', openDropdown)
-
-    function setCoauthorsList(selectedAuthor){
-        d3.select('table#coauthors-list').selectAll('tr').remove()
-
-        let coauthors_data = data.coauthors[selectedAuthor.uri]
-        coauthors_data = coauthors_data.filter((d,i) => coauthors_data.findIndex(x => x.name === d.name && x.uri === d.uri) === i)
-        coauthors_data.sort((a,b) => a.name.localeCompare(b.name))
-
-        const coauthorItems =  d3.select('table#coauthors-list')
-            .selectAll('tr')
-            .data(coauthors_data)
-            .enter()
-                .append('tr')
-                .classed('item', true)
-
-        coauthorItems.append('input')
-            .attr('type', 'checkbox')
-
-        coauthorItems.append('text')
-            .text(e => e.name)
-    }
 }
 
 function submitForm(){
@@ -67,28 +39,20 @@ function submitForm(){
     d3.selectAll('.dropdown-content').style('display', 'none')
 
     let selectedAuthor = null; 
-    let selectedCoauthors = []; 
 
     d3.select('table#authors-list').selectAll('input').each(function(){
         if (this.checked) {
             selectedAuthor = d3.select(this.parentNode).datum()
         }
     })
-
-    d3.select('table#coauthors-list').selectAll('input').each(function(){
-        if (this.checked) {
-            selectedCoauthors.push(d3.select(this.parentNode).datum())
-        }
-    })
-
-    selectedCoauthors.push(selectedAuthor)
+    console.log(selectedAuthor)
 
     // send request to server: retrieve documents for selected co-authors
     const url = protocol + hostname + "/get_docs"; // local server
     
     fetch(url, {
         method: 'POST',
-        body: JSON.stringify({'authors': selectedCoauthors})
+        body: JSON.stringify([selectedAuthor])
     }).then(response => {
         return response.text();
     }).then(res => {
@@ -97,7 +61,7 @@ function submitForm(){
             // Syntax error message
             window.alert(res);
         } else {
-            timeline.update(JSON.parse(res))
+            timeline.update(JSON.parse(res), selectedAuthor)
         }
     }).catch(error => {
         alert(error);
